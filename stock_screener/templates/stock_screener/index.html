@@ -1,0 +1,55 @@
+<nav class="navbar navbar-expand-lg navbar-dark">
+  <div class="container-fluid">
+    <a class="navbar-brand" id="top" href="{% url 'index' %}">StockScreener</a>
+
+    <button
+      class="navbar-toggler"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#navbarNav"
+      aria-controls="navbarNav"
+      aria-expanded="false"
+      aria-label="Toggle navigation"
+    >
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav justify-content-end w-100">
+        <li class="nav-item">
+          <a class="nav-link active" href="{% url 'index' %}">Search</a>
+        </li>
+
+        {% if user.is_authenticated %}
+
+
+
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'logout' %}">Log Out</a>
+        </li>
+        {% else %}
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'login' %}">Log In</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'register' %}">Register</a>
+        </li>
+
+        {% endif %}
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<div class="container">
+  {% if not stock %}
+
+  <div class="welcome">
+    <h1>Welcome to StockScreener!</h1>
+    <h4>Please enter a ticker below</h4>
+
+
+  </div>
+
+    {% include "stock_screener/child_templates/search_form.html" with stock=stock message=message %}
+    {% endif %}
+</div>

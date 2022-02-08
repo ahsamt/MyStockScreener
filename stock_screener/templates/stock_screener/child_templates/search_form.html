@@ -1,0 +1,10 @@
+<div class="search-form mt-2 mb-1">
+  <form action="" method="post">
+    {% csrf_token %}
+    <div class=>{{ stockForm.stock }}</div>
+    <button type="submit" id="searchButton">Get Results</button>
+  </form>
+</div>
+{% if message %}
+<p id="search_error_message">{{ message }}</p>
+{% endif %}
