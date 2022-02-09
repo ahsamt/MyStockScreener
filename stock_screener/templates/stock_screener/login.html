@@ -1,3 +1,8 @@
+{% extends "stock_screener/layout.html" %}
+{% load static %}
+
+{% block body %}
+
 <nav class="navbar navbar-expand-lg navbar-dark">
   <div class="container-fluid">
     <a class="navbar-brand" id="top" href="{% url 'index' %}">StockScreener</a>
@@ -70,3 +75,5 @@
   Don't have an account?
   <a href="{% url 'register' %}">Register</a>
 </div>
+
+{% endblock %}

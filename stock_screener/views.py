@@ -1,15 +1,20 @@
-from django import forms
 from django.shortcuts import render
 from django.contrib.auth import authenticate, login, logout
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
 from .models import User
 from django.db import IntegrityError
+from .forms import StockForm
 
-
-class StockForm(forms.Form):
-    stock = forms.CharField(label='Stock name', max_length=5,
-                            widget=forms.TextInput(attrs={'autofocus': True, 'placeholder': 'AAPL'}))
+signalOptions = sorted((
+    ("SMAS", "Simple Moving Average (SMA) - short window"),
+    ("SMAL", "Simple Moving Average (SMA) - long window"),
+    ("EMA", " Exponential Moving Average (EMA)"),
+    ("PSAR", "Parabolic Stop And Reverse (Parabolic SAR)"),
+    ("ADX", "Average Directional Movement Index (ADX)"),
+    ("SRSI", "Stochastic RSI (SRSI)"),
+    ("MACD", "Moving Average Convergence Divergence (MACD)"),
+))
 
 
 def index(request):

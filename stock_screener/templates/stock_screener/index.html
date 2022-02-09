@@ -1,3 +1,8 @@
+{% extends "stock_screener/layout.html" %}
+{% load static %}
+
+{% block body %}
+
 <nav class="navbar navbar-expand-lg navbar-dark">
   <div class="container-fluid">
     <a class="navbar-brand" id="top" href="{% url 'index' %}">StockScreener</a>
@@ -53,3 +58,5 @@
     {% include "stock_screener/child_templates/search_form.html" with stock=stock message=message %}
     {% endif %}
 </div>
+
+{% endblock %}

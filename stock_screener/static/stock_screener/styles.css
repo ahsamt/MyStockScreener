@@ -1,0 +1,278 @@
+:root {
+  --background-color: #fff2e5;
+  --custom-shadow: rgba(164, 164, 167, 0.25) 0px 50px 100px -20px,
+    rgba(0, 0, 0, 0.3) 0px 30px 60px -30px,
+    rgba(10, 37, 64, 0.35) 0px -2px 6px 0px inset;
+  --red-font-color: #cc0000;
+  --blue-font-color: #325c84;
+  --green-font-color: #40bc1e;
+  --red-hover-color: #99103d;
+  --grey-font-color: #333333;
+}
+
+body {
+  background: var(--background-color);
+  font-family: "Open Sans", sans-serif;
+  font-size: 16px;
+  padding-left: 0;
+}
+
+button {
+  transition: ease-in-out 200ms;
+  border-radius: 4px;
+  box-shadow: var(--custom-shadow);
+  background-color: var(--blue-font-color);
+  margin: 10px 0 5px 0;
+  padding: 3px 11px;
+  color: white;
+}
+
+button:hover {
+  background-color: var(--red-hover-color);
+  color: white;
+}
+
+h1 {
+  font-size: 30px;
+  font-weight: 530;
+  padding: 60px 0px 20px 0px;
+}
+
+h2 {
+  font-size: 23px;
+  padding: 15px 0 5px 0;
+  font-weight: 600;
+  color: var(--grey-font-color);
+}
+
+h3 {
+  font-size: 20px;
+  padding: 5px 0 5px 0;
+}
+
+h4 {
+  font-size: 18px;
+  padding-bottom: 5px;
+}
+
+h5 {
+  font-size: 16px;
+}
+
+h6 {
+  color: var(--grey-font-color);
+  font-weight: bold;
+  text-decoration: underline;
+}
+
+li > .nav-link {
+  margin: 0px 20px 0px 0px;
+  font-weight: bolder;
+}
+
+input,
+textarea {
+  outline: none;
+}
+
+
+
+.about
+ {
+  line-height: 2;
+  padding: 30px 20px 20px 20px;
+}
+
+
+.closing_price {
+  color: var(--grey-font-color);
+  font-weight: 800;
+}
+
+.edit_content {
+  text-align: left;
+  margin: 0;
+}
+
+.index-card {
+  display: block;
+  margin: 0 auto;
+  text-align: center;
+  width: 500px;
+}
+
+.navbar {
+  background-color: var(--blue-font-color);
+}
+
+.navbar-brand {
+  font-size: 23px;
+  padding-left: 20px;
+}
+.message,
+.price_change_red,
+#search_error_message {
+  color: var(--red-font-color);
+}
+
+.parameters{
+  margin: 5px;
+  font-size: 14px;
+
+}
+.price_change_green {
+  color: var(--green-font-color);
+}
+
+.question {
+  font-size: 13px;
+  padding-bottom: 5px;
+  color: var(--grey-font-color);
+  transition: ease-in-out 200ms;
+}
+
+.question:hover {
+  color: var(--red-hover-color);
+}
+.red {
+  color: var(--red-hover-color);
+  font-weight: bolder;
+}
+.centre {
+  display: block;
+  margin: auto;
+  text-align: center;
+  align-items: center;
+}
+
+.signal {
+  font-weight: bolder;
+  font-size: 15px;
+  box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;
+  padding: 8px 30px;
+  background: #e0e3e5;
+  border-radius: 4px;
+}
+
+
+.signals {
+  padding:0 80px 0 80px;
+  display: block;
+  margin: auto;
+  text-align: start;
+
+
+}
+
+.stock_link {
+  border-radius: 4px;
+  box-shadow: var(--custom-shadow);
+  margin: 0px 20px 0px 0px;
+  text-decoration: none;
+  padding: 6px 10px;
+  color: var(--blue-font-color);
+  background-color: white;
+  z-index: 99;
+}
+
+.tickers {
+  font-weight: 800;
+  color: var(--red-hover-color);
+}
+
+.watched_item {
+  margin-bottom: 20px;
+  animation-name: hide;
+  animation-duration: 2s;
+  animation-fill-mode: forwards;
+  animation-play-state: paused;
+}
+
+.watchlist {
+  border-radius: 4px;
+  box-shadow: var(--custom-shadow);
+  margin: 10px 0 10px 0;
+  color: var(--blue-font-color);
+  text-decoration: none;
+  padding: 4px 8px;
+  background-color: white;
+}
+
+.welcome {
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+#A {
+  display: block;
+}
+
+#searchButton {
+
+  display: block;
+  margin: 0 auto;
+}
+
+#search_error_message {
+  text-align: center;
+}
+
+#stock_name {
+  color: var(--grey-font-color);
+  font-weight: 900;
+}
+#topButton {
+  display: none;
+  position: fixed;
+  z-index: 99;
+  bottom: 5px;
+  right: 5px;
+  padding: 5px 10px;
+  text-decoration: none;
+  color: var(--blue-font-color);
+  background-color: white;
+  font-weight: bold;
+  font-size: 25px;
+  box-shadow: var(--custom-shadow);
+  border-radius: 4px;
+}
+
+#username {
+  display: none;
+}
+
+@media (max-width: 991px) {
+  body {
+    font-size: 14px;
+  }
+
+  .index-card {
+    width: 300px;
+    display: block;
+    margin: 0 auto;
+    text-align: center;
+  }
+}
+
+@keyframes hide {
+  0% {
+    opacity: 1;
+    height: 100%;
+    line-height: 100%;
+    margin-bottom: 20px;
+  }
+  50% {
+    opacity: 0;
+    height: 50%;
+    line-height: 100%;
+    margin-bottom: 20px;
+  }
+
+  100% {
+    opacity: 0;
+    height: 0px;
+    line-height: 0px;
+    padding: 0px;
+    margin-bottom: 0px;
+  }
+}
