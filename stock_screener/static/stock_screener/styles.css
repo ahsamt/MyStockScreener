@@ -152,9 +152,13 @@ textarea {
   padding: 8px 30px;
   background: #e0e3e5;
   border-radius: 4px;
+
 }
 
-
+.stock_search {
+  color: var(--red-hover-color);
+  font-weight: bolder;
+}
 .signals {
   padding:0 80px 0 80px;
   display: block;
