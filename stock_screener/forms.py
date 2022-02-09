@@ -2,7 +2,7 @@ from django import forms
 
 
 class StockForm(forms.Form):
-    stock = forms.CharField(label='Stock name', max_length=5,
+    ticker = forms.CharField(label='Stock name', max_length=5,
                             widget=forms.TextInput(attrs={'autofocus': True, 'placeholder': 'AAPL'}))
     smas = forms.BooleanField(label='Simple Moving Average (SMA) - short window', required=False)
     smasWS = forms.IntegerField(label='SMA window size - short', max_value=100, initial="15",

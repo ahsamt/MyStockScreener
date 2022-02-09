@@ -59,4 +59,11 @@
     {% endif %}
 </div>
 
+    {{ ticker }}
+    <div class="row">
+
+        <div class="col d-flex align-items-center justify-content-center">
+            {{ graph | safe }}
+        </div>
+    </div>
 {% endblock %}
