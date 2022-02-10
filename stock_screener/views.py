@@ -5,7 +5,7 @@ from django.urls import reverse
 from .models import User
 from django.db import IntegrityError
 from .forms import StockForm
-from .utils import read_stock_data_from_S3, get_current_tickers, add_sma, make_graph
+from .utils import read_stock_data_from_S3, get_current_tickers, add_ma, make_graph
 from datetime import date, datetime, timedelta
 from dateutil.relativedelta import relativedelta
 import pandas as pd
@@ -69,8 +69,6 @@ def index(request):
                 macdS = stockForm.cleaned_data['macdS']
                 macdSm = stockForm.cleaned_data['macdSm']
 
-                print(srsiOB)
-
                 tickerList = get_current_tickers(bucket)
                 if ticker not in tickerList:
                     message = "This ticker will need to be added to S3 bucket"
@@ -85,15 +83,12 @@ def index(request):
                     stock = read_stock_data_from_S3(bucket, ticker)
                     endDate = date.today()
                     startDate = endDate + relativedelta(months=-numMonths)
-                    startDateInternal = startDate + relativedelta(months=-3)
+                    #startDateInternal = startDate + relativedelta(months=-3)
                     startDateDatetime = datetime.combine(startDate, datetime.min.time())
 
-                    smaWS = 15
-                    smaWL = 45
-                    signal_list = [f"SMA_{str(smaWS)}", f"SMA_{str(smaWL)}"]
-                    stock = add_sma(stock, smaWL, smaWS)
-
-                    graph = make_graph(stock, ticker, signal_list, 800, 900)
+                    if ma:
+                        stock, signalNames = add_ma(stock, maS, maL, maWS, maWL, startDateDatetime)
+                        graph = make_graph(stock, ticker, signalNames, 700, 800 )
 
                     context = {
                             "ticker": ticker,

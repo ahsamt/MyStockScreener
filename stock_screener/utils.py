@@ -13,6 +13,11 @@ import urllib.request
 import urllib.parse
 import plotly.graph_objects as go
 
+def adjust_start(df, start_date):
+    mask = (df["Date"] >= start_date)
+    df = df.loc[mask]
+    return df
+
 def read_stock_data_from_S3(bucket, stock):
     s3_client = boto3.client("s3")
     object_key = f"{stock}.csv"
@@ -32,10 +37,22 @@ def get_current_tickers(bucket):
     return tickers
 
 
-def add_sma(df, window_short, window_long):
-    df[f"SMA_{window_short}"] = ta.trend.sma_indicator(df["Close"], window=window_short)
-    df[f"SMA_{window_long}"] = ta.trend.sma_indicator(df["Close"], window=window_long)
-    df["short_more_than_long"] = df[f"SMA_{window_short}"] >= df[f"SMA_{window_long}"]
+def add_ma(df, ma_short, ma_long, window_short, window_long, start_date):
+    if ma_short == "Simple Moving Average":
+        colShort = f"SMA_{window_short}"
+        df[colShort] = ta.trend.sma_indicator(df["Close"], window=window_short)
+    else:
+        colShort = f"EMA_{window_short}"
+        df[colShort] = ta.trend.ema_indicator(df["Close"], window=window_short)
+
+    if ma_long == "Simple Moving Average":
+        colLong = f"SMA_{window_long}"
+        df[colLong] = ta.trend.sma_indicator(df["Close"], window=window_long)
+    else:
+        colLong = f"EMA_{window_long}"
+        df[colLong] = ta.trend.ema_indicator(df["Close"], window=window_long)
+
+    df["short_more_than_long"] = df[colShort] >= df[colLong]
     df["No_trend_change"] = df["short_more_than_long"].eq(df["short_more_than_long"].shift())
     df = df.reset_index()
     df.loc[0, "No_trend_change"] = True
@@ -43,15 +60,14 @@ def add_sma(df, window_short, window_long):
     df.loc[mask, "Flag"] = "Buy"
     mask = (df["No_trend_change"] == False) & (df["short_more_than_long"] == False)
     df.loc[mask, "Flag"] = "Sell"
-    df["Days_since_change"] = None
-    mask = (df["Flag"] == "Sell") | (df["Flag"] == "Buy")
-    df.loc[mask, "Days_since_change"] = 0
-    for i in range(1, len(df)):
-        a = df.loc[i - 1, "Days_since_change"]
-        if (a is not None) & (df.loc[i, "Days_since_change"] != 0):
-            df.loc[i, 'Days_since_change'] = df.loc[i - 1, 'Days_since_change'] + 1
 
-    return df
+    mask = df["short_more_than_long"] == True
+    df["Recommendation"] = "Sell"
+    df.loc[mask, "Recommendation"] = "Buy"
+
+    df = adjust_start(df, start_date)
+
+    return df, [colShort, colLong]
 
 
 def make_graph(df, ticker, signal_names, height, width):
