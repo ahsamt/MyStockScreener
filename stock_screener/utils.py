@@ -57,18 +57,24 @@ def add_ma(df, ma_short, ma_long, window_short, window_long, start_date):
     df = df.reset_index()
     df.loc[0, "No_trend_change"] = True
     mask = (df["No_trend_change"] == False) & (df["short_more_than_long"] == True)
-    df.loc[mask, "Flag"] = "Buy"
+    df.loc[mask, "MA_Flag"] = "Buy"
     mask = (df["No_trend_change"] == False) & (df["short_more_than_long"] == False)
-    df.loc[mask, "Flag"] = "Sell"
+    df.loc[mask, "MA_Flag"] = "Sell"
 
     mask = df["short_more_than_long"] == True
-    df["Recommendation"] = "Sell"
-    df.loc[mask, "Recommendation"] = "Buy"
+    df["MA_Rec"] = "Sell"
+    df.loc[mask, "MA_Rec"] = "Buy"
 
-    df = adjust_start(df, start_date)
+    return df, colShort, colLong
 
-    return df, [colShort, colLong]
 
+def add_psar(df, psar_af, psar_ma):
+    df["Parabolic_SAR"] = ta.trend.PSARIndicator(df["High"], df["Low"], df["Close"], psar_af, psar_ma).psar()
+    mask = df["Parabolic_SAR"] > df["Close"]
+    df["PSAR_Rec"] = "Buy"
+    df.loc[mask, "PSAR_Rec"] = "Sell"
+
+    return df
 
 def make_graph(df, ticker, signal_names, height, width):
     """(pd DataFrame, string, integer, integer) => string

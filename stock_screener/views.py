@@ -5,7 +5,7 @@ from django.urls import reverse
 from .models import User
 from django.db import IntegrityError
 from .forms import StockForm
-from .utils import read_stock_data_from_S3, get_current_tickers, add_ma, make_graph
+from .utils import read_stock_data_from_S3, get_current_tickers, add_ma, add_psar, adjust_start, make_graph
 from datetime import date, datetime, timedelta
 from dateutil.relativedelta import relativedelta
 import pandas as pd
@@ -85,11 +85,23 @@ def index(request):
                     startDate = endDate + relativedelta(months=-numMonths)
                     #startDateInternal = startDate + relativedelta(months=-3)
                     startDateDatetime = datetime.combine(startDate, datetime.min.time())
+                    height = 700
+                    width = 800
+
+                    graphSignals = []
 
                     if ma:
-                        stock, signalNames = add_ma(stock, maS, maL, maWS, maWL, startDateDatetime)
-                        graph = make_graph(stock, ticker, signalNames, 700, 800 )
+                        stock, shortName, longName = add_ma(stock, maS, maL, maWS, maWL, startDateDatetime)
+                        graphSignals.append(shortName)
+                        graphSignals.append(longName)
 
+                    if psar:
+                        stock = add_psar(stock, psarAF, psarMA)
+                        graphSignals.append("Parabolic_SAR")
+
+                    stock = adjust_start(stock, startDateDatetime)
+
+                    graph = make_graph(stock, ticker, graphSignals, height, width)
                     context = {
                             "ticker": ticker,
                             "graph": graph,
