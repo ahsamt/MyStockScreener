@@ -117,7 +117,7 @@ textarea {
 
 .parameters{
   margin: 5px;
-  font-size: 14px;
+
 
 }
 .price_change_green {
@@ -147,12 +147,10 @@ textarea {
 
 .signal {
   font-weight: bolder;
-  font-size: 15px;
   box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;
   padding: 8px 30px;
   background: #e0e3e5;
   border-radius: 4px;
-
 }
 
 .stock_search {
@@ -164,6 +162,7 @@ textarea {
   display: block;
   margin: auto;
   text-align: start;
+  font-size: 15px;
 
 
 }

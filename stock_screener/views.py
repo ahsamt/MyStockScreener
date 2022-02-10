@@ -40,16 +40,17 @@ def index(request):
     if request.method == "POST":
         if 'ticker' in request.POST:
             stockForm = StockForm(request.POST)
-
+            print("ticker in the request.post")
             #Get all the form data
             if stockForm.is_valid():
+                print("stock form is valid")
                 ticker = stockForm.cleaned_data['ticker'].upper()
-                sma = stockForm.cleaned_data['sma']
-                smaWS = stockForm.cleaned_data['smaWS']
-                smaWL = stockForm.cleaned_data['smaWL']
-                ema = stockForm.cleaned_data['ema']
-                emaWS = stockForm.cleaned_data['emaWS']
-                emaWL = stockForm.cleaned_data['emaWL']
+                ma = stockForm.cleaned_data['ma']
+                maS = stockForm.cleaned_data['maS']
+                maL = stockForm.cleaned_data['maL']
+                maWS = stockForm.cleaned_data['maWS']
+                maWL = stockForm.cleaned_data['maWL']
+
                 psar = stockForm.cleaned_data['psar']
                 psarAF = stockForm.cleaned_data['psarAF']
                 psarMA = stockForm.cleaned_data['psarMA']
@@ -60,22 +61,15 @@ def index(request):
                 srsiW = stockForm.cleaned_data['srsiW']
                 srsiSm1 = stockForm.cleaned_data['srsiSm1']
                 srsiSm2 = stockForm.cleaned_data['srsiSm2']
+                srsiOB = stockForm.cleaned_data['srsiOB']
+                srsiOS = stockForm.cleaned_data['srsiOS']
 
                 macd = stockForm.cleaned_data['macd']
                 macdF = stockForm.cleaned_data['macdF']
                 macdS = stockForm.cleaned_data['macdS']
                 macdSm = stockForm.cleaned_data['macdSm']
 
-                print(sma, ema, psar, adx, srsi, macd)
-
-
-
-
-
-
-
-
-
+                print(srsiOB)
 
                 tickerList = get_current_tickers(bucket)
                 if ticker not in tickerList:
@@ -87,6 +81,7 @@ def index(request):
                     return render(request, "stock_screener/index.html", context)
 
                 else:
+                    print("reading data and preparing graph")
                     stock = read_stock_data_from_S3(bucket, ticker)
                     endDate = date.today()
                     startDate = endDate + relativedelta(months=-numMonths)
@@ -132,7 +127,8 @@ def index(request):
                     # }
 
                     return render(request, "stock_screener/index.html", context)
-
+        else:
+            print("ticker not in request.post")
 
 def login_view(request):
     if request.method == "POST":
