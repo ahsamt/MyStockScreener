@@ -3,21 +3,19 @@ from django import forms
 
 class StockForm(forms.Form):
     ticker = forms.CharField(label='Stock name', max_length=5,
-                            widget=forms.TextInput(attrs={'autofocus': True, 'placeholder': 'AAPL'}))
-    smas = forms.BooleanField(label='Simple Moving Average (SMA) - short window', required=False)
-    smasWS = forms.IntegerField(label='SMA window size - short', max_value=100, initial="15",
-                                widget=forms.NumberInput(attrs={'style': 'width:9ch'}))
-
-
-    smal = forms.BooleanField(label='Simple Moving Average (SMA) - long window', required=False)
-    smalWS = forms.IntegerField(label='SMA window size - long', max_value=100, initial="45",
-                                widget=forms.NumberInput(attrs={'style': 'width:9ch'}))
+                             widget=forms.TextInput(attrs={'autofocus': True, 'placeholder': 'AAPL'}))
+    sma = forms.BooleanField(label='Simple Moving Average (SMA)', required=False)
+    smaWS = forms.IntegerField(label='SMA window size - short', max_value=100, initial="15",
+                               widget=forms.NumberInput(attrs={'style': 'width:9ch'}))
+    smaWL = forms.IntegerField(label='SMA window size - long', max_value=100, initial="45",
+                               widget=forms.NumberInput(attrs={'style': 'width:9ch'}))
 
 
     ema = forms.BooleanField(label='Exponential Moving Average (EMA)', required=False)
-    emaW = forms.IntegerField(label='EMA window size', max_value=100, initial="45",
-                              widget=forms.NumberInput(attrs={'style': 'width:9ch'}))
-
+    emaWS = forms.IntegerField(label='EMA window size - short', max_value=100, initial="15",
+                               widget=forms.NumberInput(attrs={'style': 'width:9ch'}))
+    emaWL = forms.IntegerField(label='EMA window size - long', max_value=100, initial="45",
+                               widget=forms.NumberInput(attrs={'style': 'width:9ch'}))
 
     psar = forms.BooleanField(label='Parabolic Stop And Reverse (Parabolic SAR)', required=False)
     psarAF = forms.FloatField(label='Parabolic SAR Acceleration Factor (AF)', max_value=100, initial="0.02",

@@ -40,10 +40,44 @@ def index(request):
     if request.method == "POST":
         if 'ticker' in request.POST:
             stockForm = StockForm(request.POST)
+
+            #Get all the form data
             if stockForm.is_valid():
                 ticker = stockForm.cleaned_data['ticker'].upper()
-                tickerList = get_current_tickers(bucket)
+                sma = stockForm.cleaned_data['sma']
+                smaWS = stockForm.cleaned_data['smaWS']
+                smaWL = stockForm.cleaned_data['smaWL']
+                ema = stockForm.cleaned_data['ema']
+                emaWS = stockForm.cleaned_data['emaWS']
+                emaWL = stockForm.cleaned_data['emaWL']
+                psar = stockForm.cleaned_data['psar']
+                psarAF = stockForm.cleaned_data['psarAF']
+                psarMA = stockForm.cleaned_data['psarMA']
+                adx = stockForm.cleaned_data['adx']
+                adxW = stockForm.cleaned_data['adxW']
 
+                srsi = stockForm.cleaned_data['srsi']
+                srsiW = stockForm.cleaned_data['srsiW']
+                srsiSm1 = stockForm.cleaned_data['srsiSm1']
+                srsiSm2 = stockForm.cleaned_data['srsiSm2']
+
+                macd = stockForm.cleaned_data['macd']
+                macdF = stockForm.cleaned_data['macdF']
+                macdS = stockForm.cleaned_data['macdS']
+                macdSm = stockForm.cleaned_data['macdSm']
+
+                print(sma, ema, psar, adx, srsi, macd)
+
+
+
+
+
+
+
+
+
+
+                tickerList = get_current_tickers(bucket)
                 if ticker not in tickerList:
                     message = "This ticker will need to be added to S3 bucket"
                     context = {

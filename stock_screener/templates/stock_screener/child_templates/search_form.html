@@ -8,29 +8,35 @@
 
           <div class="signal row mt-3">
               <div class="stock_search col-3 mt-1">
-                  {{ stockForm.smas }}  SMA - short window
+                  {{ stockForm.sma }}  SMA
               </div>
               <div class="col-9">
-                  <span class="parameters">Window size</span>  {{ stockForm.smasWS }}
+                  <div class="row">
+                    <div class="col">
+                        <span class="parameters">Short (days)</span>  {{ stockForm.smaWS }}
+                    </div>
+                    <div class="col">
+                        <span class="parameters">Long (days)</span>  {{ stockForm.smaWL }}
+                    </div>
+                  </div>
               </div>
+
           </div>
 
-
-          <div class="signal row mt-3">
-              <div class="stock_search col-3 mt-1">
-                  {{ stockForm.smal }}  SMA - long window
-              </div>
-               <div class="col-9">
-                  <span class="parameters">Window size</span>  {{ stockForm.smalWS }}
-              </div>
-          </div>
 
           <div class="signal row mt-3">
               <div class="stock_search col-3 mt-1">
                   {{ stockForm.ema }}    EMA
               </div>
               <div class="col-9">
-                  <span class="parameters">Window size</span>  {{ stockForm.emaW }}
+                  <div class="row">
+                    <div class="col">
+                        <span class="parameters">Short (days)</span>  {{ stockForm.emaWS }}
+                    </div>
+                    <div class="col">
+                        <span class="parameters">Long (days)</span>  {{ stockForm.emaWL }}
+                    </div>
+                  </div>
               </div>
           </div>
 
