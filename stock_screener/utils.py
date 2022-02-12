@@ -1,4 +1,4 @@
-#import json
+# import json
 import yfinance as yf
 import pandas as pd
 import boto3
@@ -13,10 +13,12 @@ import urllib.request
 import urllib.parse
 import plotly.graph_objects as go
 
+
 def adjust_start(df, start_date):
     mask = (df["Date"] >= start_date)
     df = df.loc[mask]
     return df
+
 
 def read_stock_data_from_S3(bucket, stock):
     s3_client = boto3.client("s3")
@@ -69,12 +71,52 @@ def add_ma(df, ma_short, ma_long, window_short, window_long, start_date):
 
 
 def add_psar(df, psar_af, psar_ma):
+    if 'Date' not in df.columns:
+        df = df.reset_index()
     df["Parabolic_SAR"] = ta.trend.PSARIndicator(df["High"], df["Low"], df["Close"], psar_af, psar_ma).psar()
     mask = df["Parabolic_SAR"] > df["Close"]
     df["PSAR_Rec"] = "Buy"
     df.loc[mask, "PSAR_Rec"] = "Sell"
 
     return df
+
+
+def add_adx(df, window_size, limit):
+    if 'Date' not in df.columns:
+        df = df.reset_index()
+    df["ADX"] = ta.trend.ADXIndicator(df["High"], df["Low"], df["Close"], window=window_size).adx()
+    mask = df["ADX"] > limit
+    df["ADX_Rec"] = False
+    df.loc[mask, "ADX_Rec"] = True
+
+    return df
+
+
+def add_srsi(df, window_size, smooth1, smooth2, overbought_limit, oversold_limit):
+    if 'Date' not in df.columns:
+        df = df.reset_index()
+    df["SRSI"] = ta.momentum.StochRSIIndicator(df["Close"], window=window_size,
+                                               smooth1=smooth1, smooth2=smooth2).stochrsi()
+    df["SRSI_Rec"] = "Wait"
+    mask = df["SRSI"] > overbought_limit
+    df.loc[mask, "SRSI_Rec"] = "Sell"
+    mask = df["SRSI"] < oversold_limit
+    df.loc[mask, "SRSI_Rec"] = "Buy"
+
+    return df
+
+
+def add_macd(df, window_slow, window_fast, smoothing_period):
+    if 'Date' not in df.columns:
+        df = df.reset_index()
+    df["MACD"] = ta.trend.MACD(df["Close"], window_slow=window_slow, window_fast=window_fast,
+                               window_sign=smoothing_period).macd()
+    mask = df["MACD"] >= 0
+    df["MACD_Rec"] = "Sell"
+    df.loc[mask, "MACD_Rec"] = "Buy"
+
+    return df
+
 
 def make_graph(df, ticker, signal_names, height, width):
     """(pd DataFrame, string, integer, integer) => string

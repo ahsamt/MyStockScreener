@@ -5,7 +5,8 @@ from django.urls import reverse
 from .models import User
 from django.db import IntegrityError
 from .forms import StockForm
-from .utils import read_stock_data_from_S3, get_current_tickers, add_ma, add_psar, adjust_start, make_graph
+from .utils import read_stock_data_from_S3, get_current_tickers, add_ma, add_psar, add_adx, add_srsi, add_macd, \
+    adjust_start,  make_graph
 from datetime import date, datetime, timedelta
 from dateutil.relativedelta import relativedelta
 import pandas as pd
@@ -56,6 +57,7 @@ def index(request):
                 psarMA = stockForm.cleaned_data['psarMA']
                 adx = stockForm.cleaned_data['adx']
                 adxW = stockForm.cleaned_data['adxW']
+                adxL = stockForm.cleaned_data['adxW']
 
                 srsi = stockForm.cleaned_data['srsi']
                 srsiW = stockForm.cleaned_data['srsiW']
@@ -90,6 +92,8 @@ def index(request):
 
                     graphSignals = []
 
+                    if not (ma and psar and adx and srsi and macd):
+                        stock = stock.reset_index()
                     if ma:
                         stock, shortName, longName = add_ma(stock, maS, maL, maWS, maWL, startDateDatetime)
                         graphSignals.append(shortName)
@@ -98,6 +102,18 @@ def index(request):
                     if psar:
                         stock = add_psar(stock, psarAF, psarMA)
                         graphSignals.append("Parabolic_SAR")
+
+                    if adx:
+                        stock = add_adx(stock, adxW, adxL)
+                        graphSignals.append("ADX")
+
+                    if srsi:
+                        stock = add_srsi(stock, srsiW, srsiSm1, srsiSm2, srsiOB, srsiOS)
+                        graphSignals.append("SRSI")
+
+                    if macd:
+                        stock = add_macd(stock, macdS, macdF, macdSm)
+                        graphSignals.append("MACD")
 
                     stock = adjust_start(stock, startDateDatetime)
 
