@@ -6,3 +6,13 @@
 /dataSources.local.xml
 # Editor-based HTTP Client requests
 /httpRequests/
+
+# Text backup files
+*.bak
+
+# Database
+*.sqlite3
+
+package.json
+package-lock.json
+node_modules
