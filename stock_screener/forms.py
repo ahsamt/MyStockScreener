@@ -1,15 +1,15 @@
 from django import forms
-ma_choices = [('SMA', 'Simple Moving Average'), ('EMA', 'Exponential Moving Average')]
-
+ma1_choices = [('SMA', 'Simple Moving Average'), ('EMA', 'Exponential Moving Average')]
+ma2_choices = [('SMA', 'Simple Moving Average'), ('EMA', 'Exponential Moving Average')]
 
 class StockForm(forms.Form):
     ticker = forms.CharField(label='Stock name', max_length=5,
                              widget=forms.TextInput(attrs={'autofocus': True, 'placeholder': 'AAPL'}))
     ma = forms.BooleanField(label='Moving Average (SMA)', required=False)
-    maS = forms.ChoiceField(label='Choice of Moving Average - short term', required=False, choices=ma_choices)
+    maS = forms.ChoiceField(label='Choice of Moving Average - short term', required=False, choices=ma1_choices)
     maWS = forms.IntegerField(label='Moving Average window size - short', max_value=100, initial="15",
                               widget=forms.NumberInput(attrs={'style': 'width:9ch'}))
-    maL = forms.ChoiceField(label='Choice of Moving Average - long term', required=False,  choices=ma_choices)
+    maL = forms.ChoiceField(label='Choice of Moving Average - long term', required=False,  choices=ma2_choices)
 
     maWL = forms.IntegerField(label='Moving Average window size - long', max_value=100, initial="45",
                               widget=forms.NumberInput(attrs={'style': 'width:9ch'}))

@@ -7,6 +7,7 @@ from django.db import IntegrityError
 from .forms import StockForm
 from .utils import read_stock_data_from_S3, get_current_tickers, add_ma, add_psar, add_adx, add_srsi, add_macd, \
     adjust_start,  make_graph
+from .recommendations import add_final_rec_column
 from datetime import date, datetime, timedelta
 from dateutil.relativedelta import relativedelta
 import pandas as pd
@@ -95,7 +96,7 @@ def index(request):
                     if not (ma and psar and adx and srsi and macd):
                         stock = stock.reset_index()
                     if ma:
-                        stock, shortName, longName = add_ma(stock, maS, maL, maWS, maWL, startDateDatetime)
+                        stock, shortName, longName = add_ma(stock, maS, maL, maWS, maWL)
                         graphSignals.append(shortName)
                         graphSignals.append(longName)
 
@@ -109,15 +110,19 @@ def index(request):
 
                     if srsi:
                         stock = add_srsi(stock, srsiW, srsiSm1, srsiSm2, srsiOB, srsiOS)
-                        graphSignals.append("SRSI")
+                        graphSignals.append("Stochastic_RSI")
 
                     if macd:
                         stock = add_macd(stock, macdS, macdF, macdSm)
                         graphSignals.append("MACD")
 
+                    stock = add_final_rec_column(stock, [adx, ma, macd, psar, srsi])
+
                     stock = adjust_start(stock, startDateDatetime)
 
                     graph = make_graph(stock, ticker, graphSignals, height, width)
+
+                    print(graphSignals)
                     context = {
                             "ticker": ticker,
                             "graph": graph,

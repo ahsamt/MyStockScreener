@@ -39,15 +39,15 @@ def get_current_tickers(bucket):
     return tickers
 
 
-def add_ma(df, ma_short, ma_long, window_short, window_long, start_date):
-    if ma_short == "Simple Moving Average":
+def add_ma(df, ma_short, ma_long, window_short, window_long):
+    if ma_short == "SMA":
         colShort = f"SMA_{window_short}"
         df[colShort] = ta.trend.sma_indicator(df["Close"], window=window_short)
     else:
         colShort = f"EMA_{window_short}"
         df[colShort] = ta.trend.ema_indicator(df["Close"], window=window_short)
 
-    if ma_long == "Simple Moving Average":
+    if ma_long == "SMA":
         colLong = f"SMA_{window_long}"
         df[colLong] = ta.trend.sma_indicator(df["Close"], window=window_long)
     else:
@@ -76,7 +76,7 @@ def add_psar(df, psar_af, psar_ma):
     df["Parabolic_SAR"] = ta.trend.PSARIndicator(df["High"], df["Low"], df["Close"], psar_af, psar_ma).psar()
     mask = df["Parabolic_SAR"] > df["Close"]
     df["PSAR_Rec"] = "Buy"
-    df.loc[mask, "PSAR_Rec"] = "Sell"
+    df.loc[mask, "Parabolic_SAR_Rec"] = "Sell"
 
     return df
 
@@ -95,13 +95,13 @@ def add_adx(df, window_size, limit):
 def add_srsi(df, window_size, smooth1, smooth2, overbought_limit, oversold_limit):
     if 'Date' not in df.columns:
         df = df.reset_index()
-    df["SRSI"] = ta.momentum.StochRSIIndicator(df["Close"], window=window_size,
-                                               smooth1=smooth1, smooth2=smooth2).stochrsi()
-    df["SRSI_Rec"] = "Wait"
-    mask = df["SRSI"] > overbought_limit
-    df.loc[mask, "SRSI_Rec"] = "Sell"
-    mask = df["SRSI"] < oversold_limit
-    df.loc[mask, "SRSI_Rec"] = "Buy"
+    df["Stochastic_RSI"] = ta.momentum.StochRSIIndicator(df["Close"], window=window_size,
+                                                         smooth1=smooth1, smooth2=smooth2).stochrsi()
+    df["Stochastic_RSI_Rec"] = "Wait"
+    mask = df["Stochastic_RSI"] > overbought_limit
+    df.loc[mask, "Stochastic_RSI_Rec"] = "Sell"
+    mask = df["Stochastic_RSI"] < oversold_limit
+    df.loc[mask, "Stochastic_RSI_Rec"] = "Buy"
 
     return df
 
