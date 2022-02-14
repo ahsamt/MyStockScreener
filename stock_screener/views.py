@@ -95,6 +95,9 @@ def index(request):
 
                     if not (ma and psar and adx and srsi and macd):
                         stock = stock.reset_index()
+                        recommendation = "You have not added any signals to this search. " \
+                                         "Please select relevant signals on the search page " \
+                                         "to see additional information for the selected stock."
                     if ma:
                         stock, shortName, longName = add_ma(stock, maS, maL, maWS, maWL)
                         graphSignals.append(shortName)
@@ -122,10 +125,13 @@ def index(request):
 
                     graph = make_graph(stock, ticker, graphSignals, height, width)
 
+                    recommendation = f"Analysis based on the signals selected " \
+                                     f"suggests that you should {stock.iloc[-1][-1].lower()}"
                     print(graphSignals)
                     context = {
                             "ticker": ticker,
                             "graph": graph,
+                            "recommendation": recommendation,
                             "stockForm": stockForm,
                     }
                     # data1, data2 = prep_graph_data(stock)
