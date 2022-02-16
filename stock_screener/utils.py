@@ -162,3 +162,37 @@ def make_graph(df, ticker, signal_names, height, width):
                       )
     graph = fig.to_html(full_html=False)
     return graph
+
+
+def format_float(number):
+    """(float) => string
+    Takes a number that needs to be formatted, returns a string formatted as a float with 2 decimal places
+    """
+    string = '{0:.2f}'.format(number)
+    return string
+
+
+def get_price_change(df):
+    """(pd dfFrame) => (float, tuple)
+    Takes in Pandas dfFrame with stock prices for a specific instrument,
+    returns:
+    1 - a float for the last closing price
+    2 - a tuple:
+        - a string showing the changes in price since previous trading day,
+        - a colour name (red or green) to use in HTML template to display the change.
+    """
+
+    closingPrice = df["Close"].iloc[-1]
+    previousPrice = df["Close"].iloc[-2]
+    priceDif = closingPrice - previousPrice
+    percDif = format_float(priceDif / previousPrice * 100)
+    if priceDif > 0:
+        sign = "+"
+        color = "green"
+    else:
+        sign = ""
+        color = "red"
+    priceDif = format_float(priceDif)
+    closingPrice = format_float(closingPrice)
+    change = (f"{sign}{priceDif} USD  ({sign}{percDif}%)", color)
+    return closingPrice, change

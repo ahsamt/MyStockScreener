@@ -6,7 +6,7 @@ from .models import User
 from django.db import IntegrityError
 from .forms import StockForm
 from .utils import read_stock_data_from_S3, get_current_tickers, add_ma, add_psar, add_adx, add_srsi, add_macd, \
-    adjust_start,  make_graph, add_days_since_change
+    adjust_start,  make_graph, add_days_since_change, get_price_change
 from .recommendations import add_final_rec_column
 from datetime import date, datetime, timedelta
 from dateutil.relativedelta import relativedelta
@@ -84,12 +84,13 @@ def index(request):
                 else:
                     print("reading data and preparing graph")
                     stock = read_stock_data_from_S3(bucket, ticker)
+                    tickerName = yf.Ticker(ticker).info['longName']
                     endDate = date.today()
                     startDate = endDate + relativedelta(months=-numMonths)
                     #startDateInternal = startDate + relativedelta(months=-3)
                     startDateDatetime = datetime.combine(startDate, datetime.min.time())
-                    height = 700
-                    width = 800
+                    height = 575
+                    width = 840
 
                     graphSignals = []
 
@@ -140,41 +141,21 @@ def index(request):
                     elif str(daysSinceChange)[-1] == 1:
                         changeInfo = f"{daysSinceChange} day since trend change"
                     else:
-                        changeInfo = f"{daysSinceChange} day since trend change"
+                        changeInfo = f"{daysSinceChange} days since trend change"
+
+                    closingPrice, priceChange = get_price_change(stock)
 
                     print(graphSignals)
                     context = {
                             "ticker": ticker,
+                            "tickerName": tickerName,
                             "graph": graph,
                             "recommendation": recommendation,
                             "changeInfo": changeInfo,
+                            "closingPrice": closingPrice,
+                            "priceChange": priceChange,
                             "stockForm": stockForm,
                     }
-                    # data1, data2 = prep_graph_data(stock)
-                    # stockFull = sp500[stock]
-                    # closing_price, change = get_change_info(data1, stock)
-                    # graph1 = make_graph_1(data1, stock, 470, 630)
-                    # graph2 = make_graph_2(data2, stock, 470, 630)
-                    # watchlisted = False
-                    # stockID = None
-
-                    # if request.user.is_authenticated:
-                    #     searchObj = SavedSearch.objects.filter(user=request.user, stock=ticker)
-                    #     if len(searchObj):
-                    #         watchlisted = True
-                    #         stockID = searchObj[0].id
-
-                    # context = {
-                    #     "stockForm": stockForm,
-                    #     "stock": stock,
-                    #     "stockFull": stockFull,
-                    #     "stockID": stockID,
-                    #     "closing_price": closing_price,
-                    #     "change": change,
-                    #     "watchlisted": watchlisted,
-                    #     "graph1": graph1,
-                    #     "graph2": graph2
-                    # }
 
                     return render(request, "stock_screener/index.html", context)
         else:

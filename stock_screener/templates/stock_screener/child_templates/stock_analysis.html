@@ -1,0 +1,15 @@
+
+<div class="stock_info card mb-4">
+    <div class="card-body">
+        <h4 class="card-title" id="ticker_name">{{ ticker }} ({{ tickerName }})</h4>
+        <h5 class="card-subtitle mb-2">
+            <span class="text-muted">Last closing price:</span>
+            <span class="closing_price">{{ closingPrice }} USD</span>
+        </h5>
+        <h5 class="card-subtitle mb-2">
+            <span class="price_change_{{ priceChange.1 }}">{{ priceChange.0 }}</span>
+        </h5>
+        <div>{{ recommendation }}</div>
+        <div>{{ changeInfo }}</div>
+    </div>
+</div>

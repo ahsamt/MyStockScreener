@@ -94,12 +94,6 @@ textarea {
   margin: 0;
 }
 
-.index-card {
-  display: block;
-  margin: 0 auto;
-  text-align: center;
-  width: 500px;
-}
 
 .navbar {
   background-color: var(--blue-font-color);
@@ -191,7 +185,7 @@ textarea {
   animation-play-state: paused;
 }
 
-.watchlist {
+.stock_info {
   border-radius: 4px;
   box-shadow: var(--custom-shadow);
   margin: 10px 0 10px 0;

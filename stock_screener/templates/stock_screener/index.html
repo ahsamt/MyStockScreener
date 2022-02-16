@@ -46,28 +46,35 @@
 </nav>
 
 <div class="container">
-  {% if not stock %}
+  {% if not ticker %}
 
   <div class="welcome">
     <h1>Welcome to StockScreener!</h1>
-    <h4>Please enter a ticker below</h4>
+    <h4>Please enter a ticker below and select the relevant signals</h4>
 
 
   </div>
 
     {% include "stock_screener/child_templates/search_form.html" with stock=stock message=message %}
-    {% endif %}
-</div>
+  {% endif %}
 
-    {{ ticker }}
-    <br />
-    {{ recommendation }}
-    <br />
-    {{ changeInfo }}
-    <div class="row">
 
+  <div class="row mt-5">
+      <div class="col">
+
+          {% include "stock_screener/child_templates/stock_analysis.html" with ticker=ticker priceChange=priceChange closingPrice=closingPrice recommendation=recommendation changeInfo=changeInfo %}
+
+      </div>
+      <div class="col">
         <div class="col d-flex align-items-center justify-content-center">
             {{ graph | safe }}
         </div>
+      </div>
+  </div>
+
+    <div class="row">
+
+
     </div>
+</div >
 {% endblock %}
