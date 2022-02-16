@@ -9,7 +9,7 @@ def add_final_rec_column(df, signalList):
     if signalNum == 1:
         if adx:
             print("ADX only")
-            df["Final_Rec"] = df["ADX_Rec"]
+            df["Final_Rec"] = np.where(df["ADX_Rec"] == True, "Trending", "Rangebound")
 
         elif ma:
             print("MA only")
@@ -193,5 +193,6 @@ def add_final_rec_column(df, signalList):
                     df["MACD_Rec"] == df["Parabolic_SAR_Rec"]) & (df["Parabolic_SAR_Rec"] == df["Stochastic_RSI_Rec"])
         df["Final_Rec"] = np.where(mask, df["MA_Rec"], "Wait")
 
+    print(df.tail())
     return df
 

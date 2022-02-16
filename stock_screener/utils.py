@@ -2,7 +2,7 @@
 import yfinance as yf
 import pandas as pd
 import boto3
-import numpy
+import numpy as np
 from datetime import date, datetime, timedelta
 from dateutil.relativedelta import relativedelta
 from io import StringIO
@@ -16,8 +16,9 @@ import plotly.graph_objects as go
 
 def adjust_start(df, start_date):
     mask = (df["Date"] >= start_date)
-    df = df.loc[mask]
-    return df
+    dfNew = df.loc[mask].copy(deep=True)
+    dfNew.reset_index(drop=True, inplace=True)
+    return dfNew
 
 
 def read_stock_data_from_S3(bucket, stock):
@@ -114,6 +115,21 @@ def add_macd(df, window_slow, window_fast, smoothing_period):
     mask = df["MACD"] >= 0
     df["MACD_Rec"] = "Sell"
     df.loc[mask, "MACD_Rec"] = "Buy"
+
+    return df
+
+
+def add_days_since_change(df, col_name):
+    mask = df[col_name].eq(df[col_name].shift())
+    df["Change_Flag"] = np.where(mask, False, True)
+    df.loc[0, "Change_Flag"] = False
+    df["Days_Since_Change"] = None
+    mask = (df["Change_Flag"] == True)
+    df.loc[mask, "Days_Since_Change"] = 0
+    for i in range(1, len(df)):
+        a = df.loc[i - 1, "Days_Since_Change"]
+        if (a is not None) & (df.loc[i, "Days_Since_Change"] != 0):
+            df.loc[i, 'Days_Since_Change'] = df.loc[i - 1, 'Days_Since_Change'] + 1
 
     return df
 

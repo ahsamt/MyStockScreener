@@ -6,7 +6,7 @@ from .models import User
 from django.db import IntegrityError
 from .forms import StockForm
 from .utils import read_stock_data_from_S3, get_current_tickers, add_ma, add_psar, add_adx, add_srsi, add_macd, \
-    adjust_start,  make_graph
+    adjust_start,  make_graph, add_days_since_change
 from .recommendations import add_final_rec_column
 from datetime import date, datetime, timedelta
 from dateutil.relativedelta import relativedelta
@@ -93,7 +93,7 @@ def index(request):
 
                     graphSignals = []
 
-                    if not (ma and psar and adx and srsi and macd):
+                    if not (ma or psar or adx or srsi or macd):
                         stock = stock.reset_index()
                         recommendation = "You have not added any signals to this search. " \
                                          "Please select relevant signals on the search page " \
@@ -121,17 +121,33 @@ def index(request):
 
                     stock = add_final_rec_column(stock, [adx, ma, macd, psar, srsi])
 
+                    stock = add_days_since_change(stock, "Final_Rec")
                     stock = adjust_start(stock, startDateDatetime)
 
                     graph = make_graph(stock, ticker, graphSignals, height, width)
 
-                    recommendation = f"Analysis based on the signals selected " \
-                                     f"suggests that you should {stock.iloc[-1][-1].lower()}"
+                    rec = stock.loc[stock.index[-1], "Final_Rec"].lower()
+                    daysSinceChange = stock.loc[stock.index[-1], "Days_Since_Change"]
+
+                    if rec in ["trending", "rangebound"]:
+                        recommendation = f"{ticker} is {rec} at the moment."
+                    else:
+
+                        recommendation = f"Analysis based on the signals selected " \
+                                     f"suggests that you should {rec}."
+                    if daysSinceChange is None:
+                        changeInfo = "This trend has not changed in the past year"
+                    elif str(daysSinceChange)[-1] == 1:
+                        changeInfo = f"{daysSinceChange} day since trend change"
+                    else:
+                        changeInfo = f"{daysSinceChange} day since trend change"
+
                     print(graphSignals)
                     context = {
                             "ticker": ticker,
                             "graph": graph,
                             "recommendation": recommendation,
+                            "changeInfo": changeInfo,
                             "stockForm": stockForm,
                     }
                     # data1, data2 = prep_graph_data(stock)
