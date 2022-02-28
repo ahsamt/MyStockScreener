@@ -21,6 +21,84 @@ def adjust_start(df, start_date):
     return dfNew
 
 
+def get_company_names_from_yf(ticker_list):
+    """list => list
+    Takes in a list of tickers.
+    Returns a list of corresponding company names found on yfinance.
+    """
+    names = []
+    for item in ticker_list:
+        ticker = yf.Ticker(item)
+        tickerDetails = ticker.info
+        names.append(tickerDetails['shortName'])
+    return names
+
+def upload_csv_to_S3(bucket, df, file_name):
+    csv_buffer = StringIO()
+    df.to_csv(csv_buffer)
+    s3_resource = boto3.resource('s3')
+    result = s3_resource.Object(bucket, f"{file_name}.csv").put(Body=csv_buffer.getvalue())
+    res = result.get('ResponseMetadata')
+
+    if res.get('HTTPStatusCode') == 200:
+        print('File Uploaded Successfully')
+    else:
+        print('File Not Uploaded')
+
+    return None
+
+# def upload_stock_data_to_S3(bucket, df, ticker):
+#     csv_buffer = StringIO()
+#     df.to_csv(csv_buffer)
+#     s3_resource = boto3.resource('s3')
+#     result = s3_resource.Object(bucket, f"{ticker}.csv").put(Body=csv_buffer.getvalue())
+#     res = result.get('ResponseMetadata')
+#
+#     if res.get('HTTPStatusCode') == 200:
+#         print('File Uploaded Successfully')
+#     else:
+#         print('File Not Uploaded')
+#
+#     return None
+#
+#
+# def upload_ticker_info_to_S3(bucket, df):
+#     """(string, pd DataFrame) => None
+#    Takes in a string representing the name of the S3 bucket where current tickers are being stored
+#    and a DataFrame with the most recent ticker information that needs to be uploaded on S3.
+#    Uploads the most recent tickers as a text file to the indicated S3 bucket and returns None.
+#    """
+#
+#
+# csv_buffer = StringIO()
+# df.to_csv(csv_buffer)
+# s3_resource = boto3.resource('s3')
+# result = s3_resource.Object(bucket, "TickersInfo.csv").put(Body=csv_buffer.getvalue())
+# res = result.get('ResponseMetadata')
+#
+# if res.get('HTTPStatusCode') == 200:
+#     print('File Uploaded Successfully')
+# else:
+#     print('File Not Uploaded')
+
+def update_ticker_info_S3(bucket, new_ticker_list):
+    """(string, list) => None
+   Takes in a string representing the name of the S3 bucket where current tickers are being stored
+   and a list of new tickers that need to be added to the ticker information file on S3.
+   Uploads an updated ticker information file to S3 as a csv file and returns None.
+   """
+
+    dfUpdate = pd.DataFrame(new_ticker_list)
+    dfUpdate["Name"] = get_company_names_from_yf(new_ticker_list)
+    dfUpdate.columns = "Ticker", "Name"
+    dfUpdate = dfUpdate.set_index("Ticker")
+    df = get_current_tickers_info(bucket)
+    df = df.append(dfUpdate, ignore_index=False)
+    upload_csv_to_S3(bucket, df, "TickersInfo")
+
+    return None
+
+
 def read_stock_data_from_S3(bucket, stock):
     s3_client = boto3.client("s3")
     object_key = f"{stock}.csv"

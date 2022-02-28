@@ -6,7 +6,8 @@ from .models import User
 from django.db import IntegrityError
 from .forms import StockForm
 from .utils import read_stock_data_from_S3, add_ma, add_psar, add_adx, add_srsi, add_macd, \
-    adjust_start,  make_graph, add_days_since_change, get_price_change, get_current_tickers_info
+    adjust_start,  make_graph, add_days_since_change, get_price_change, get_current_tickers_info, \
+    upload_csv_to_S3, update_ticker_info_S3
 from .recommendations import add_final_rec_column
 from datetime import date, datetime, timedelta
 from dateutil.relativedelta import relativedelta
@@ -72,97 +73,108 @@ def index(request):
                 macdS = stockForm.cleaned_data['macdS']
                 macdSm = stockForm.cleaned_data['macdSm']
 
+                endDate = date.today()
+                startDate = endDate + relativedelta(months=-numMonths)
+                startDateInternal = startDate + relativedelta(months=-3)
+                startDateDatetime = datetime.combine(startDate, datetime.min.time())
+
+                graphSignals = []
+                height = 575
+                width = 840
+
                 tickerInfo = get_current_tickers_info(bucket)
                 tickerList = list(tickerInfo.index)
                 if ticker not in tickerList:
-                    message = "This ticker will need to be added to S3 bucket"
-                    context = {
+                    stock = yf.download(ticker, start=startDateInternal, end=endDate)
+                    if stock.empty:
+                        message = "This ticker will need to be added to S3 bucket"
+                        context = {
                         "message": message,
                         "stockForm": StockForm
-                    }
-                    return render(request, "stock_screener/index.html", context)
+                        }
+                        return render(request, "stock_screener/index.html", context)
+                    else:
+                        print("Data downloaded in full")
+                        upload_csv_to_S3(bucket, stock, ticker)
+                        update_ticker_info_S3(bucket, [ticker])
+                        tickerInfo = get_current_tickers_info(bucket)
+                        #tickerList = list(tickerInfo.index)
+
 
                 else:
                     print("reading data and preparing graph")
                     stock = read_stock_data_from_S3(bucket, ticker)
-                    tickerName = tickerInfo.loc[ticker]["Name"]
-                    endDate = date.today()
-                    startDate = endDate + relativedelta(months=-numMonths)
-                    #startDateInternal = startDate + relativedelta(months=-3)
-                    startDateDatetime = datetime.combine(startDate, datetime.min.time())
-                    height = 575
-                    width = 840
 
-                    graphSignals = []
+                tickerName = tickerInfo.loc[ticker]["Name"]
 
-                    # if no signals are selected:
-                    if not (ma or psar or adx or srsi or macd):
-                        stock = stock.reset_index()
-                        recommendation = "You have not added any signals to this search. " \
-                                         "Please select relevant signals on the search page " \
-                                         "to see additional information for the selected stock."
-                        changeInfo = None
+                # if no signals are selected:
+                if not (ma or psar or adx or srsi or macd):
+                    stock = stock.reset_index()
+                    recommendation = "You have not added any signals to this search. " \
+                                     "Please select relevant signals on the search page " \
+                                     "to see additional information for the selected stock."
+                    changeInfo = None
 
+                else:
+                    if ma:
+                        stock, shortName, longName = add_ma(stock, maS, maL, maWS, maWL)
+                        graphSignals.append(shortName)
+                        graphSignals.append(longName)
+
+                    if psar:
+                        stock = add_psar(stock, psarAF, psarMA)
+                        graphSignals.append("Parabolic_SAR")
+
+                    if adx:
+                        stock = add_adx(stock, adxW, adxL)
+                        graphSignals.append("ADX")
+
+                    if srsi:
+                        stock = add_srsi(stock, srsiW, srsiSm1, srsiSm2, srsiOB, srsiOS)
+                        graphSignals.append("Stochastic_RSI")
+
+                    if macd:
+                        stock = add_macd(stock, macdS, macdF, macdSm)
+                        graphSignals.append("MACD")
+
+                    stock = add_final_rec_column(stock, [adx, ma, macd, psar, srsi])
+
+                    stock = add_days_since_change(stock, "Final_Rec")
+                    rec = stock.loc[stock.index[-1], "Final_Rec"].lower()
+                    daysSinceChange = stock.loc[stock.index[-1], "Days_Since_Change"]
+
+                    if rec in ["trending", "rangebound"]:
+                        recommendation = f"{ticker} is {rec} at the moment."
                     else:
-                        if ma:
-                            stock, shortName, longName = add_ma(stock, maS, maL, maWS, maWL)
-                            graphSignals.append(shortName)
-                            graphSignals.append(longName)
+                        recommendation = f"Analysis based on the signals selected " \
+                                         f"suggests that you should {rec}."
 
-                        if psar:
-                            stock = add_psar(stock, psarAF, psarMA)
-                            graphSignals.append("Parabolic_SAR")
+                    if daysSinceChange is None:
+                        changeInfo = "This trend has not changed in the past year"
+                    elif str(daysSinceChange)[-1] == 1:
+                        changeInfo = f"{daysSinceChange} day since trend change"
+                    else:
+                        changeInfo = f"{daysSinceChange} days since trend change"
 
-                        if adx:
-                            stock = add_adx(stock, adxW, adxL)
-                            graphSignals.append("ADX")
+                stock = adjust_start(stock, startDateDatetime)
 
-                        if srsi:
-                            stock = add_srsi(stock, srsiW, srsiSm1, srsiSm2, srsiOB, srsiOS)
-                            graphSignals.append("Stochastic_RSI")
+                graph = make_graph(stock, ticker, graphSignals, height, width)
 
-                        if macd:
-                            stock = add_macd(stock, macdS, macdF, macdSm)
-                            graphSignals.append("MACD")
+                closingPrice, priceChange = get_price_change(stock)
 
-                        stock = add_final_rec_column(stock, [adx, ma, macd, psar, srsi])
+                print(stock.tail(15))
+                context = {
+                        "ticker": ticker,
+                        "tickerName": tickerName,
+                        "graph": graph,
+                        "recommendation": recommendation,
+                        "changeInfo": changeInfo,
+                        "closingPrice": closingPrice,
+                        "priceChange": priceChange,
+                        "stockForm": stockForm,
+                }
 
-                        stock = add_days_since_change(stock, "Final_Rec")
-                        rec = stock.loc[stock.index[-1], "Final_Rec"].lower()
-                        daysSinceChange = stock.loc[stock.index[-1], "Days_Since_Change"]
-
-                        if rec in ["trending", "rangebound"]:
-                            recommendation = f"{ticker} is {rec} at the moment."
-                        else:
-                            recommendation = f"Analysis based on the signals selected " \
-                                             f"suggests that you should {rec}."
-
-                        if daysSinceChange is None:
-                            changeInfo = "This trend has not changed in the past year"
-                        elif str(daysSinceChange)[-1] == 1:
-                            changeInfo = f"{daysSinceChange} day since trend change"
-                        else:
-                            changeInfo = f"{daysSinceChange} days since trend change"
-
-                    stock = adjust_start(stock, startDateDatetime)
-
-                    graph = make_graph(stock, ticker, graphSignals, height, width)
-
-                    closingPrice, priceChange = get_price_change(stock)
-
-                    print(stock.tail(15))
-                    context = {
-                            "ticker": ticker,
-                            "tickerName": tickerName,
-                            "graph": graph,
-                            "recommendation": recommendation,
-                            "changeInfo": changeInfo,
-                            "closingPrice": closingPrice,
-                            "priceChange": priceChange,
-                            "stockForm": stockForm,
-                    }
-
-                    return render(request, "stock_screener/index.html", context)
+                return render(request, "stock_screener/index.html", context)
         else:
             print("ticker not in request.post")
 
