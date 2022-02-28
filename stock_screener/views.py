@@ -87,7 +87,7 @@ def index(request):
                 if ticker not in tickerList:
                     stock = yf.download(ticker, start=startDateInternal, end=endDate)
                     if stock.empty:
-                        message = "This ticker will need to be added to S3 bucket"
+                        message = f"Details for ticker {ticker} cannot be found"
                         context = {
                         "message": message,
                         "stockForm": StockForm
