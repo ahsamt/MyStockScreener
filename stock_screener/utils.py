@@ -32,12 +32,34 @@ def read_stock_data_from_S3(bucket, stock):
     return df
 
 
-def get_current_tickers(bucket):
-    s3 = boto3.client('s3')
-    tickerFile = s3.get_object(Bucket=bucket, Key="Tickers.txt")
-    tickers = tickerFile['Body'].read().decode('utf-8').split()
+# def get_company_name_from_S3(bucket, ticker):
+#     s3_client = boto3.client("s3")
+#     object_key = "TickersInfo.csv"
+#     csv_obj = s3_client.get_object(Bucket=bucket, Key=object_key)
+#     body = csv_obj['Body']
+#     csv_string = body.read().decode('utf-8')
+#     df = pd.read_csv(StringIO(csv_string), index_col=[0])
+#     name = df.loc[ticker]["Name"]
+#
+#     return name
 
-    return tickers
+
+def get_current_tickers_info(bucket):
+    s3_client = boto3.client("s3")
+    object_key = "TickersInfo.csv"
+    csv_obj = s3_client.get_object(Bucket=bucket, Key=object_key)
+    body = csv_obj['Body']
+    csv_string = body.read().decode('utf-8')
+    df = pd.read_csv(StringIO(csv_string), index_col=[0])
+
+    return df
+
+
+# def get_current_tickers(bucket):
+#     df = get_current_tickers_info(bucket)
+#     tickers = list(df.index)
+#
+#     return tickers
 
 
 def add_ma(df, ma_short, ma_long, window_short, window_long):

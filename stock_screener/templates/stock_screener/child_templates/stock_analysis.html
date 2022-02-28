@@ -10,6 +10,9 @@
             <span class="price_change_{{ priceChange.1 }}">{{ priceChange.0 }}</span>
         </h5>
         <div>{{ recommendation }}</div>
+
+        {% if changeInfo %}
         <div>{{ changeInfo }}</div>
+        {% endif %}
     </div>
 </div>

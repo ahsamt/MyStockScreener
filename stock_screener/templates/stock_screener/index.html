@@ -56,7 +56,7 @@
   </div>
 
     {% include "stock_screener/child_templates/search_form.html" with stock=stock message=message %}
-  {% endif %}
+  {% else %}
 
 
   <div class="row mt-5">
@@ -72,9 +72,6 @@
       </div>
   </div>
 
-    <div class="row">
-
-
-    </div>
+   {% endif %}
 </div >
 {% endblock %}
