@@ -5,9 +5,9 @@ from django.urls import reverse
 from .models import User
 from django.db import IntegrityError
 from .forms import StockForm
-from .utils import read_stock_data_from_S3, add_ma, add_psar, add_adx, add_srsi, add_macd, \
+from .utils import read_csv_from_S3, add_ma, add_psar, add_adx, add_srsi, add_macd, \
     adjust_start,  make_graph, add_days_since_change, get_price_change, get_current_tickers_info, \
-    upload_csv_to_S3, update_ticker_info_S3
+    upload_csv_to_S3, update_ticker_info_S3, stocks_tidy_up
 from .recommendations import add_final_rec_column
 from datetime import date, datetime, timedelta
 from dateutil.relativedelta import relativedelta
@@ -75,7 +75,7 @@ def index(request):
 
                 endDate = date.today()
                 startDate = endDate + relativedelta(months=-numMonths)
-                startDateInternal = startDate + relativedelta(months=-3)
+                startDateInternal = startDate + relativedelta(months=-6)
                 startDateDatetime = datetime.combine(startDate, datetime.min.time())
 
                 graphSignals = []
@@ -95,7 +95,10 @@ def index(request):
                         return render(request, "stock_screener/index.html", context)
                     else:
                         print("Data downloaded in full")
-                        upload_csv_to_S3(bucket, stock, ticker)
+                        stock = stocks_tidy_up(stock, ticker)
+                        stocks = read_csv_from_S3(bucket, "Stocks")
+                        updatedStocks = pd.concat([stocks, stock], axis=0)
+                        upload_csv_to_S3(bucket, updatedStocks, "Stocks")
                         update_ticker_info_S3(bucket, [ticker])
                         tickerInfo = get_current_tickers_info(bucket)
                         #tickerList = list(tickerInfo.index)
@@ -103,7 +106,7 @@ def index(request):
 
                 else:
                     print("reading data and preparing graph")
-                    stock = read_stock_data_from_S3(bucket, ticker)
+                    stock = read_csv_from_S3(bucket, "Stocks")[ticker]
 
                 tickerName = tickerInfo.loc[ticker]["Name"]
 

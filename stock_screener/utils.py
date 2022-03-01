@@ -30,8 +30,13 @@ def get_company_names_from_yf(ticker_list):
     for item in ticker_list:
         ticker = yf.Ticker(item)
         tickerDetails = ticker.info
-        names.append(tickerDetails['shortName'])
+        try:
+            name = tickerDetails['longName']
+        except KeyError:
+            name = tickerDetails['shortName']
+        names.append(name)
     return names
+
 
 def upload_csv_to_S3(bucket, df, file_name):
     csv_buffer = StringIO()
@@ -46,6 +51,7 @@ def upload_csv_to_S3(bucket, df, file_name):
         print('File Not Uploaded')
 
     return None
+
 
 # def upload_stock_data_to_S3(bucket, df, ticker):
 #     csv_buffer = StringIO()
@@ -99,15 +105,29 @@ def update_ticker_info_S3(bucket, new_ticker_list):
     return None
 
 
-def read_stock_data_from_S3(bucket, stock):
+def read_csv_from_S3(bucket, file_name):
     s3_client = boto3.client("s3")
-    object_key = f"{stock}.csv"
+    object_key = f"{file_name}.csv"
     csv_obj = s3_client.get_object(Bucket=bucket, Key=object_key)
     body = csv_obj['Body']
     csv_string = body.read().decode('utf-8')
-    df = pd.read_csv(StringIO(csv_string), index_col=[0], parse_dates=[0])
+    df = pd.read_csv(StringIO(csv_string), header=[0, 1], index_col=[0], parse_dates=[0])
 
     return df
+
+
+def stocks_tidy_up(df, ticker=None):
+    if not ticker:
+        df.columns = df.columns.to_flat_index()
+        df.columns = pd.MultiIndex.from_tuples(df.columns)
+        df = df.swaplevel(axis=1).sort_index(axis=1)
+    else:
+        columns = [(ticker, 'Open'), (ticker, 'High'), (ticker, "Low"), (ticker, "Close"), (ticker, "Adj Close"),
+                   (ticker, "Volume")]
+        df.columns = pd.MultiIndex.from_tuples(columns)
+
+    return df
+
 
 
 # def get_company_name_from_S3(bucket, ticker):
