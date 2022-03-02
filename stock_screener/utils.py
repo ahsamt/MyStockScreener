@@ -12,6 +12,7 @@ import json
 import urllib.request
 import urllib.parse
 import plotly.graph_objects as go
+import requests
 
 
 def adjust_start(df, start_date):
@@ -23,8 +24,8 @@ def adjust_start(df, start_date):
 
 def get_company_name_from_yf(ticker):
     """string => string
-    Takes in a list of tickers.
-    Returns a list of corresponding company names found on yfinance.
+    Takes in a ticker as a string.
+    Returns the matching company name found on yfinance.
     """
 
     ticker = yf.Ticker(ticker)
@@ -49,41 +50,6 @@ def upload_csv_to_S3(bucket, df, file_name):
         print('File Not Uploaded')
 
     return None
-
-
-# def upload_stock_data_to_S3(bucket, df, ticker):
-#     csv_buffer = StringIO()
-#     df.to_csv(csv_buffer)
-#     s3_resource = boto3.resource('s3')
-#     result = s3_resource.Object(bucket, f"{ticker}.csv").put(Body=csv_buffer.getvalue())
-#     res = result.get('ResponseMetadata')
-#
-#     if res.get('HTTPStatusCode') == 200:
-#         print('File Uploaded Successfully')
-#     else:
-#         print('File Not Uploaded')
-#
-#     return None
-#
-#
-# def upload_ticker_info_to_S3(bucket, df):
-#     """(string, pd DataFrame) => None
-#    Takes in a string representing the name of the S3 bucket where current tickers are being stored
-#    and a DataFrame with the most recent ticker information that needs to be uploaded on S3.
-#    Uploads the most recent tickers as a text file to the indicated S3 bucket and returns None.
-#    """
-#
-#
-# csv_buffer = StringIO()
-# df.to_csv(csv_buffer)
-# s3_resource = boto3.resource('s3')
-# result = s3_resource.Object(bucket, "TickersInfo.csv").put(Body=csv_buffer.getvalue())
-# res = result.get('ResponseMetadata')
-#
-# if res.get('HTTPStatusCode') == 200:
-#     print('File Uploaded Successfully')
-# else:
-#     print('File Not Uploaded')
 
 
 def prepare_ticker_info_update(current_tickers_info, ticker, ticker_name):
@@ -127,19 +93,6 @@ def stock_tidy_up(df, ticker):
     return newDF
 
 
-
-# def get_company_name_from_S3(bucket, ticker):
-#     s3_client = boto3.client("s3")
-#     object_key = "TickersInfo.csv"
-#     csv_obj = s3_client.get_object(Bucket=bucket, Key=object_key)
-#     body = csv_obj['Body']
-#     csv_string = body.read().decode('utf-8')
-#     df = pd.read_csv(StringIO(csv_string), index_col=[0])
-#     name = df.loc[ticker]["Name"]
-#
-#     return name
-
-
 def get_current_tickers_info(bucket):
     s3_client = boto3.client("s3")
     object_key = "TickersInfo.csv"
@@ -149,13 +102,6 @@ def get_current_tickers_info(bucket):
     df = pd.read_csv(StringIO(csv_string), index_col=[0])
 
     return df
-
-
-# def get_current_tickers(bucket):
-#     df = get_current_tickers_info(bucket)
-#     tickers = list(df.index)
-#
-#     return tickers
 
 
 def add_ma(df, ma_short, ma_long, window_short, window_long):

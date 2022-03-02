@@ -3,7 +3,7 @@ ma1_choices = [('SMA', 'Simple Moving Average'), ('EMA', 'Exponential Moving Ave
 ma2_choices = [('SMA', 'Simple Moving Average'), ('EMA', 'Exponential Moving Average')]
 
 class StockForm(forms.Form):
-    ticker = forms.CharField(label='Stock name', max_length=5,
+    ticker = forms.CharField(label='Stock name', max_length=30,
                              widget=forms.TextInput(attrs={'autofocus': True, 'placeholder': 'AAPL'}))
     ma = forms.BooleanField(label='Moving Average (SMA)', required=False)
     maS = forms.ChoiceField(label='Choice of Moving Average - short term', required=False, choices=ma1_choices)

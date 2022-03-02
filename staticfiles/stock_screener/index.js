@@ -2,6 +2,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // check on scroll if "back to top" button should be displayed
   window.addEventListener("scroll", () => top_scroll());
 
+
   // add clarifying message re S&P 500 on the search page
   if (document.querySelector(".question")) {
     document.querySelector(".question").addEventListener("click", (event) => {

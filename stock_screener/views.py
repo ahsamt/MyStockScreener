@@ -7,7 +7,7 @@ from django.db import IntegrityError
 from .forms import StockForm
 from .utils import read_csv_from_S3, add_ma, add_psar, add_adx, add_srsi, add_macd, \
     adjust_start, make_graph, add_days_since_change, get_price_change, get_current_tickers_info, \
-    upload_csv_to_S3, stock_tidy_up, get_company_name_from_yf, prepare_ticker_info_update
+    upload_csv_to_S3, stock_tidy_up, prepare_ticker_info_update, get_company_name_from_yf
 from .recommendations import add_final_rec_column
 from datetime import date, datetime, timedelta
 from dateutil.relativedelta import relativedelta
@@ -103,6 +103,7 @@ def index(request):
                     else:
                         print("Data downloaded in full")
                         tickerName = get_company_name_from_yf(ticker)
+                        gettingName = time.time()
                         tickerInfo = prepare_ticker_info_update(tickerInfo, ticker, tickerName)
                         tickerInfoPrep = time.time()
                         upload_csv_to_S3(bucket, tickerInfo, "TickersInfo")
@@ -114,7 +115,8 @@ def index(request):
                         fullEndTime = time.time()
 
                         print(f"stock download time takes {stockDownLoadTime - fullStartTime}")
-                        print(f" ticker info prep takes {tickerInfoPrep - stockDownLoadTime}")
+                        print(f"getting the full name takes {gettingName - stockDownLoadTime}")
+                        print(f" ticker info prep takes {tickerInfoPrep - gettingName}")
                         print(f"ticker info upload takes {tickerUploadTime - tickerInfoPrep}")
                         print(f"full execution time takes {fullEndTime - fullStartTime}")
 
