@@ -87,8 +87,6 @@ def index(request):
                 tickerInfo = get_current_tickers_info(bucket)
                 tickerList = list(tickerInfo.index)
 
-                uploadRequired = False
-
                 if ticker not in tickerList:
                     fullStartTime = time.time()
                     stock = yf.download(ticker, start=startDateInternal, end=endDate)
@@ -122,8 +120,9 @@ def index(request):
 
                 else:
                     print("reading data and preparing graph")
-                    stock = existingStocks[ticker]
+                    stock = existingStocks[ticker].copy()
 
+                stock.dropna(inplace=True)
                 tickerName = tickerInfo.loc[ticker]["Name"]
 
                 # if no signals are selected:
