@@ -122,7 +122,7 @@ def index(request):
                     print("reading data and preparing graph")
                     stock = existingStocks[ticker].copy()
 
-                stock.dropna(inplace=True)
+                stock.dropna(how="all", inplace=True)
                 tickerName = tickerInfo.loc[ticker]["Name"]
 
                 # if no signals are selected:

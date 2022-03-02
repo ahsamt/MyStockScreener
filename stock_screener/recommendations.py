@@ -47,9 +47,9 @@ def add_final_rec_column(df, signalList):
 
         elif adx and srsi:
 
-            print("ADX and Parabolic_SAR")
+            print("ADX and Stochastic_RSI")
             mask = df["ADX_Rec"] == True
-            df["Final_Rec"] = np.where(mask, df["Parabolic_SAR_Rec"], "Wait")
+            df["Final_Rec"] = np.where(mask, df["Stochastic_RSI_Rec"], "Wait")
 
         elif ma and macd:
             print("MA and MACD")
