@@ -6,14 +6,15 @@ from .models import User
 from django.db import IntegrityError
 from .forms import StockForm
 from .utils import read_csv_from_S3, add_ma, add_psar, add_adx, add_srsi, add_macd, \
-    adjust_start,  make_graph, add_days_since_change, get_price_change, get_current_tickers_info, \
-    upload_csv_to_S3, update_ticker_info_S3, stocks_tidy_up
+    adjust_start, make_graph, add_days_since_change, get_price_change, get_current_tickers_info, \
+    upload_csv_to_S3, stock_tidy_up, get_company_name_from_yf, prepare_ticker_info_update
 from .recommendations import add_final_rec_column
 from datetime import date, datetime, timedelta
 from dateutil.relativedelta import relativedelta
 import pandas as pd
 import plotly.graph_objects as go
 import yfinance as yf
+import time
 import os
 import numpy as np
 import json
@@ -21,7 +22,6 @@ import ta
 import json
 import urllib.request
 import urllib.parse
-
 
 signalOptions = sorted((
     ("SMAS", "Simple Moving Average (SMA) - short window"),
@@ -36,6 +36,7 @@ signalOptions = sorted((
 numMonths = 12
 bucket = 'stockscreener-data'
 
+
 def index(request):
     if request.method == "GET":
         return render(request, "stock_screener/index.html", {"stockForm": StockForm()})
@@ -44,7 +45,7 @@ def index(request):
         if 'ticker' in request.POST:
             stockForm = StockForm(request.POST)
             print("ticker in the request.post")
-            #Get all the form data
+            # Get all the form data
             if stockForm.is_valid():
                 print("stock form is valid")
                 ticker = stockForm.cleaned_data['ticker'].upper()
@@ -82,31 +83,44 @@ def index(request):
                 height = 575
                 width = 840
 
+                existingStocks = read_csv_from_S3(bucket, "Stocks")
                 tickerInfo = get_current_tickers_info(bucket)
                 tickerList = list(tickerInfo.index)
+
+                uploadRequired = False
+
                 if ticker not in tickerList:
+                    fullStartTime = time.time()
                     stock = yf.download(ticker, start=startDateInternal, end=endDate)
+                    stockDownLoadTime = time.time()
                     if stock.empty:
                         message = f"Details for ticker {ticker} cannot be found"
                         context = {
-                        "message": message,
-                        "stockForm": StockForm
+                            "message": message,
+                            "stockForm": StockForm
                         }
                         return render(request, "stock_screener/index.html", context)
                     else:
                         print("Data downloaded in full")
-                        stock = stocks_tidy_up(stock, ticker)
-                        stocks = read_csv_from_S3(bucket, "Stocks")
-                        updatedStocks = pd.concat([stocks, stock], axis=0)
+                        tickerName = get_company_name_from_yf(ticker)
+                        tickerInfo = prepare_ticker_info_update(tickerInfo, ticker, tickerName)
+                        tickerInfoPrep = time.time()
+                        upload_csv_to_S3(bucket, tickerInfo, "TickersInfo")
+                        tickerUploadTime = time.time()
+                        updatedStock = stock_tidy_up(stock, ticker)
+                        updatedStocks = pd.concat([existingStocks, updatedStock], axis=1)
                         upload_csv_to_S3(bucket, updatedStocks, "Stocks")
-                        update_ticker_info_S3(bucket, [ticker])
-                        tickerInfo = get_current_tickers_info(bucket)
-                        #tickerList = list(tickerInfo.index)
+                        tickerList = list(tickerInfo.index)
+                        fullEndTime = time.time()
 
+                        print(f"stock download time takes {stockDownLoadTime - fullStartTime}")
+                        print(f" ticker info prep takes {tickerInfoPrep - stockDownLoadTime}")
+                        print(f"ticker info upload takes {tickerUploadTime - tickerInfoPrep}")
+                        print(f"full execution time takes {fullEndTime - fullStartTime}")
 
                 else:
                     print("reading data and preparing graph")
-                    stock = read_csv_from_S3(bucket, "Stocks")[ticker]
+                    stock = existingStocks[ticker]
 
                 tickerName = tickerInfo.loc[ticker]["Name"]
 
@@ -167,19 +181,20 @@ def index(request):
 
                 print(stock.tail(15))
                 context = {
-                        "ticker": ticker,
-                        "tickerName": tickerName,
-                        "graph": graph,
-                        "recommendation": recommendation,
-                        "changeInfo": changeInfo,
-                        "closingPrice": closingPrice,
-                        "priceChange": priceChange,
-                        "stockForm": stockForm,
+                    "ticker": ticker,
+                    "tickerName": tickerName,
+                    "graph": graph,
+                    "recommendation": recommendation,
+                    "changeInfo": changeInfo,
+                    "closingPrice": closingPrice,
+                    "priceChange": priceChange,
+                    "stockForm": stockForm,
                 }
 
                 return render(request, "stock_screener/index.html", context)
         else:
             print("ticker not in request.post")
+
 
 def login_view(request):
     if request.method == "POST":

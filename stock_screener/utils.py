@@ -21,21 +21,19 @@ def adjust_start(df, start_date):
     return dfNew
 
 
-def get_company_names_from_yf(ticker_list):
-    """list => list
+def get_company_name_from_yf(ticker):
+    """string => string
     Takes in a list of tickers.
     Returns a list of corresponding company names found on yfinance.
     """
-    names = []
-    for item in ticker_list:
-        ticker = yf.Ticker(item)
-        tickerDetails = ticker.info
-        try:
-            name = tickerDetails['longName']
-        except KeyError:
-            name = tickerDetails['shortName']
-        names.append(name)
-    return names
+
+    ticker = yf.Ticker(ticker)
+    tickerDetails = ticker.info
+    try:
+        name = tickerDetails['longName']
+    except KeyError:
+        name = tickerDetails['shortName']
+    return name
 
 
 def upload_csv_to_S3(bucket, df, file_name):
@@ -87,22 +85,18 @@ def upload_csv_to_S3(bucket, df, file_name):
 # else:
 #     print('File Not Uploaded')
 
-def update_ticker_info_S3(bucket, new_ticker_list):
-    """(string, list) => None
+
+def prepare_ticker_info_update(current_tickers_info, ticker, ticker_name):
+    """(df, string, string) => df
    Takes in a string representing the name of the S3 bucket where current tickers are being stored
    and a list of new tickers that need to be added to the ticker information file on S3.
-   Uploads an updated ticker information file to S3 as a csv file and returns None.
+   Uploads an updated ticker information file to S3 as a csv file and returns the updated dataframe.
    """
+    dt = {'Ticker': [ticker], 'Name': [ticker_name]}
+    dfUpdate = pd.DataFrame(data=dt).set_index('Ticker')
+    df = current_tickers_info.append(dfUpdate, ignore_index=False)
 
-    dfUpdate = pd.DataFrame(new_ticker_list)
-    dfUpdate["Name"] = get_company_names_from_yf(new_ticker_list)
-    dfUpdate.columns = "Ticker", "Name"
-    dfUpdate = dfUpdate.set_index("Ticker")
-    df = get_current_tickers_info(bucket)
-    df = df.append(dfUpdate, ignore_index=False)
-    upload_csv_to_S3(bucket, df, "TickersInfo")
-
-    return None
+    return df
 
 
 def read_csv_from_S3(bucket, file_name):
@@ -116,17 +110,21 @@ def read_csv_from_S3(bucket, file_name):
     return df
 
 
-def stocks_tidy_up(df, ticker=None):
-    if not ticker:
-        df.columns = df.columns.to_flat_index()
-        df.columns = pd.MultiIndex.from_tuples(df.columns)
-        df = df.swaplevel(axis=1).sort_index(axis=1)
-    else:
-        columns = [(ticker, 'Open'), (ticker, 'High'), (ticker, "Low"), (ticker, "Close"), (ticker, "Adj Close"),
-                   (ticker, "Volume")]
-        df.columns = pd.MultiIndex.from_tuples(columns)
-
+def stocks_tidy_up(df):
+    df.columns = df.columns.to_flat_index()
+    df.columns = pd.MultiIndex.from_tuples(df.columns)
+    df = df.swaplevel(axis=1).sort_index(axis=1)
     return df
+
+
+def stock_tidy_up(df, ticker):
+    newDF = df.copy(deep=True)
+    columns = [(ticker, 'Open'), (ticker, 'High'), (ticker, "Low"), (ticker, "Close"), (ticker, "Adj Close"),
+                   (ticker, "Volume")]
+    newDF.columns = pd.MultiIndex.from_tuples(columns)
+    newDF = newDF.sort_index(axis=1)
+
+    return newDF
 
 
 
