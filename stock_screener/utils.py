@@ -86,7 +86,7 @@ def stocks_tidy_up(df):
 def stock_tidy_up(df, ticker):
     newDF = df.copy(deep=True)
     columns = [(ticker, 'Open'), (ticker, 'High'), (ticker, "Low"), (ticker, "Close"), (ticker, "Adj Close"),
-                   (ticker, "Volume")]
+               (ticker, "Volume")]
     newDF.columns = pd.MultiIndex.from_tuples(columns)
     newDF = newDF.sort_index(axis=1)
 
@@ -236,6 +236,13 @@ def format_float(number):
     return string
 
 
+def calculate_price_dif(newPrice, oldPrice):
+    priceDif = newPrice - oldPrice
+    percDif = format_float(priceDif / oldPrice * 100)
+
+    return priceDif, percDif
+
+
 def get_price_change(df):
     """(pd dfFrame) => (float, tuple)
     Takes in Pandas dfFrame with stock prices for a specific instrument,
@@ -248,8 +255,7 @@ def get_price_change(df):
 
     closingPrice = df["Close"].iloc[-1]
     previousPrice = df["Close"].iloc[-2]
-    priceDif = closingPrice - previousPrice
-    percDif = format_float(priceDif / previousPrice * 100)
+    priceDif, percDif = calculate_price_dif(closingPrice, previousPrice)
     if priceDif > 0:
         sign = "+"
         color = "green"
@@ -257,6 +263,20 @@ def get_price_change(df):
         sign = ""
         color = "red"
     priceDif = format_float(priceDif)
-    closingPrice = format_float(closingPrice)
     change = (f"{sign}{priceDif} USD  ({sign}{percDif}%)", color)
     return closingPrice, change
+
+
+def get_date_within_df(df, dt):
+    allDates = list(df["Date"])
+    while dt not in allDates:
+        dt = dt - pd.DateOffset(1)
+    return dt
+
+def get_previous_sma(df, sma_col, latest_date, no_of_days):
+    reqDate = get_date_within_df(df, latest_date - pd.DateOffset(no_of_days))
+    mask = df["Date"] == reqDate
+    prevSma = list(df.loc[mask, sma_col])[0]
+    return prevSma
+
+

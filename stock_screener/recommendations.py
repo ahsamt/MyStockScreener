@@ -193,6 +193,6 @@ def add_final_rec_column(df, signalList):
                     df["MACD_Rec"] == df["Parabolic_SAR_Rec"]) & (df["Parabolic_SAR_Rec"] == df["Stochastic_RSI_Rec"])
         df["Final_Rec"] = np.where(mask, df["MA_Rec"], "Wait")
 
-    print(df.tail())
+    #print(df.tail())
     return df
 

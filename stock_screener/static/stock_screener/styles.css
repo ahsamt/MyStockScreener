@@ -172,6 +172,10 @@ textarea {
   z-index: 99;
 }
 
+.table {
+  font-size: 12px;
+  color: var(--blue-font-color);
+}
 .tickers {
   font-weight: 800;
   color: var(--red-hover-color);

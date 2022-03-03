@@ -7,7 +7,8 @@ from django.db import IntegrityError
 from .forms import StockForm
 from .utils import read_csv_from_S3, add_ma, add_psar, add_adx, add_srsi, add_macd, \
     adjust_start, make_graph, add_days_since_change, get_price_change, get_current_tickers_info, \
-    upload_csv_to_S3, stock_tidy_up, prepare_ticker_info_update, get_company_name_from_yf
+    upload_csv_to_S3, stock_tidy_up, prepare_ticker_info_update, get_company_name_from_yf, get_previous_sma, \
+    calculate_price_dif, format_float
 from .recommendations import add_final_rec_column
 from datetime import date, datetime, timedelta
 from dateutil.relativedelta import relativedelta
@@ -22,6 +23,7 @@ import ta
 import json
 import urllib.request
 import urllib.parse
+
 
 signalOptions = sorted((
     ("SMAS", "Simple Moving Average (SMA) - short window"),
@@ -128,9 +130,8 @@ def index(request):
                 # if no signals are selected:
                 if not (ma or psar or adx or srsi or macd):
                     stock = stock.reset_index()
-                    recommendation = "You have not added any signals to this search. " \
-                                     "Please select relevant signals on the search page " \
-                                     "to see additional information for the selected stock."
+                    rec = "No signals selected"
+                    daysSinceChange = "n/a"
                     changeInfo = None
 
                 else:
@@ -158,7 +159,7 @@ def index(request):
                     stock = add_final_rec_column(stock, [adx, ma, macd, psar, srsi])
 
                     stock = add_days_since_change(stock, "Final_Rec")
-                    rec = stock.loc[stock.index[-1], "Final_Rec"].lower()
+                    rec = stock.loc[stock.index[-1], "Final_Rec"]  # .lower()
                     daysSinceChange = stock.loc[stock.index[-1], "Days_Since_Change"]
 
                     if rec in ["trending", "rangebound"]:
@@ -174,21 +175,49 @@ def index(request):
                     else:
                         changeInfo = f"{daysSinceChange} days since trend change"
 
-                stock = adjust_start(stock, startDateDatetime)
+                for column in stock.columns:
+                    if column.startswith("SMA"):
+                        smaAdded = True
+                        smaCol = column
+                    else:
+                        smaAdded = False
+                if not smaAdded:
+                    stock["SMA_15"] = ta.trend.sma_indicator(stock["Close"], window=15)
+                    smaCol = "SMA_15"
 
-                graph = make_graph(stock, ticker, graphSignals, height, width)
+                latestDate = stock["Date"].max()
+                sma1 = get_previous_sma(stock, smaCol, latestDate, 7)
+                sma2 = get_previous_sma(stock, smaCol, latestDate, 30)
+                sma3 = get_previous_sma(stock, smaCol, latestDate, 90)
 
                 closingPrice, priceChange = get_price_change(stock)
+
+                change1 = calculate_price_dif(closingPrice, sma1)[1] + "%"
+                change2 = calculate_price_dif(closingPrice, sma2)[1] + "%"
+                change3 = calculate_price_dif(closingPrice, sma3)[1] + "%"
+
+                stock = adjust_start(stock, startDateDatetime)
+                graph = make_graph(stock, ticker, graphSignals, height, width)
+
+                data = [ticker, rec, change1, change2, change3, daysSinceChange, format_float(closingPrice)]
+
+                resultTable = pd.DataFrame([data],
+                                       columns=['Ticker', 'Analysis Outcome', '1 Week Change', '1 Month Change',
+                                                '3 Months Change', 'Days Since Trend Change', 'Closing Price, USD'])
+                resultTable.set_index('Ticker', inplace=True)
+                resultTable.rename_axis(None, inplace=True)
+                htmlResultTable = resultTable.to_html(col_space=40, bold_rows=True, classes="table", justify="left")
 
                 print(stock.tail(15))
                 context = {
                     "ticker": ticker,
                     "tickerName": tickerName,
                     "graph": graph,
-                    "recommendation": recommendation,
+                    "rec": rec,
                     "changeInfo": changeInfo,
-                    "closingPrice": closingPrice,
+                    "closingPrice": format_float(closingPrice),
                     "priceChange": priceChange,
+                    "htmlResultTable": htmlResultTable,
                     "stockForm": stockForm,
                 }
 
