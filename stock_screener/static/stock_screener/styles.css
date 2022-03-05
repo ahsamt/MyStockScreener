@@ -192,7 +192,7 @@ textarea {
 .stock_info {
   border-radius: 4px;
   box-shadow: var(--custom-shadow);
-  margin: 10px 0 10px 0;
+  margin: 0px 0 10px 0;
   color: var(--blue-font-color);
   text-decoration: none;
   padding: 4px 8px;

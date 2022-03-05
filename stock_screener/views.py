@@ -24,7 +24,6 @@ import json
 import urllib.request
 import urllib.parse
 
-
 signalOptions = sorted((
     ("SMAS", "Simple Moving Average (SMA) - short window"),
     ("SMAL", "Simple Moving Average (SMA) - long window"),
@@ -81,7 +80,8 @@ def index(request):
                 startDateInternal = startDate + relativedelta(months=-6)
                 startDateDatetime = datetime.combine(startDate, datetime.min.time())
 
-                graphSignals = []
+                selectedSignals = []
+                signalResults = []
                 height = 575
                 width = 840
 
@@ -137,43 +137,45 @@ def index(request):
                 else:
                     if ma:
                         stock, shortName, longName = add_ma(stock, maS, maL, maWS, maWL)
-                        graphSignals.append(shortName)
-                        graphSignals.append(longName)
+                        selectedSignals.append(shortName)
+                        selectedSignals.append(longName)
 
                     if psar:
                         stock = add_psar(stock, psarAF, psarMA)
-                        graphSignals.append("Parabolic_SAR")
+                        selectedSignals.append("Parabolic SAR")
 
                     if adx:
                         stock = add_adx(stock, adxW, adxL)
-                        graphSignals.append("ADX")
+                        selectedSignals.append("ADX")
 
                     if srsi:
                         stock = add_srsi(stock, srsiW, srsiSm1, srsiSm2, srsiOB, srsiOS)
-                        graphSignals.append("Stochastic_RSI")
+                        selectedSignals.append("Stochastic RSI")
 
                     if macd:
                         stock = add_macd(stock, macdS, macdF, macdSm)
-                        graphSignals.append("MACD")
+                        selectedSignals.append("MACD")
 
                     stock = add_final_rec_column(stock, [adx, ma, macd, psar, srsi])
 
-                    stock = add_days_since_change(stock, "Final_Rec")
-                    rec = stock.loc[stock.index[-1], "Final_Rec"]  # .lower()
+                    stock = add_days_since_change(stock, "Final Rec")
+
+                    rec = stock.loc[stock.index[-1], "Final Rec"]  # .lower()
                     daysSinceChange = stock.loc[stock.index[-1], "Days_Since_Change"]
 
-                    if rec in ["trending", "rangebound"]:
-                        recommendation = f"{ticker} is {rec} at the moment."
-                    else:
-                        recommendation = f"Analysis based on the signals selected " \
-                                         f"suggests that you should {rec}."
+                    #if rec in ["trending", "rangebound"]:
 
-                    if daysSinceChange is None:
-                        changeInfo = "This trend has not changed in the past year"
-                    elif str(daysSinceChange)[-1] == 1:
-                        changeInfo = f"{daysSinceChange} day since trend change"
-                    else:
-                        changeInfo = f"{daysSinceChange} days since trend change"
+                        # recommendation = f"{ticker} is {rec} at the moment."
+                    # else:
+                    #     recommendation = f"Analysis based on the signals selected " \
+                    #                      f"suggests that you should {rec}."
+                    #
+                    # if daysSinceChange is None:
+                    #     changeInfo = "This trend has not changed in the past year"
+                    # elif str(daysSinceChange)[-1] == 1:
+                    #     changeInfo = f"{daysSinceChange} day since trend change"
+                    # else:
+                    #     changeInfo = f"{daysSinceChange} days since trend change"
 
                 for column in stock.columns:
                     if column.startswith("SMA"):
@@ -182,8 +184,8 @@ def index(request):
                     else:
                         smaAdded = False
                 if not smaAdded:
-                    stock["SMA_15"] = ta.trend.sma_indicator(stock["Close"], window=15)
-                    smaCol = "SMA_15"
+                    stock["Table SMA"] = ta.trend.sma_indicator(stock["Close"], window=15)
+                    smaCol = "Table SMA"
 
                 latestDate = stock["Date"].max()
                 sma1 = get_previous_sma(stock, smaCol, latestDate, 7)
@@ -197,16 +199,27 @@ def index(request):
                 change3 = calculate_price_dif(closingPrice, sma3)[1] + "%"
 
                 stock = adjust_start(stock, startDateDatetime)
-                graph = make_graph(stock, ticker, graphSignals, height, width)
+                graph = make_graph(stock, ticker, selectedSignals, height, width)
 
-                data = [ticker, rec, change1, change2, change3, daysSinceChange, format_float(closingPrice)]
+                for signal in selectedSignals:
+                    signalResults.append(format_float(stock.loc[stock.index.max()][signal]))
+
+                data = [rec,
+                        daysSinceChange,
+                        change1,
+                        change2,
+                        change3] + signalResults
 
                 resultTable = pd.DataFrame([data],
-                                       columns=['Ticker', 'Analysis Outcome', '1 Week Change', '1 Month Change',
-                                                '3 Months Change', 'Days Since Trend Change', 'Closing Price, USD'])
-                resultTable.set_index('Ticker', inplace=True)
-                resultTable.rename_axis(None, inplace=True)
-                htmlResultTable = resultTable.to_html(col_space=40, bold_rows=True, classes="table", justify="left")
+                                           columns=['Analysis Outcome',
+                                                    'Days Since Trend Change',
+                                                    '1 Week Change',
+                                                    '1 Month Change',
+                                                    '3 Months Change'] + selectedSignals)
+                resultTable.set_index('Analysis Outcome', inplace=True)
+                resultTable = resultTable.transpose()
+                #resultTable.rename_axis(None, inplace=True)
+                htmlResultTable = resultTable.to_html(col_space=30, bold_rows=True, classes="table", justify="left")
 
                 print(stock.tail(15))
                 context = {
@@ -214,7 +227,7 @@ def index(request):
                     "tickerName": tickerName,
                     "graph": graph,
                     "rec": rec,
-                    "changeInfo": changeInfo,
+                    #"changeInfo": changeInfo,
                     "closingPrice": format_float(closingPrice),
                     "priceChange": priceChange,
                     "htmlResultTable": htmlResultTable,

@@ -106,17 +106,17 @@ def get_current_tickers_info(bucket):
 
 def add_ma(df, ma_short, ma_long, window_short, window_long):
     if ma_short == "SMA":
-        colShort = f"SMA_{window_short}"
+        colShort = f"SMA {window_short}"
         df[colShort] = ta.trend.sma_indicator(df["Close"], window=window_short)
     else:
-        colShort = f"EMA_{window_short}"
+        colShort = f"EMA {window_short}"
         df[colShort] = ta.trend.ema_indicator(df["Close"], window=window_short)
 
     if ma_long == "SMA":
-        colLong = f"SMA_{window_long}"
+        colLong = f"SMA {window_long}"
         df[colLong] = ta.trend.sma_indicator(df["Close"], window=window_long)
     else:
-        colLong = f"EMA_{window_long}"
+        colLong = f"EMA {window_long}"
         df[colLong] = ta.trend.ema_indicator(df["Close"], window=window_long)
 
     df["short_more_than_long"] = df[colShort] >= df[colLong]
@@ -124,13 +124,13 @@ def add_ma(df, ma_short, ma_long, window_short, window_long):
     df = df.reset_index()
     df.loc[0, "No_trend_change"] = True
     mask = (df["No_trend_change"] == False) & (df["short_more_than_long"] == True)
-    df.loc[mask, "MA_Flag"] = "Buy"
+    df.loc[mask, "MA Flag"] = "Buy"
     mask = (df["No_trend_change"] == False) & (df["short_more_than_long"] == False)
-    df.loc[mask, "MA_Flag"] = "Sell"
+    df.loc[mask, "MA Flag"] = "Sell"
 
     mask = df["short_more_than_long"] == True
-    df["MA_Rec"] = "Sell"
-    df.loc[mask, "MA_Rec"] = "Buy"
+    df["MA Rec"] = "Sell"
+    df.loc[mask, "MA Rec"] = "Buy"
 
     return df, colShort, colLong
 
@@ -138,10 +138,10 @@ def add_ma(df, ma_short, ma_long, window_short, window_long):
 def add_psar(df, psar_af, psar_ma):
     if 'Date' not in df.columns:
         df = df.reset_index()
-    df["Parabolic_SAR"] = ta.trend.PSARIndicator(df["High"], df["Low"], df["Close"], psar_af, psar_ma).psar()
-    mask = df["Parabolic_SAR"] > df["Close"]
-    df["PSAR_Rec"] = "Buy"
-    df.loc[mask, "Parabolic_SAR_Rec"] = "Sell"
+    df["Parabolic SAR"] = ta.trend.PSARIndicator(df["High"], df["Low"], df["Close"], psar_af, psar_ma).psar()
+    mask = df["Parabolic SAR"] > df["Close"]
+    df["PSAR Rec"] = "Buy"
+    df.loc[mask, "Parabolic SAR Rec"] = "Sell"
 
     return df
 
@@ -151,8 +151,8 @@ def add_adx(df, window_size, limit):
         df = df.reset_index()
     df["ADX"] = ta.trend.ADXIndicator(df["High"], df["Low"], df["Close"], window=window_size).adx()
     mask = df["ADX"] > limit
-    df["ADX_Rec"] = False
-    df.loc[mask, "ADX_Rec"] = True
+    df["ADX Rec"] = False
+    df.loc[mask, "ADX Rec"] = True
 
     return df
 
@@ -160,13 +160,13 @@ def add_adx(df, window_size, limit):
 def add_srsi(df, window_size, smooth1, smooth2, overbought_limit, oversold_limit):
     if 'Date' not in df.columns:
         df = df.reset_index()
-    df["Stochastic_RSI"] = ta.momentum.StochRSIIndicator(df["Close"], window=window_size,
+    df["Stochastic RSI"] = ta.momentum.StochRSIIndicator(df["Close"], window=window_size,
                                                          smooth1=smooth1, smooth2=smooth2).stochrsi()
-    df["Stochastic_RSI_Rec"] = "Wait"
-    mask = df["Stochastic_RSI"] > overbought_limit
-    df.loc[mask, "Stochastic_RSI_Rec"] = "Sell"
-    mask = df["Stochastic_RSI"] < oversold_limit
-    df.loc[mask, "Stochastic_RSI_Rec"] = "Buy"
+    df["Stochastic RSI Rec"] = "Wait"
+    mask = df["Stochastic RSI"] > overbought_limit
+    df.loc[mask, "Stochastic RSI Rec"] = "Sell"
+    mask = df["Stochastic RSI"] < oversold_limit
+    df.loc[mask, "Stochastic RSI Rec"] = "Buy"
 
     return df
 
@@ -177,8 +177,8 @@ def add_macd(df, window_slow, window_fast, smoothing_period):
     df["MACD"] = ta.trend.MACD(df["Close"], window_slow=window_slow, window_fast=window_fast,
                                window_sign=smoothing_period).macd()
     mask = df["MACD"] >= 0
-    df["MACD_Rec"] = "Sell"
-    df.loc[mask, "MACD_Rec"] = "Buy"
+    df["MACD Rec"] = "Sell"
+    df.loc[mask, "MACD Rec"] = "Buy"
 
     return df
 

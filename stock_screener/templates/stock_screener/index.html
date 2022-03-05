@@ -63,9 +63,12 @@
   <div class="row mt-5">
       <div class="col">
 
-          {% include "stock_screener/child_templates/stock_analysis.html" with ticker=ticker priceChange=priceChange closingPrice=closingPrice recommendation=recommendation changeInfo=changeInfo htmlResultTable=htmlResultTable %}
+          {% include "stock_screener/child_templates/stock_analysis.html" with ticker=ticker priceChange=priceChange closingPrice=closingPrice recommendation=recommendation htmlResultTable=htmlResultTable %}
 
       </div>
+
+
+
       <div class="col">
         <div class="col d-flex align-items-center justify-content-center">
             {{ graph | safe }}
