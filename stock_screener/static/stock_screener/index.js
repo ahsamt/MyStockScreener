@@ -2,6 +2,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // check on scroll if "back to top" button should be displayed
   window.addEventListener("scroll", () => top_scroll());
 
+
   // add clarifying message re S&P 500 on the search page
   if (document.querySelector(".question")) {
     document.querySelector(".question").addEventListener("click", (event) => {
@@ -83,33 +84,37 @@ function update_notes(event) {
 
 function update_watchlist(event) {
   event.preventDefault();
-  let stock = event.target.dataset.stock_name;
-  let stockID = event.target.dataset.stock_id;
+  console.log("Hello")
+  let ticker = event.target.dataset.ticker_name;
+  let tickerID = event.target.dataset.ticker_id;
+  let tickerFull = event.target.dataset.ticker_full;
   let user = document.getElementById("username").innerHTML;
-
+  console.log(tickerID)
   // Check via internal API if this stock is in user's watchlist
-  if (stockID === "None") {
+  if (tickerID === "None") {
+    console.log("creating a post request")
     fetch("/saved_searches", {
       method: "POST",
       body: JSON.stringify({
-        stock: stock,
+        ticker: ticker,
+        ticker_full: tickerFull,
       }),
     })
       .then((response) => response.json())
       .then((result) => {
         if (result.message === "Search saved successfully") {
-          event.target.dataset.stock_id = result.id;
-          event.target.innerHTML = `Remove ${stock} from watchlist`;
+          event.target.dataset.ticker_id = result.id;
+          event.target.innerHTML = `Remove ${ticker} from watchlist`;
         }
       });
   } else {
-    fetch(`/saved_searches/${stockID}`, {
+    fetch(`/saved_searches/${tickerID}`, {
       method: "DELETE",
     }).then((response) => {
       if (response.ok) {
-        event.target.dataset.stock_id = "None";
-        if (stock !== undefined) {
-          event.target.innerHTML = `Add ${stock} to watchlist`;
+        event.target.dataset.ticker_id = "None";
+        if (ticker !== undefined) {
+          event.target.innerHTML = `Add ${ticker} to watchlist`;
         }
       }
     });
@@ -117,15 +122,15 @@ function update_watchlist(event) {
 }
 
 function remove_from_watchlist(event) {
-  let stockID = event.target.dataset.stock_id;
+  let stockID = event.target.dataset.ticker_id;
   let confirm = prompt(
-    `Are you sure you want to remove this stock from your watchlist? This will permanently delete any notes you have saved. (y/n)`
+    `Are you sure you want to remove this ticker from your watchlist? This will permanently delete any notes you have saved. (y/n)`
   );
   if (confirm === "y") {
     update_watchlist(event);
-    document.getElementById(`watchedItem${stockID}`).style.animationPlayState =
+    document.getElementById(`watchedItem${tickerID}`).style.animationPlayState =
       "running";
-    document.getElementById(`stock_link${stockID}`).style.display = "none";
+    document.getElementById(`stock_link${tickerID}`).style.display = "none";
   } else if (confirm === "n") {
     alert("No problem, we'll keep it where it is!");
   } else {

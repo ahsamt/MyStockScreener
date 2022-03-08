@@ -94,12 +94,6 @@ textarea {
   margin: 0;
 }
 
-.index-card {
-  display: block;
-  margin: 0 auto;
-  text-align: center;
-  width: 500px;
-}
 
 .navbar {
   background-color: var(--blue-font-color);
@@ -115,6 +109,11 @@ textarea {
   color: var(--red-font-color);
 }
 
+.parameters{
+  margin: 5px;
+
+
+}
 .price_change_green {
   color: var(--green-font-color);
 }
@@ -133,11 +132,33 @@ textarea {
   color: var(--red-hover-color);
   font-weight: bolder;
 }
-.search-form {
+.centre {
+  display: block;
+  margin: auto;
+  text-align: center;
+  align-items: center;
+}
+
+.signal {
+  font-weight: bolder;
+  box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;
+  padding: 8px 30px;
+  background: #e0e3e5;
+  border-radius: 4px;
+}
+
+.stock_search {
+  color: var(--red-hover-color);
+  font-weight: bolder;
+}
+.signals {
+  padding:0 80px 0 80px;
   display: block;
   margin: auto;
   text-align: start;
-  color:red;
+  font-size: 15px;
+
+
 }
 
 .stock_link {
@@ -151,6 +172,10 @@ textarea {
   z-index: 99;
 }
 
+.table {
+  font-size: 12px;
+  color: var(--blue-font-color);
+}
 .tickers {
   font-weight: 800;
   color: var(--red-hover-color);
@@ -164,10 +189,10 @@ textarea {
   animation-play-state: paused;
 }
 
-.watchlist {
+.stock_info {
   border-radius: 4px;
   box-shadow: var(--custom-shadow);
-  margin: 10px 0 10px 0;
+  margin: 0px 0 10px 0;
   color: var(--blue-font-color);
   text-decoration: none;
   padding: 4px 8px;
@@ -184,7 +209,9 @@ textarea {
 }
 
 #searchButton {
-  margin: 14px 0;
+
+  display: block;
+  margin: 0 auto;
 }
 
 #search_error_message {

@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.contrib.auth import authenticate, login, logout
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
-from .models import User
+from .models import User, SavedSearch, SignalConstructor
 from django.db import IntegrityError
 from .forms import StockForm
 from .utils import read_csv_from_S3, add_ma, add_psar, add_adx, add_srsi, add_macd, \
@@ -23,6 +23,9 @@ import ta
 import json
 import urllib.request
 import urllib.parse
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required
 
 signalOptions = sorted((
     ("SMAS", "Simple Moving Average (SMA) - short window"),
@@ -220,6 +223,14 @@ def index(request):
                 resultTable = resultTable.transpose()
                 #resultTable.rename_axis(None, inplace=True)
                 htmlResultTable = resultTable.to_html(col_space=30, bold_rows=True, classes="table", justify="left")
+                watchlisted = False
+                tickerID = None
+
+                if request.user.is_authenticated:
+                    searchObj = SavedSearch.objects.filter(user=request.user, ticker=ticker)
+                    if len(searchObj):
+                        watchlisted = True
+                        stockID = searchObj[0].id
 
                 print(stock.tail(15))
                 context = {
@@ -227,11 +238,13 @@ def index(request):
                     "tickerName": tickerName,
                     "graph": graph,
                     "rec": rec,
-                    #"changeInfo": changeInfo,
                     "closingPrice": format_float(closingPrice),
                     "priceChange": priceChange,
                     "htmlResultTable": htmlResultTable,
                     "stockForm": stockForm,
+                    "watchlisted": watchlisted,
+                    "tickerID": tickerID,
+
                 }
 
                 return render(request, "stock_screener/index.html", context)
@@ -286,3 +299,63 @@ def register(request):
         return HttpResponseRedirect(reverse("index"))
     else:
         return render(request, "stock_screener/register.html")
+
+
+@csrf_exempt
+@login_required
+def saved_searches(request):
+    # Creating a new saved search must be via POST
+    if request.method != "POST":
+        return JsonResponse({"error": "POST request required."}, status=400)
+
+    # Check received data emails
+    data = json.loads(request.body)
+
+    ticker = data.get("ticker")
+    if ticker == [""]:
+        return JsonResponse({
+            "error": "Ticker name is required."
+        }, status=400)
+    ticker_full = data.get("ticker_full")
+
+    # Create a saved search for the logged in user
+    savedSearch = SavedSearch(
+        user=request.user,
+        ticker=ticker,
+        ticker_full=ticker_full,
+    )
+    savedSearch.save()
+    search_id = savedSearch.id
+    return JsonResponse({"message": "Search saved successfully", "id": search_id}, status=201)
+
+
+@csrf_exempt
+@login_required
+def saved_search(request, search_id):
+    # Query for requested search
+    try:
+        search = SavedSearch.objects.get(user=request.user, pk=search_id)
+    except SavedSearch.DoesNotExist:
+        return JsonResponse({"error": "No such search has been saved for this user."}, status=404)
+
+    # Return saved search contents
+    if request.method == "GET":
+        return JsonResponse(search.serialize())
+
+    # Update notes for the saved search
+    elif request.method == "PUT":
+        data = json.loads(request.body)
+        if data.get("notes") is not None:
+            search.notes = data["notes"]
+        search.save()
+        return HttpResponse(status=204)
+
+    elif request.method == "DELETE":
+        search.delete()
+        return HttpResponse(status=204)
+
+    # Search must be via GET, PUT or DELETE
+    else:
+        return JsonResponse({
+            "error": "GET, PUT or DELETE request required."
+        }, status=400)
