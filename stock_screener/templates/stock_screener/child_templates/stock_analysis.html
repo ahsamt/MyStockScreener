@@ -85,7 +85,8 @@
         data-macd="{{ newSignal.macd }}",
         data-macdF="{{ newSignal.macdF }}",
         data-macdS="{{ newSignal.macdS }}",
-        data-macdSm="{{ newSignal.macdSm }}"
+        data-macdSm="{{ newSignal.macdSm }}",
+        data-previousSignal = "{{ savedConstructor }}"
 
       >{% if not savedConstructor %}
         Save this signal

@@ -27,6 +27,13 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     });
 
+
+    // save current signal when the relevant button is clicked on the index page
+  document.querySelectorAll(".add-signal").forEach((add_signal_button) => {
+    add_signal_button.addEventListener("click", (event) => add_signal(event));
+  });
+
+
   // save notes when the relevant button is clicked on the watchlist page
   document.querySelectorAll(".save_notes_button").forEach((save_button) => {
     save_button.addEventListener("click", (event) => update_notes(event));
@@ -145,4 +152,76 @@ function display_stock_list(event) {
   });
   document.getElementById(`${event.target.dataset.letter}`).style.display =
     "block";
+}
+
+function add_signal(event) {
+  event.preventDefault();
+  let ma = event.target.dataset.ma;
+  let maS = event.target.dataset.mas;
+  let maL = event.target.dataset.mal;
+  let maWS = event.target.dataset.maws;
+  let maWL = event.target.dataset.mawl;
+  let psar = event.target.dataset.psar;
+  let psarAF = event.target.dataset.psaraf;
+  let psarMA = event.target.dataset.psarma;
+  let adx = event.target.dataset.adx;
+  let adxW = event.target.dataset.adxw;
+  let adxL = event.target.dataset.adxl;
+
+  let srsi = event.target.dataset.srsi;
+  let srsiW = event.target.dataset.srsiw;
+  let srsiSm1 = event.target.dataset.srsism1;
+  let srsiSm2 = event.target.dataset.srsism2;
+  let srsiOB = event.target.dataset.srsiob;
+  let srsiOS = event.target.dataset.srsios;
+
+  let macd = event.target.dataset.macd;
+  let macdF = event.target.dataset.macdf;
+  let macdS = event.target.dataset.macds;
+  let macdSm = event.target.dataset.macdsm;
+
+  let previousSignal = event.target.dataset.previoussignal;
+
+  let user = document.getElementById("username").innerHTML;
+
+  //
+    console.log("creating a post request")
+    fetch("/saved_signals", {
+      method: "POST",
+      body: JSON.stringify({
+          ma : ma,
+          maS : maS,
+          maL : maL,
+          maWS : maWS,
+          maWL : maWL,
+          psar : psar,
+          psarAF : psarAF,
+          psarMA : psarMA,
+          adx : adx,
+          adxW : adxW,
+          adxL : adxL,
+
+          srsi : srsi,
+          srsiW : srsiW,
+          srsiSm1 : srsiSm1,
+          srsiSm2 : srsiSm2,
+          srsiOB : srsiOB,
+          srsiOS : srsiOS,
+
+          macd : macd,
+          macdF : macdF,
+          macdS : macdS,
+          macdSm : macdSm,
+          previousSignal: previousSignal,
+      }),
+    })
+      .then((response) => response.json())
+      .then((result) => {
+        if (result.message === "Signal saved successfully") {
+          event.target.dataset.previousSignal = result.id;
+          event.target.innerHTML = `This signal has been saved`;
+        }
+      });
+
+
 }

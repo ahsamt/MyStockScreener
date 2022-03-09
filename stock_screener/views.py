@@ -238,7 +238,7 @@ def index(request):
                         tickerID = searchObj[0].id
 
                     constructorObj = SignalConstructor.objects.filter \
-                        (users=request.user)
+                        (user=request.user)
                     if len(constructorObj):
                         savedConstructor = constructorObj[0]
 
@@ -265,12 +265,12 @@ def index(request):
                                 and savedConstructor.macdSm == macdSm):
                             constructorAdded = True
 
-                        else:
-                            newSignal = {"ma": ma, "maS": maS, "maL": maL, "maWS": maWS, "maWL": maWL, "psar": psar,
-                                         "psarAF": psarAF, "psarMA": psarMA, "adx": adx, "adxW": adxW, "adxL": adxL,
-                                         "srsi": srsi, "srsiW": srsiW, "srsiSm1": srsiSm1, "srsiSm2": srsiSm2,
-                                         "srsiOB": srsiOB, "srsiOS": srsiOS, "macd": macd, "macdF": macdF,
-                                         "macdS": macdS, "macdSm": macdSm}
+
+                        newSignal = {"ma": ma, "maS": maS, "maL": maL, "maWS": maWS, "maWL": maWL, "psar": psar,
+                                     "psarAF": psarAF, "psarMA": psarMA, "adx": adx, "adxW": adxW, "adxL": adxL,
+                                     "srsi": srsi, "srsiW": srsiW, "srsiSm1": srsiSm1, "srsiSm2": srsiSm2,
+                                     "srsiOB": srsiOB, "srsiOS": srsiOS, "macd": macd, "macdF": macdF,
+                                     "macdS": macdS, "macdSm": macdSm}
 
                 print(stock.tail(15))
                 context = {
@@ -402,3 +402,87 @@ def saved_search(request, search_id):
         return JsonResponse({
             "error": "GET, PUT or DELETE request required."
         }, status=400)
+
+
+@csrf_exempt
+@login_required
+def saved_signals(request):
+    # Creating a new saved signal must be via POST
+    if request.method != "POST":
+        return JsonResponse({"error": "POST request required."}, status=400)
+
+    # Check received data emails
+    data = json.loads(request.body)
+
+    ma = data.get("ma")
+    if ma == "":
+        return JsonResponse({
+            "error": "True or False is required."
+        }, status=400)
+    maS = data.get("maS")
+    if not maS:
+        return JsonResponse({
+            "error": "String is required."
+        }, status=400)
+    maL = data.get("maL")
+    maWS = data.get("maWS")
+    maWL = data.get("maWL")
+    psar = data.get("psar")
+    psarAF = data.get("psarAF")
+    psarMA = data.get("psarMA")
+    adx = data.get("adx")
+    adxW = data.get("adxW")
+    adxL = data.get("adxL")
+
+    srsi = data.get("srsi")
+    srsiW = data.get("srsiW")
+    srsiSm1 = data.get("srsiSm1")
+    srsiSm2 = data.get("srsiSm2")
+    srsiOB = data.get("srsiOB")
+    srsiOS = data.get("srsiOS")
+
+    macd = data.get("macd")
+    macdF = data.get("macdF")
+    macdS = data.get("macdS")
+    macdSm = data.get("macdSm")
+    previousSignal = data.get("previousSignal")
+
+    # Create a saved search for the logged in user
+    try:
+        oldSignal = SignalConstructor.objects.get(user=request.user)
+        oldSignal.delete()
+    except SignalConstructor.DoesNotExist:
+        print("nothing to delete")
+    print("creating constructor")
+    print("values are: " , previousSignal)
+    newSignal = SignalConstructor(
+        user=request.user,
+        ma=ma,
+        maS=maS,
+        maL=maL,
+        maWS=maWS,
+        maWL=maWL,
+        psar=psar,
+        psarAF=psarAF,
+        psarMA=psarMA,
+        adx=adx,
+        adxW=adxW,
+        adxL=adxL,
+
+        srsi=srsi,
+        srsiW=srsiW,
+        srsiSm1=srsiSm1,
+        srsiSm2=srsiSm2,
+        srsiOB=srsiOB,
+        srsiOS=srsiOS,
+
+        macd=macd,
+        macdF=macdF,
+        macdS=macdS,
+        macdSm=macdSm,
+    )
+    newSignal.save()
+    signal_id = newSignal.id
+
+
+    return JsonResponse({"message": "Signal saved successfully", "id": signal_id}, status=201)

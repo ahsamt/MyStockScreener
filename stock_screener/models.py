@@ -70,8 +70,8 @@ class SignalConstructor(models.Model):
     macdS = models.IntegerField(default=52)
     macdSm = models.IntegerField(default=9)
 
-    users = models.ManyToManyField(User)
-
+    user = models.ForeignKey("User", on_delete=models.CASCADE, related_name="savedSignal", blank=True, null=True)
+    customName = models.CharField(max_length=15, default="Custom")
 
     def __str__(self):
         listRep = []
