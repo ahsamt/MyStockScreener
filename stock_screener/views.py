@@ -64,7 +64,7 @@ def index(request):
                 psarMA = stockForm.cleaned_data['psarMA']
                 adx = stockForm.cleaned_data['adx']
                 adxW = stockForm.cleaned_data['adxW']
-                adxL = stockForm.cleaned_data['adxW']
+                adxL = stockForm.cleaned_data['adxL']
 
                 srsi = stockForm.cleaned_data['srsi']
                 srsiW = stockForm.cleaned_data['srsiW']
@@ -166,9 +166,9 @@ def index(request):
                     rec = stock.loc[stock.index[-1], "Final Rec"]  # .lower()
                     daysSinceChange = stock.loc[stock.index[-1], "Days_Since_Change"]
 
-                    #if rec in ["trending", "rangebound"]:
+                    # if rec in ["trending", "rangebound"]:
 
-                        # recommendation = f"{ticker} is {rec} at the moment."
+                    # recommendation = f"{ticker} is {rec} at the moment."
                     # else:
                     #     recommendation = f"Analysis based on the signals selected " \
                     #                      f"suggests that you should {rec}."
@@ -204,6 +204,7 @@ def index(request):
                 stock = adjust_start(stock, startDateDatetime)
                 graph = make_graph(stock, ticker, selectedSignals, height, width)
 
+                print(selectedSignals)
                 for signal in selectedSignals:
                     signalResults.append(format_float(stock.loc[stock.index.max()][signal]))
 
@@ -221,16 +222,55 @@ def index(request):
                                                     '3 Months Change'] + selectedSignals)
                 resultTable.set_index('Analysis Outcome', inplace=True)
                 resultTable = resultTable.transpose()
-                #resultTable.rename_axis(None, inplace=True)
+                # resultTable.rename_axis(None, inplace=True)
                 htmlResultTable = resultTable.to_html(col_space=30, bold_rows=True, classes="table", justify="left")
+
                 watchlisted = False
                 tickerID = None
+                constructorAdded = False
+                savedConstructor = None
+                newSignal = None
 
                 if request.user.is_authenticated:
                     searchObj = SavedSearch.objects.filter(user=request.user, ticker=ticker)
                     if len(searchObj):
                         watchlisted = True
-                        stockID = searchObj[0].id
+                        tickerID = searchObj[0].id
+
+                    constructorObj = SignalConstructor.objects.filter \
+                        (users=request.user)
+                    if len(constructorObj):
+                        savedConstructor = constructorObj[0]
+
+                        if (savedConstructor.ma == ma
+                                and savedConstructor.maS == maS
+                                and savedConstructor.maL == maL
+                                and savedConstructor.maWS == maWS
+                                and savedConstructor.maWL == maWL
+                                and savedConstructor.psar == psar
+                                and savedConstructor.psarAF == psarAF
+                                and savedConstructor.psarMA == psarMA
+                                and savedConstructor.adx == adx
+                                and savedConstructor.adxW == adxW
+                                and savedConstructor.adxL == adxL
+                                and savedConstructor.srsi == srsi
+                                and savedConstructor.srsiW == srsiW
+                                and savedConstructor.srsiSm1 == srsiSm1
+                                and savedConstructor.srsiSm2 == srsiSm2
+                                and savedConstructor.srsiOB == srsiOB
+                                and savedConstructor.srsiOS == srsiOS
+                                and savedConstructor.macd == macd
+                                and savedConstructor.macdF == macdF
+                                and savedConstructor.macdS == macdS
+                                and savedConstructor.macdSm == macdSm):
+                            constructorAdded = True
+
+                        else:
+                            newSignal = {"ma": ma, "maS": maS, "maL": maL, "maWS": maWS, "maWL": maWL, "psar": psar,
+                                         "psarAF": psarAF, "psarMA": psarMA, "adx": adx, "adxW": adxW, "adxL": adxL,
+                                         "srsi": srsi, "srsiW": srsiW, "srsiSm1": srsiSm1, "srsiSm2": srsiSm2,
+                                         "srsiOB": srsiOB, "srsiOS": srsiOS, "macd": macd, "macdF": macdF,
+                                         "macdS": macdS, "macdSm": macdSm}
 
                 print(stock.tail(15))
                 context = {
@@ -244,6 +284,9 @@ def index(request):
                     "stockForm": stockForm,
                     "watchlisted": watchlisted,
                     "tickerID": tickerID,
+                    "savedConstructor": savedConstructor,
+                    "constructorAdded": constructorAdded,
+                    "newSignal": newSignal,
 
                 }
 
