@@ -1,0 +1,10 @@
+{% extends "stock_screener/layout.html" %}
+{% load static %}
+
+{% block body %}
+
+    {%  for item in watched_tickers %}
+        {{ item.ticker }}
+    {% endfor %}
+
+{% endblock %}

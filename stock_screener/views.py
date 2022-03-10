@@ -10,6 +10,7 @@ from .utils import read_csv_from_S3, add_ma, add_psar, add_adx, add_srsi, add_ma
     upload_csv_to_S3, stock_tidy_up, prepare_ticker_info_update, get_company_name_from_yf, get_previous_sma, \
     calculate_price_dif, format_float
 from .recommendations import add_final_rec_column
+from .calculations import make_calculations
 from datetime import date, datetime, timedelta
 from dateutil.relativedelta import relativedelta
 import pandas as pd
@@ -127,58 +128,60 @@ def index(request):
                     print("reading data and preparing graph")
                     stock = existingStocks[ticker].copy()
 
-                stock.dropna(how="all", inplace=True)
                 tickerName = tickerInfo.loc[ticker]["Name"]
+                stock.dropna(how="all", inplace=True)
+                signals = [ma, maS, maL, maWS, maWL, psar, psarAF, psarMA, adx, adxW, adxL, srsi, srsiW, srsiSm1,
+                           srsiSm2, srsiOB, srsiOS, macd, macdS, macdF, macdSm]
 
                 # if no signals are selected:
                 if not (ma or psar or adx or srsi or macd):
                     stock = stock.reset_index()
                     rec = "No signals selected"
                     daysSinceChange = "n/a"
-                    changeInfo = None
 
                 else:
-                    if ma:
-                        stock, shortName, longName = add_ma(stock, maS, maL, maWS, maWL)
-                        selectedSignals.append(shortName)
-                        selectedSignals.append(longName)
-
-                    if psar:
-                        stock = add_psar(stock, psarAF, psarMA)
-                        selectedSignals.append("Parabolic SAR")
-
-                    if adx:
-                        stock = add_adx(stock, adxW, adxL)
-                        selectedSignals.append("ADX")
-
-                    if srsi:
-                        stock = add_srsi(stock, srsiW, srsiSm1, srsiSm2, srsiOB, srsiOS)
-                        selectedSignals.append("Stochastic RSI")
-
-                    if macd:
-                        stock = add_macd(stock, macdS, macdF, macdSm)
-                        selectedSignals.append("MACD")
-
-                    stock = add_final_rec_column(stock, [adx, ma, macd, psar, srsi])
-
-                    stock = add_days_since_change(stock, "Final Rec")
-
+                    stock, selectedSignals = make_calculations(ticker, tickerName, stock, signals)
                     rec = stock.loc[stock.index[-1], "Final Rec"]  # .lower()
                     daysSinceChange = stock.loc[stock.index[-1], "Days_Since_Change"]
 
-                    # if rec in ["trending", "rangebound"]:
+                #     if ma:
+                #         stock, shortName, longName = add_ma(stock, maS, maL, maWS, maWL)
+                #         selectedSignals.append(shortName)
+                #         selectedSignals.append(longName)
+                #
+                #     if psar:
+                #         stock = add_psar(stock, psarAF, psarMA)
+                #         selectedSignals.append("Parabolic SAR")
+                #
+                #     if adx:
+                #         stock = add_adx(stock, adxW, adxL)
+                #         selectedSignals.append("ADX")
+                #
+                #     if srsi:
+                #         stock = add_srsi(stock, srsiW, srsiSm1, srsiSm2, srsiOB, srsiOS)
+                #         selectedSignals.append("Stochastic RSI")
+                #
+                #     if macd:
+                #         stock = add_macd(stock, macdS, macdF, macdSm)
+                #         selectedSignals.append("MACD")
+                #
+                #     stock = add_final_rec_column(stock, [adx, ma, macd, psar, srsi])
+                #
+                #     stock = add_days_since_change(stock, "Final Rec")
 
-                    # recommendation = f"{ticker} is {rec} at the moment."
-                    # else:
-                    #     recommendation = f"Analysis based on the signals selected " \
-                    #                      f"suggests that you should {rec}."
-                    #
-                    # if daysSinceChange is None:
-                    #     changeInfo = "This trend has not changed in the past year"
-                    # elif str(daysSinceChange)[-1] == 1:
-                    #     changeInfo = f"{daysSinceChange} day since trend change"
-                    # else:
-                    #     changeInfo = f"{daysSinceChange} days since trend change"
+                # if rec in ["trending", "rangebound"]:
+
+                # recommendation = f"{ticker} is {rec} at the moment."
+                # else:
+                #     recommendation = f"Analysis based on the signals selected " \
+                #                      f"suggests that you should {rec}."
+                #
+                # if daysSinceChange is None:
+                #     changeInfo = "This trend has not changed in the past year"
+                # elif str(daysSinceChange)[-1] == 1:
+                #     changeInfo = f"{daysSinceChange} day since trend change"
+                # else:
+                #     changeInfo = f"{daysSinceChange} days since trend change"
 
                 for column in stock.columns:
                     if column.startswith("SMA"):
@@ -186,6 +189,7 @@ def index(request):
                         smaCol = column
                     else:
                         smaAdded = False
+
                 if not smaAdded:
                     stock["Table SMA"] = ta.trend.sma_indicator(stock["Close"], window=15)
                     smaCol = "Table SMA"
@@ -264,7 +268,6 @@ def index(request):
                                 and savedConstructor.macdS == macdS
                                 and savedConstructor.macdSm == macdSm):
                             constructorAdded = True
-
 
                         newSignal = {"ma": ma, "maS": maS, "maL": maL, "maWS": maWS, "maWL": maWL, "psar": psar,
                                      "psarAF": psarAF, "psarMA": psarMA, "adx": adx, "adxW": adxW, "adxL": adxL,
@@ -454,7 +457,7 @@ def saved_signals(request):
     except SignalConstructor.DoesNotExist:
         print("nothing to delete")
     print("creating constructor")
-    print("values are: " , previousSignal)
+    print("values are: ", previousSignal)
     newSignal = SignalConstructor(
         user=request.user,
         ma=ma,
@@ -484,5 +487,35 @@ def saved_signals(request):
     newSignal.save()
     signal_id = newSignal.id
 
-
     return JsonResponse({"message": "Signal saved successfully", "id": signal_id}, status=201)
+
+
+def watchlist(request):
+    if request.method == "GET":
+
+        if request.user.is_authenticated:
+
+            watched_tickers = []
+            watchlist = SavedSearch.objects.filter(user=request.user)
+            watchlist = sorted(watchlist, key=lambda p: p.date, reverse=True)
+            allStocks = read_csv_from_S3(bucket, "Stocks")
+
+            signal = SignalConstructor.objects.filter(user=request.user)
+
+            for item in watchlist:
+                ticker = item.ticker
+                watchlist_item = {}
+                watchlist_item["ticker"] = ticker
+                watchlist_item["tickerFull"] = item.ticker_full
+                watchlist_item["notes"] = item.notes
+                watchlist_item["tickerID"] = item.id
+
+                # watchlist_item["data1"], watchlist_item["data2"] = prep_graph_data(stock)
+                # watchlist_item["closing_price"], watchlist_item["change"] = get_change_info(watchlist_item["data1"],
+                #                                                                             stock)
+                # watchlist_item["graph1"] = make_graph_1(watchlist_item["data1"], stock, 575, 840)
+                # watchlist_item["graph2"] = make_graph_2(watchlist_item["data2"], stock, 575, 840)
+
+                watched_tickers.append(watchlist_item)
+
+        return render(request, "stock_screener/watchlist.html", {'watched_tickers': watched_tickers})
