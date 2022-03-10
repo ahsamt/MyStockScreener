@@ -58,7 +58,7 @@
 
         {% if constructorAdded %}
 
-        <div>Constructor already added to your profile</div>
+        <div id = "existing_signal_message">You have previously saved this signal for your watchlisted items</div>
 
             {% else %}
 
@@ -94,7 +94,7 @@
                 Replace your saved signal with this one
                 {%  endif %}</a
       >
-
+        <div id ="signal_saved_message">This signal has been saved for your watchlisted items</div>
         {%  endif %}
     {% endif %}
 </div>

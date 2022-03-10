@@ -219,7 +219,8 @@ function add_signal(event) {
       .then((result) => {
         if (result.message === "Signal saved successfully") {
           event.target.dataset.previousSignal = result.id;
-          event.target.innerHTML = `This signal has been saved`;
+          event.target.style.display = "none";
+          document.getElementById("signal_saved_message").style.display = "block";
         }
       });
 

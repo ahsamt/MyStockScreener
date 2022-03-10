@@ -94,7 +94,14 @@ textarea {
   margin: 0;
 }
 
+#existing_signal_message, #signal_saved_message {
+  color: var(--green-font-color);
+  margin: 10px 0;
+}
 
+#signal_saved_message {
+  display: none;
+}
 .navbar {
   background-color: var(--blue-font-color);
 }
@@ -193,6 +200,17 @@ textarea {
   border-radius: 4px;
   box-shadow: var(--custom-shadow);
   margin: 0px 0 10px 0;
+  color: var(--blue-font-color);
+  text-decoration: none;
+  padding: 4px 8px;
+  background-color: white;
+}
+
+
+.watchlist, .add-signal{
+  border-radius: 4px;
+  box-shadow: var(--custom-shadow);
+  margin: 10px 0 10px 0;
   color: var(--blue-font-color);
   text-decoration: none;
   padding: 4px 8px;
