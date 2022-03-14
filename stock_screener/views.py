@@ -5,25 +5,17 @@ from django.urls import reverse
 from .models import User, SavedSearch, SignalConstructor
 from django.db import IntegrityError
 from .forms import StockForm
-from .utils import read_csv_from_S3, add_ma, add_psar, add_adx, add_srsi, add_macd, \
-    adjust_start, make_graph, add_days_since_change, get_price_change, get_current_tickers_info, \
+from .utils import read_csv_from_S3, adjust_start, make_graph, get_price_change, get_current_tickers_info, \
     upload_csv_to_S3, stock_tidy_up, prepare_ticker_info_update, get_company_name_from_yf, get_previous_sma, \
     calculate_price_dif, format_float
-from .recommendations import add_final_rec_column
 from .calculations import make_calculations
 from datetime import date, datetime, timedelta
 from dateutil.relativedelta import relativedelta
 import pandas as pd
-import plotly.graph_objects as go
 import yfinance as yf
-import time
-import os
-import numpy as np
-import json
 import ta
 import json
-import urllib.request
-import urllib.parse
+
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
@@ -94,9 +86,8 @@ def index(request):
                 tickerList = list(tickerInfo.index)
 
                 if ticker not in tickerList:
-                    fullStartTime = time.time()
                     stock = yf.download(ticker, start=startDateInternal, end=endDate)
-                    stockDownLoadTime = time.time()
+                    print(stock.tail())
                     if stock.empty:
                         message = f"Details for ticker {ticker} cannot be found"
                         context = {
@@ -107,22 +98,13 @@ def index(request):
                     else:
                         print("Data downloaded in full")
                         tickerName = get_company_name_from_yf(ticker)
-                        gettingName = time.time()
                         tickerInfo = prepare_ticker_info_update(tickerInfo, ticker, tickerName)
-                        tickerInfoPrep = time.time()
                         upload_csv_to_S3(bucket, tickerInfo, "TickersInfo")
-                        tickerUploadTime = time.time()
                         updatedStock = stock_tidy_up(stock, ticker)
                         updatedStocks = pd.concat([existingStocks, updatedStock], axis=1)
                         upload_csv_to_S3(bucket, updatedStocks, "Stocks")
+                       # stock = updatedStocks[ticker]
                         tickerList = list(tickerInfo.index)
-                        fullEndTime = time.time()
-
-                        print(f"stock download time takes {stockDownLoadTime - fullStartTime}")
-                        print(f"getting the full name takes {gettingName - stockDownLoadTime}")
-                        print(f" ticker info prep takes {tickerInfoPrep - gettingName}")
-                        print(f"ticker info upload takes {tickerUploadTime - tickerInfoPrep}")
-                        print(f"full execution time takes {fullEndTime - fullStartTime}")
 
                 else:
                     print("reading data and preparing graph")

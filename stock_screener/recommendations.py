@@ -32,7 +32,7 @@ def add_final_rec_column(df, signalList):
         if adx and ma:
             print("ADX and MA")
             mask = df["ADX Rec"] == True
-            df.loc[mask, "Final Rec"] = df["MA Rec"]
+            df["Final Rec"] = np.where(mask, df["MA Rec"], "Wait")
 
         elif adx and macd:
             print("ADX and MACD")
