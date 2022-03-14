@@ -538,6 +538,7 @@ def watchlist(request):
                 change2 = calculate_price_dif(closingPrice, sma2)[1] + "%"
                 change3 = calculate_price_dif(closingPrice, sma3)[1] + "%"
 
+                closingPrice = format_float(closingPrice)
                 data = adjust_start(data, startDateDatetime)
                 # watched_tickers["graph"] = make_graph(data, ticker, selectedSignals, 500, 600)
 
@@ -550,6 +551,7 @@ def watchlist(request):
                     [ticker,
                      watchlist_item["rec"],
                      watchlist_item["daysSinceChange"],
+                     closingPrice,
                      change1,
                      change2,
                      change3] + signalResults
@@ -558,6 +560,7 @@ def watchlist(request):
                                                              columns=['Ticker',
                                                                       'Analysis Outcome',
                                                                       'Days Since Trend Change',
+                                                                      'Closing Price',
                                                                       '1 Week Change',
                                                                       '1 Month Change',
                                                                       '3 Months Change'] + selectedSignals)
@@ -567,6 +570,7 @@ def watchlist(request):
             jointTable = pd.DataFrame(columns=['Ticker',
                                                'Analysis Outcome',
                                                'Days Since Trend Change',
+                                               'Closing Price',
                                                '1 Week Change',
                                                '1 Month Change',
                                                '3 Months Change'] + selectedSignals)
