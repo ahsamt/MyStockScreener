@@ -269,11 +269,12 @@ def index(request):
                                 and savedConstructor.macdSm == macdSm):
                             constructorAdded = True
 
-                        newSignal = {"ma": ma, "maS": maS, "maL": maL, "maWS": maWS, "maWL": maWL, "psar": psar,
-                                     "psarAF": psarAF, "psarMA": psarMA, "adx": adx, "adxW": adxW, "adxL": adxL,
-                                     "srsi": srsi, "srsiW": srsiW, "srsiSm1": srsiSm1, "srsiSm2": srsiSm2,
-                                     "srsiOB": srsiOB, "srsiOS": srsiOS, "macd": macd, "macdF": macdF,
-                                     "macdS": macdS, "macdSm": macdSm}
+                    newSignal = {"ma": ma, "maS": maS, "maL": maL, "maWS": maWS, "maWL": maWL, "psar": psar,
+                                 "psarAF": psarAF, "psarMA": psarMA, "adx": adx, "adxW": adxW, "adxL": adxL,
+                                 "srsi": srsi, "srsiW": srsiW, "srsiSm1": srsiSm1, "srsiSm2": srsiSm2,
+                                 "srsiOB": srsiOB, "srsiOS": srsiOS, "macd": macd, "macdF": macdF,
+                                 "macdS": macdS, "macdSm": macdSm}
+                print(newSignal)
 
                 print(stock.tail(15))
                 context = {
@@ -418,6 +419,7 @@ def saved_signals(request):
     data = json.loads(request.body)
 
     ma = data.get("ma")
+    print(ma)
     if ma == "":
         return JsonResponse({
             "error": "True or False is required."
