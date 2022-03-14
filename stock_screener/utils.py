@@ -140,7 +140,7 @@ def add_psar(df, psar_af, psar_ma):
         df = df.reset_index()
     df["Parabolic SAR"] = ta.trend.PSARIndicator(df["High"], df["Low"], df["Close"], psar_af, psar_ma).psar()
     mask = df["Parabolic SAR"] > df["Close"]
-    df["PSAR Rec"] = "Buy"
+    df["Parabolic SAR Rec"] = "Buy"
     df.loc[mask, "Parabolic SAR Rec"] = "Sell"
 
     return df

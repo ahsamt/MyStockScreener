@@ -2,9 +2,52 @@
 {% load static %}
 
 {% block body %}
+<nav class="navbar navbar-expand-lg navbar-dark">
+  <div class="container-fluid">
+    <a class="navbar-brand" id="top" href="{% url 'index' %}">StockScreener</a>
+
+    <button
+      class="navbar-toggler"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#navbarNav"
+      aria-controls="navbarNav"
+      aria-expanded="false"
+      aria-label="Toggle navigation"
+    >
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav justify-content-end w-100">
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'index' %}">Search</a>
+        </li>
+
+        {%  if user.is_authenticated %}
+
+        <li class="nav-item">
+          <a class="nav-link active" href="{% url 'watchlist' %}">Watchlist</a>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'logout' %}">Log Out</a>
+        </li>
+        {% else %}
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'login' %}">Log In</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'register' %}">Register</a>
+        </li>
+
+        {% endif %}
+      </ul>
+    </div>
+  </div>
+</nav>
 
     {%  for item in watched_tickers %}
         {{ item.ticker }}
     {% endfor %}
-
+{{ htmlResultTable | safe }}
 {% endblock %}

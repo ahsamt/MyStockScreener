@@ -3,7 +3,7 @@ from .utils import add_ma, add_adx, add_psar, add_srsi, add_macd, add_days_since
 from .recommendations import add_final_rec_column
 
 
-def make_calculations(ticker, ticker_full, stock_df, signals_list):
+def make_calculations(stock_df, signals_list):
     selectedSignals = []
 
     ma, maS, maL, maWS, maWL, psar, psarAF, psarMA, adx, adxW, adxL, srsi, srsiW, srsiSm1, srsiSm2, srsiOB, srsiOS, macd, macdS, macdF, macdSm = signals_list

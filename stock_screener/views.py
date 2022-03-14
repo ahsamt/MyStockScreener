@@ -140,48 +140,9 @@ def index(request):
                     daysSinceChange = "n/a"
 
                 else:
-                    stock, selectedSignals = make_calculations(ticker, tickerName, stock, signals)
+                    stock, selectedSignals = make_calculations(stock, signals)
                     rec = stock.loc[stock.index[-1], "Final Rec"]  # .lower()
                     daysSinceChange = stock.loc[stock.index[-1], "Days_Since_Change"]
-
-                #     if ma:
-                #         stock, shortName, longName = add_ma(stock, maS, maL, maWS, maWL)
-                #         selectedSignals.append(shortName)
-                #         selectedSignals.append(longName)
-                #
-                #     if psar:
-                #         stock = add_psar(stock, psarAF, psarMA)
-                #         selectedSignals.append("Parabolic SAR")
-                #
-                #     if adx:
-                #         stock = add_adx(stock, adxW, adxL)
-                #         selectedSignals.append("ADX")
-                #
-                #     if srsi:
-                #         stock = add_srsi(stock, srsiW, srsiSm1, srsiSm2, srsiOB, srsiOS)
-                #         selectedSignals.append("Stochastic RSI")
-                #
-                #     if macd:
-                #         stock = add_macd(stock, macdS, macdF, macdSm)
-                #         selectedSignals.append("MACD")
-                #
-                #     stock = add_final_rec_column(stock, [adx, ma, macd, psar, srsi])
-                #
-                #     stock = add_days_since_change(stock, "Final Rec")
-
-                # if rec in ["trending", "rangebound"]:
-
-                # recommendation = f"{ticker} is {rec} at the moment."
-                # else:
-                #     recommendation = f"Analysis based on the signals selected " \
-                #                      f"suggests that you should {rec}."
-                #
-                # if daysSinceChange is None:
-                #     changeInfo = "This trend has not changed in the past year"
-                # elif str(daysSinceChange)[-1] == 1:
-                #     changeInfo = f"{daysSinceChange} day since trend change"
-                # else:
-                #     changeInfo = f"{daysSinceChange} days since trend change"
 
                 for column in stock.columns:
                     if column.startswith("SMA"):
@@ -493,6 +454,10 @@ def saved_signals(request):
 
 
 def watchlist(request):
+    endDate = date.today()
+    startDate = endDate + relativedelta(months=-numMonths)
+    startDateInternal = startDate + relativedelta(months=-6)
+    startDateDatetime = datetime.combine(startDate, datetime.min.time())
     if request.method == "GET":
 
         if request.user.is_authenticated:
@@ -502,7 +467,34 @@ def watchlist(request):
             watchlist = sorted(watchlist, key=lambda p: p.date, reverse=True)
             allStocks = read_csv_from_S3(bucket, "Stocks")
 
-            signal = SignalConstructor.objects.filter(user=request.user)
+            try:
+                signal = SignalConstructor.objects.get(user=request.user)
+
+            except SignalConstructor.DoesNotExist:
+                signal = None
+
+            if signal:
+                signals = [signal.ma,
+                           signal.maS,
+                           signal.maL,
+                           signal.maWS,
+                           signal.maWL,
+                           signal.psar,
+                           signal.psarAF,
+                           signal.psarMA,
+                           signal.adx,
+                           signal.adxW,
+                           signal.adxL,
+                           signal.srsi,
+                           signal.srsiW,
+                           signal.srsiSm1,
+                           signal.srsiSm2,
+                           signal.srsiOB,
+                           signal.srsiOS,
+                           signal.macd,
+                           signal.macdS,
+                           signal.macdF,
+                           signal.macdSm]
 
             for item in watchlist:
                 ticker = item.ticker
@@ -512,12 +504,79 @@ def watchlist(request):
                 watchlist_item["notes"] = item.notes
                 watchlist_item["tickerID"] = item.id
 
-                # watchlist_item["data1"], watchlist_item["data2"] = prep_graph_data(stock)
-                # watchlist_item["closing_price"], watchlist_item["change"] = get_change_info(watchlist_item["data1"],
-                #                                                                             stock)
-                # watchlist_item["graph1"] = make_graph_1(watchlist_item["data1"], stock, 575, 840)
-                # watchlist_item["graph2"] = make_graph_2(watchlist_item["data2"], stock, 575, 840)
+                data = allStocks[ticker].copy()
+                data.dropna(how="all", inplace=True)
+                if signal:
 
+                    data, selectedSignals = make_calculations(data, signals)
+                    watchlist_item["rec"] = data.loc[data.index[-1], "Final Rec"]
+                    watchlist_item["daysSinceChange"] = data.loc[data.index[-1], "Days_Since_Change"]
+                else:
+                    data = data.reset_index()
+                    watchlist_item["rec"] = "No signals selected"
+                    watchlist_item["daysSinceChange"] = "n/a"
+
+                for column in data.columns:
+                    if column.startswith("SMA"):
+                        smaAdded = True
+                        smaCol = column
+                    else:
+                        smaAdded = False
+
+                if not smaAdded:
+                    data["Table SMA"] = ta.trend.sma_indicator(data["Close"], window=15)
+                    smaCol = "Table SMA"
+
+                latestDate = data["Date"].max()
+                sma1 = get_previous_sma(data, smaCol, latestDate, 7)
+                sma2 = get_previous_sma(data, smaCol, latestDate, 30)
+                sma3 = get_previous_sma(data, smaCol, latestDate, 90)
+
+                closingPrice, priceChange = get_price_change(data)
+
+                change1 = calculate_price_dif(closingPrice, sma1)[1] + "%"
+                change2 = calculate_price_dif(closingPrice, sma2)[1] + "%"
+                change3 = calculate_price_dif(closingPrice, sma3)[1] + "%"
+
+                data = adjust_start(data, startDateDatetime)
+                # watched_tickers["graph"] = make_graph(data, ticker, selectedSignals, 500, 600)
+
+                signalResults = []
+                print(selectedSignals)
+                for signal in selectedSignals:
+                    signalResults.append(format_float(data.loc[data.index.max()][signal]))
+
+                tableEntries = \
+                    [ticker,
+                     watchlist_item["rec"],
+                     watchlist_item["daysSinceChange"],
+                     change1,
+                     change2,
+                     change3] + signalResults
+
+                watchlist_item["resultTable"] = pd.DataFrame([tableEntries],
+                                                             columns=['Ticker',
+                                                                      'Analysis Outcome',
+                                                                      'Days Since Trend Change',
+                                                                      '1 Week Change',
+                                                                      '1 Month Change',
+                                                                      '3 Months Change'] + selectedSignals)
+
+                # resultTable.set_index('Analysis Outcome', inplace=True)
                 watched_tickers.append(watchlist_item)
+            jointTable = pd.DataFrame(columns=['Ticker',
+                                               'Analysis Outcome',
+                                               'Days Since Trend Change',
+                                               '1 Week Change',
+                                               '1 Month Change',
+                                               '3 Months Change'] + selectedSignals)
+            for elt in watched_tickers:
+                print(elt["resultTable"])
+                jointTable = pd.concat([jointTable, elt["resultTable"]], axis=0)
 
-        return render(request, "stock_screener/watchlist.html", {'watched_tickers': watched_tickers})
+            jointTable.set_index("Ticker", inplace=True)
+            jointTable.rename_axis(None, inplace=True)
+            htmlResultTable = jointTable.to_html(col_space=30, bold_rows=True, classes="table", justify="left")
+
+        return render(request, "stock_screener/watchlist.html",
+                      {'watched_tickers': watched_tickers, "htmlResultTable": htmlResultTable})
