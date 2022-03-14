@@ -575,10 +575,11 @@ def watchlist(request):
                                                '1 Month Change',
                                                '3 Months Change'] + selectedSignals)
             for elt in watched_tickers:
-                print(elt["resultTable"])
+
                 jointTable = pd.concat([jointTable, elt["resultTable"]], axis=0)
 
             jointTable.set_index("Ticker", inplace=True)
+            jointTable.sort_values(by=['Days Since Trend Change', 'Ticker'], inplace=True)
             jointTable.rename_axis(None, inplace=True)
             htmlResultTable = jointTable.to_html(col_space=30, bold_rows=True, classes="table", justify="left")
 
