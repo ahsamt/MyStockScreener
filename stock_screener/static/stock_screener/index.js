@@ -13,6 +13,30 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  document.querySelectorAll(".graph-button").forEach((graph_button) => {
+    graph_button.addEventListener("click", (event) => show_graph(event));
+  });
+
+  document.querySelectorAll(".close-graph").forEach((graph_button) => {
+    graph_button.addEventListener("click", (event) => hide_graphs(event));
+  });
+
+  function show_graph(event) {
+    event.preventDefault();
+    let ticker = event.target.dataset.ticker;
+    let graph = document.getElementById(`${ticker}_graph`);
+    let table = document.getElementById("result-table");
+    graph.style.display = "block";
+    table.style.display = "none";
+  }
+
+  function hide_graphs(event) {
+    event.preventDefault();
+    document.querySelectorAll(`.graphs`).forEach((g) => {
+      g.style.display = "none"});
+    document.getElementById("result-table").style.display = "block";
+
+  }
   // update watchlist when the relevant button is clicked on the index page
   document.querySelectorAll(".watchlist").forEach((watch_button) => {
     watch_button.addEventListener("click", (event) => update_watchlist(event));

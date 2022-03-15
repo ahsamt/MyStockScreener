@@ -45,9 +45,15 @@
     </div>
   </div>
 </nav>
+<div id="result-table">{{ htmlResultTable | safe }}</div>
 
-    {%  for item in watched_tickers %}
+
+
+    {% for item in watched_tickers  %}
+        <div class = "graphs" id="{{ item.ticker }}_graph">
+            <button class="close-graph">Close graph</button>
+            <div > {{ item.graph | safe }}</div>
+        </div>
 
     {% endfor %}
-{{ htmlResultTable | safe }}
 {% endblock %}

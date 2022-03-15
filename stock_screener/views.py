@@ -447,6 +447,7 @@ def watchlist(request):
         if request.user.is_authenticated:
 
             watched_tickers = []
+            graphs = []
             watchlist = SavedSearch.objects.filter(user=request.user)
             watchlist = sorted(watchlist, key=lambda p: p.date, reverse=True)
             allStocks = read_csv_from_S3(bucket, "Stocks")
@@ -524,8 +525,8 @@ def watchlist(request):
 
                 closingPrice = format_float(closingPrice)
                 data = adjust_start(data, startDateDatetime)
-                graph = make_graph(data, ticker, selectedSignals, 500, 600)
-
+                graph = make_graph(data, ticker, selectedSignals, 600, 800)
+                watchlist_item["graph"] = graph
 
 
                 signalResults = []
@@ -541,8 +542,8 @@ def watchlist(request):
                      change1,
                      change2,
                      change3] \
-                    + signalResults + [
-                        '''<a href="https://www.google.co.uk/" target="blank"> Graph </a>''']
+                    + signalResults + [f"<button class = 'graph-button' data-ticker={ticker}>See graph</button>"]
+                        #'''<a href="https://www.google.co.uk/" target="blank"> Graph </a>''']
 
                 watchlist_item["resultTable"] = pd.DataFrame([tableEntries],
                                                              columns=['Ticker',
