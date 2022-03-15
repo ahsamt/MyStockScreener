@@ -209,7 +209,7 @@ def make_graph(df, ticker, signal_names, height, width):
                {"count": 3, "label": "3M", "step": "month", "stepmode": "backward"},
                {"count": 6, "label": "6M", "step": "month", "stepmode": "backward"},
                {"count": 1, "label": "1Y", "step": "year", "stepmode": "backward"}, ]
-
+    timestmp = date.today()
     fig = go.Figure()
 
     fig.add_trace(go.Scatter(name=ticker, x=df["Date"], y=df["Close"]))
@@ -225,6 +225,7 @@ def make_graph(df, ticker, signal_names, height, width):
                           }}, width=width, height=height,
                       )
     graph = fig.to_html(full_html=False)
+
     return graph
 
 
@@ -273,10 +274,9 @@ def get_date_within_df(df, dt):
         dt = dt - pd.DateOffset(1)
     return dt
 
+
 def get_previous_sma(df, sma_col, latest_date, no_of_days):
     reqDate = get_date_within_df(df, latest_date - pd.DateOffset(no_of_days))
     mask = df["Date"] == reqDate
     prevSma = list(df.loc[mask, sma_col])[0]
     return prevSma
-
-

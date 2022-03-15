@@ -2,6 +2,8 @@ from django.shortcuts import render
 from django.contrib.auth import authenticate, login, logout
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
+from django.utils.safestring import mark_safe
+
 from .models import User, SavedSearch, SignalConstructor
 from django.db import IntegrityError
 from .forms import StockForm
@@ -103,7 +105,7 @@ def index(request):
                         updatedStock = stock_tidy_up(stock, ticker)
                         updatedStocks = pd.concat([existingStocks, updatedStock], axis=1)
                         upload_csv_to_S3(bucket, updatedStocks, "Stocks")
-                       # stock = updatedStocks[ticker]
+                        # stock = updatedStocks[ticker]
                         tickerList = list(tickerInfo.index)
 
                 else:
@@ -522,7 +524,9 @@ def watchlist(request):
 
                 closingPrice = format_float(closingPrice)
                 data = adjust_start(data, startDateDatetime)
-                # watched_tickers["graph"] = make_graph(data, ticker, selectedSignals, 500, 600)
+                graph = make_graph(data, ticker, selectedSignals, 500, 600)
+
+
 
                 signalResults = []
                 print(selectedSignals)
@@ -536,7 +540,9 @@ def watchlist(request):
                      closingPrice,
                      change1,
                      change2,
-                     change3] + signalResults
+                     change3] \
+                    + signalResults + [
+                        '''<a href="https://www.google.co.uk/" target="blank"> Graph </a>''']
 
                 watchlist_item["resultTable"] = pd.DataFrame([tableEntries],
                                                              columns=['Ticker',
@@ -545,7 +551,7 @@ def watchlist(request):
                                                                       'Closing Price',
                                                                       '1 Week Change',
                                                                       '1 Month Change',
-                                                                      '3 Months Change'] + selectedSignals)
+                                                                      '3 Months Change'] + selectedSignals + ["Graph"])
 
                 # resultTable.set_index('Analysis Outcome', inplace=True)
                 watched_tickers.append(watchlist_item)
@@ -555,15 +561,17 @@ def watchlist(request):
                                                'Closing Price',
                                                '1 Week Change',
                                                '1 Month Change',
-                                               '3 Months Change'] + selectedSignals)
+                                               '3 Months Change'] + selectedSignals + ["Graph"])
             for elt in watched_tickers:
-
                 jointTable = pd.concat([jointTable, elt["resultTable"]], axis=0)
 
             jointTable.set_index("Ticker", inplace=True)
             jointTable.sort_values(by=['Days Since Trend Change', 'Ticker'], inplace=True)
             jointTable.rename_axis(None, inplace=True)
-            htmlResultTable = jointTable.to_html(col_space=30, bold_rows=True, classes="table", justify="left")
+
+            htmlResultTable = jointTable.to_html(col_space=30, bold_rows=True, classes="table", justify="left",
+                                                 escape=False)
 
         return render(request, "stock_screener/watchlist.html",
                       {'watched_tickers': watched_tickers, "htmlResultTable": htmlResultTable})
+
