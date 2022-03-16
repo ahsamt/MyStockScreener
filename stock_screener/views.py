@@ -9,7 +9,7 @@ from django.db import IntegrityError
 from .forms import StockForm
 from .utils import read_csv_from_S3, adjust_start, make_graph, get_price_change, get_current_tickers_info, \
     upload_csv_to_S3, stock_tidy_up, prepare_ticker_info_update, get_company_name_from_yf, get_previous_sma, \
-    calculate_price_dif, format_float
+    calculate_price_dif, format_float, backtest_signal
 from .calculations import make_calculations
 from datetime import date, datetime, timedelta
 from dateutil.relativedelta import relativedelta
@@ -152,7 +152,7 @@ def index(request):
 
                 stock = adjust_start(stock, startDateDatetime)
                 graph = make_graph(stock, ticker, selectedSignals, height, width)
-
+                backtestResult = backtest_signal(stock)
                 print(selectedSignals)
                 for signal in selectedSignals:
                     signalResults.append(format_float(stock.loc[stock.index.max()][signal]))
@@ -236,7 +236,7 @@ def index(request):
                     "savedConstructor": savedConstructor,
                     "constructorAdded": constructorAdded,
                     "newSignal": newSignal,
-
+                    "backtestResult": backtestResult,
                 }
 
                 return render(request, "stock_screener/index.html", context)
@@ -490,7 +490,6 @@ def watchlist(request):
                 watchlist_item["notes"] = item.notes
                 watchlist_item["tickerID"] = item.id
 
-
                 data = allStocks[ticker].copy()
                 data.dropna(how="all", inplace=True)
                 if signal:
@@ -530,7 +529,6 @@ def watchlist(request):
                 graph = make_graph(data, ticker, selectedSignals, 600, 800)
                 watchlist_item["graph"] = graph
 
-
                 signalResults = []
                 print(selectedSignals)
                 for signal in selectedSignals:
@@ -545,7 +543,7 @@ def watchlist(request):
                      change2,
                      change3] \
                     + signalResults + [f"<button class = 'graph-button' data-ticker={ticker}>See graph</button>"]
-                        #'''<a href="https://www.google.co.uk/" target="blank"> Graph </a>''']
+                # '''<a href="https://www.google.co.uk/" target="blank"> Graph </a>''']
 
                 watchlist_item["resultTable"] = pd.DataFrame([tableEntries],
                                                              columns=['Ticker',
@@ -577,4 +575,3 @@ def watchlist(request):
 
         return render(request, "stock_screener/watchlist.html",
                       {'watched_tickers': watched_tickers, "htmlResultTable": htmlResultTable})
-
