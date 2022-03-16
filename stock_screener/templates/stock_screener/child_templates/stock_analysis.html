@@ -1,112 +1,115 @@
+<div>
+    <div class="stock_info card mb-4">
+        <div class="card-body">
+            <h4 class="card-title" id="ticker_name">{{ ticker }} ({{ tickerName }})</h4>
+            <h5 class="card-subtitle mb-2">
+                <span class="text-muted">Last closing price:</span>
+                <span class="closing_price">{{ closingPrice }} USD</span>
+            </h5>
+            <h5 class="card-subtitle mb-2">
+                <span class="price_change_{{ priceChange.1 }}">{{ priceChange.0 }}</span>
+            </h5>
 
-<div class="stock_info card mb-4">
-    <div class="card-body">
-        <h4 class="card-title" id="ticker_name">{{ ticker }} ({{ tickerName }})</h4>
-        <h5 class="card-subtitle mb-2">
-            <span class="text-muted">Last closing price:</span>
-            <span class="closing_price">{{ closingPrice }} USD</span>
-        </h5>
-        <h5 class="card-subtitle mb-2">
-            <span class="price_change_{{ priceChange.1 }}">{{ priceChange.0 }}</span>
-        </h5>
 
+        </div>
 
-    </div>
+        {{ htmlResultTable | safe }}
 
-    {{ htmlResultTable | safe }}
+        {% if user.is_authenticated %}
 
-    {% if user.is_authenticated %}
+        {% if watchlisted %}
 
-    {% if watchlisted %}
+        <div class="card-link">
+            <a
+            href="#"
+            class="watchlist"
+            data-ticker_name="{{ ticker }}"
+            data-ticker_id="{{ tickerID }}"
+            data-ticker_full="{{ tickerName }}"
+            >
+                Remove {{ ticker }} from watchlist
+            </a>
+        </div>
 
-      <div class="card-link">
+        {% else %}
+
         <a
-          href="#"
-          class="watchlist"
-          data-ticker_name="{{ ticker }}"
-          data-ticker_id="{{ tickerID }}"
-          data-ticker_full="{{ tickerName }}"
+            href="#"
+            class="watchlist"
+            data-ticker_name="{{ ticker }}"
+            data-ticker_id="{{ tickerID }}"
+            data-ticker_full="{{ tickerName }}"
         >
-          Remove {{ ticker }} from watchlist
+            Add {{ ticker }} to watchlist
         </a>
-      </div>
 
-      {% else %}
+        {% endif %} {% else %}
 
-      <a
-        href="#"
-        class="watchlist"
-        data-ticker_name="{{ ticker }}"
-        data-ticker_id="{{ tickerID }}"
-        data-ticker_full="{{ tickerName }}"
-      >
-        Add {{ ticker }} to watchlist</a
-      >
+        <p>
+            Please
+            <a href="{% url 'login' %}">log In</a>
+            or <a href="{% url 'register' %}">register</a> to add this stock to your
+            watchlist
+        </p>
 
-      {% endif %} {% else %}
+        {% endif %}
 
-      <p>
-        Please
-        <a href="{% url 'login' %}">log In</a>
-        or <a href="{% url 'register' %}">register</a> to add this stock to your
-        watchlist
-      </p>
+        {% if user.is_authenticated %}
 
-      {% endif %}
+            {% if constructorAdded %}
 
-    {% if user.is_authenticated %}
-
-        {% if constructorAdded %}
-
-        <div id = "existing_signal_message">You have previously saved this signal for your watchlisted items</div>
+                <div id = "existing_signal_message">You have previously saved this signal for your watchlisted items</div>
 
             {% else %}
 
-            <a
-        href="#"
-        class="add-signal"
-        data-ma="{{ newSignal.ma }}"
-        data-maS="{{ newSignal.maS }}",
-        data-maL="{{ newSignal.maL }}",
-        data-maWS="{{ newSignal.maWS }}",
-        data-maWL="{{ newSignal.maWL }}",
-        data-psar="{{ newSignal.psar }}",
-        data-psarAF="{{ newSignal.psarAF }}",
-        data-psarMA="{{ newSignal.psarMA }}",
-        data-adx="{{ newSignal.adx }}",
-        data-adxW="{{ newSignal.adxW }}",
-        data-adxL="{{ newSignal.adxL }}",
-        data-srsi="{{ newSignal.srsi }}",
-        data-srsiW="{{ newSignal.srsiW }}",
-        data-srsiSm1="{{ newSignal.srsiSm1 }}",
-        data-srsiSm2="{{ newSignal.srsiSm2 }}",
-        data-srsiOB="{{ newSignal.srsiOB }}",
-        data-srsiOS="{{ newSignal.srsiOS }}",
-        data-macd="{{ newSignal.macd }}",
-        data-macdF="{{ newSignal.macdF }}",
-        data-macdS="{{ newSignal.macdS }}",
-        data-macdSm="{{ newSignal.macdSm }}",
-        data-previousSignal = "{{ savedConstructor }}"
+                <a  href="#" class="add-signal"
+                    data-ma="{{ newSignal.ma }}"
+                    data-maS="{{ newSignal.maS }}"
+                    data-maL="{{ newSignal.maL }}"
+                    data-maWS="{{ newSignal.maWS }}"
+                    data-maWL="{{ newSignal.maWL }}"
+                    data-psar="{{ newSignal.psar }}"
+                    data-psarAF="{{ newSignal.psarAF }}"
+                    data-psarMA="{{ newSignal.psarMA }}"
+                    data-adx="{{ newSignal.adx }}"
+                    data-adxW="{{ newSignal.adxW }}"
+                    data-adxL="{{ newSignal.adxL }}"
+                    data-srsi="{{ newSignal.srsi }}"
+                    data-srsiW="{{ newSignal.srsiW }}"
+                    data-srsiSm1="{{ newSignal.srsiSm1 }}"
+                    data-srsiSm2="{{ newSignal.srsiSm2 }}"
+                    data-srsiOB="{{ newSignal.srsiOB }}"
+                    data-srsiOS="{{ newSignal.srsiOS }}"
+                    data-macd="{{ newSignal.macd }}"
+                    data-macdF="{{ newSignal.macdF }}"
+                    data-macdS="{{ newSignal.macdS }}"
+                    data-macdSm="{{ newSignal.macdSm }}"
+                    data-previousSignal = "{{ savedConstructor }}"
 
-      >{% if not savedConstructor %}
-        Save this signal
-                {% else %}
-                Replace your saved signal with this one
-                {%  endif %}</a
-      >
-        <div id ="signal_saved_message">This signal has been saved for your watchlisted items</div>
-        {%  endif %}
+                >
+                    {% if not savedConstructor %}
+                        Save this signal
+                    {% else %}
+                        Replace your saved signal with this one
+                    {%  endif %}
+                </a>
 
-        <div>Backtesting outcome for this signal (12 months): {{ backtestResult }}</div>
-        <a
-        href="#"
-        class="backtest-signal mb-3">
+                <div id ="signal_saved_message">This signal has been saved for your watchlisted items</div>
+            {%  endif %}
+        {% endif %}
+    </div>
 
-           See backtesting data for this signal
+    <div class="stock_info card mb-4">
+        <div class="card-body">
+            <h4 class="card-title" id="ticker_name">Backtesting this signal</h4>
+            <h5 class="card-subtitle mb-2">
+                <span class="text-muted">Outcome for {{ ticker }}</span>
+                <span class="closing_price">{{ backtestResult }}</span>
+            </h5>
 
-        </a>
-        <br />
-        <div>{{ htmlBacktestTable | safe }}</div>
+            <div id="backtesting-table">{{ htmlBacktestTable | safe }}</div>
+        </div>
 
-    {% endif %}
+    </div>
+
 </div>

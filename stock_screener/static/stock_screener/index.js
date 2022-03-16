@@ -21,6 +21,9 @@ document.addEventListener("DOMContentLoaded", () => {
     graph_button.addEventListener("click", (event) => hide_graphs(event));
   });
 
+
+
+
   function show_graph(event) {
     event.preventDefault();
     let ticker = event.target.dataset.ticker;

@@ -101,7 +101,9 @@ textarea {
   color: var(--green-font-color);
   margin: 10px 0;
 }
+#backtesting-table {
 
+}
 #signal_saved_message {
   display: none;
 }
