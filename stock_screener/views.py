@@ -481,6 +481,7 @@ def watchlist(request):
                            signal.macdF,
                            signal.macdSm]
 
+            # can i pass it to html as an object instead?
             for item in watchlist:
                 ticker = item.ticker
                 watchlist_item = {}
@@ -488,6 +489,7 @@ def watchlist(request):
                 watchlist_item["tickerFull"] = item.ticker_full
                 watchlist_item["notes"] = item.notes
                 watchlist_item["tickerID"] = item.id
+
 
                 data = allStocks[ticker].copy()
                 data.dropna(how="all", inplace=True)

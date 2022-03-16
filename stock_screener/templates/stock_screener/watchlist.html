@@ -53,6 +53,31 @@
         <div class = "graphs" id="{{ item.ticker }}_graph">
             <button class="close-graph">Close graph</button>
             <div > {{ item.graph | safe }}</div>
+
+            <h4>Your notes for {{ item.ticker }}:</h4>
+        <form
+          class="edit_notes"
+          id="editNotes{{ item.tickerID }}"
+          data-stock_id="{{ item.tickerID }}"
+        >
+          <div class="form-group">
+            <textarea
+              class="edit_content form-control"
+              id="editContent{{ item.tickerID }}"
+              rows="12"
+            >
+                {{ item.notes }}
+            </textarea>
+            <button
+              class="save_notes_button"
+              type="submit"
+              data-stock_id="{{ item.tickerID }}"
+            >
+              Save notes
+            </button>
+          </div>
+        </form>
+        <div><p class="message mt-2 mb-3" id="messageNotes{{ item.tickerID }}"></p></div>
         </div>
 
     {% endfor %}

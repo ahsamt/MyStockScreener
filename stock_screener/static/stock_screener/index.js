@@ -96,9 +96,9 @@ function get_time() {
 function update_notes(event) {
   // use internal API to update user's notes for specific stock
   event.preventDefault();
-  let stockID = event.target.dataset.stock_id;
-  let updated_notes = document.getElementById(`editContent${stockID}`).value;
-  fetch(`/saved_searches/${stockID}`, {
+  let tickerID = event.target.dataset.ticker_id;
+  let updated_notes = document.getElementById(`editContent${tickerID}`).value;
+  fetch(`/saved_searches/${tickerID}`, {
     method: "PUT",
     body: JSON.stringify({
       notes: updated_notes,
@@ -107,7 +107,7 @@ function update_notes(event) {
     if (response.ok) {
       let time = get_time();
       document.getElementById(
-        `messageNotes${stockID}`
+        `messageNotes${tickerID}`
       ).innerHTML = `Notes saved at ${time}`;
     }
   });
