@@ -152,7 +152,8 @@ def index(request):
 
                 stock = adjust_start(stock, startDateDatetime)
                 graph = make_graph(stock, ticker, selectedSignals, height, width)
-                backtestResult = backtest_signal(stock)
+                backtestResult, backtestData = backtest_signal(stock)
+                htmlBacktestTable = backtestData.to_html(col_space=30, bold_rows=True, classes="table", justify="left")
                 print(selectedSignals)
                 for signal in selectedSignals:
                     signalResults.append(format_float(stock.loc[stock.index.max()][signal]))
@@ -173,6 +174,7 @@ def index(request):
                 resultTable = resultTable.transpose()
                 # resultTable.rename_axis(None, inplace=True)
                 htmlResultTable = resultTable.to_html(col_space=30, bold_rows=True, classes="table", justify="left")
+
 
                 watchlisted = False
                 tickerID = None
@@ -237,6 +239,7 @@ def index(request):
                     "constructorAdded": constructorAdded,
                     "newSignal": newSignal,
                     "backtestResult": backtestResult,
+                    "htmlBacktestTable": htmlBacktestTable,
                 }
 
                 return render(request, "stock_screener/index.html", context)

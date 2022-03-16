@@ -97,13 +97,16 @@
         <div id ="signal_saved_message">This signal has been saved for your watchlisted items</div>
         {%  endif %}
 
-        <div>Backtesting outome for this signal (12 months): {{ backtestResult }}</div>
+        <div>Backtesting outcome for this signal (12 months): {{ backtestResult }}</div>
         <a
         href="#"
-        class="backtest-signal">
+        class="backtest-signal mb-3">
 
-           See backtesting for this signal
+           See backtesting data for this signal
+
         </a>
+        <br />
+        <div>{{ htmlBacktestTable | safe }}</div>
 
     {% endif %}
 </div>
