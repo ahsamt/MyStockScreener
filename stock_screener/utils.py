@@ -304,3 +304,18 @@ def backtest_signal(df):
     outcome = str(round(sum(backTestClean["Profit/Loss"]), 2)) + "%"
 
     return outcome, backTestClean
+
+
+def check_for_sma_column(df):
+    """Checks if the dataframe has a column starting with 'SMA'
+    (Simple Moving Average column)"""
+    for column in df.columns:
+        if column.startswith("SMA"):
+            return column
+        return None
+
+
+def add_sma_col(df):
+    df["Table SMA"] = ta.trend.sma_indicator(df["Close"], window=15)
+    column = "Table SMA"
+    return df, column

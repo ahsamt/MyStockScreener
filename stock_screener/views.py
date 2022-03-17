@@ -2,35 +2,23 @@ from django.shortcuts import render
 from django.contrib.auth import authenticate, login, logout
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
-from django.utils.safestring import mark_safe
 
 from .models import User, SavedSearch, SignalConstructor
 from django.db import IntegrityError
 from .forms import StockForm
 from .utils import read_csv_from_S3, adjust_start, make_graph, get_price_change, get_current_tickers_info, \
     upload_csv_to_S3, stock_tidy_up, prepare_ticker_info_update, get_company_name_from_yf, get_previous_sma, \
-    calculate_price_dif, format_float, backtest_signal
+    calculate_price_dif, format_float, backtest_signal, check_for_sma_column, add_sma_col
 from .calculations import make_calculations
-from datetime import date, datetime, timedelta
+from datetime import date, datetime
 from dateutil.relativedelta import relativedelta
 import pandas as pd
 import yfinance as yf
-import ta
 import json
 
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
-
-signalOptions = sorted((
-    ("SMAS", "Simple Moving Average (SMA) - short window"),
-    ("SMAL", "Simple Moving Average (SMA) - long window"),
-    ("EMA", " Exponential Moving Average (EMA)"),
-    ("PSAR", "Parabolic Stop And Reverse (Parabolic SAR)"),
-    ("ADX", "Average Directional Movement Index (ADX)"),
-    ("SRSI", "Stochastic RSI (SRSI)"),
-    ("MACD", "Moving Average Convergence Divergence (MACD)"),
-))
 
 numMonths = 12
 bucket = 'stockscreener-data'
@@ -43,10 +31,9 @@ def index(request):
     if request.method == "POST":
         if 'ticker' in request.POST:
             stockForm = StockForm(request.POST)
-            print("ticker in the request.post")
+
             # Get all the form data
             if stockForm.is_valid():
-                print("stock form is valid")
                 ticker = stockForm.cleaned_data['ticker'].upper()
                 ma = stockForm.cleaned_data['ma']
                 maS = stockForm.cleaned_data['maS']
@@ -73,28 +60,29 @@ def index(request):
                 macdS = stockForm.cleaned_data['macdS']
                 macdSm = stockForm.cleaned_data['macdSm']
 
+                # Calculating the start date according to client requirements
                 endDate = date.today()
                 startDate = endDate + relativedelta(months=-numMonths)
-                startDateInternal = startDate + relativedelta(months=-6)
                 startDateDatetime = datetime.combine(startDate, datetime.min.time())
 
-                selectedSignals = []
                 signalResults = []
+
+                # setting height and width for the graph
                 height = 575
                 width = 840
 
+                # getting stocks data from S3
                 existingStocks = read_csv_from_S3(bucket, "Stocks")
                 tickerList = set(existingStocks.columns.get_level_values(0).tolist())
                 tickerInfo = get_current_tickers_info(bucket)
 
-
                 if ticker not in tickerList:
+                    # download data from Yahoo Finance if not available from S3
+                    # making sure it covers the same range of dates
                     firstDate = existingStocks.index.min().date() + relativedelta(days=1)
                     lastDate = existingStocks.index.max().date() + relativedelta(days=1)
-
                     stock = yf.download(ticker, start=firstDate, end=lastDate)
-                    # check if teh above returns a df one day short
-                    print(stock.tail())
+
                     if stock.empty:
                         message = f"Details for ticker {ticker} cannot be found"
                         context = {
@@ -104,58 +92,72 @@ def index(request):
                         return render(request, "stock_screener/index.html", context)
                     else:
                         print("Data downloaded in full")
+
+                        # get full company name for the ticker and save info on S3
                         tickerName = get_company_name_from_yf(ticker)
                         tickerInfo = prepare_ticker_info_update(tickerInfo, ticker, tickerName)
                         upload_csv_to_S3(bucket, tickerInfo, "TickersInfo")
+
+                        # prepare stock data for concatenation with the table on S3
                         updatedStock = stock_tidy_up(stock, ticker)
+
+                        # update stock data table and upload back on S3
                         updatedStocks = pd.concat([existingStocks, updatedStock], axis=1)
                         upload_csv_to_S3(bucket, updatedStocks, "Stocks")
-                        # stock = updatedStocks[ticker]
-                        tickerList = list(tickerInfo.index)
+
+                        tickerList = set(updatedStocks.columns.get_level_values(0).tolist())
 
                 else:
                     print("reading data and preparing graph")
                     stock = existingStocks[ticker].copy()
 
+                # getting full company name for the selected ticker
                 tickerName = tickerInfo.loc[ticker]["Name"]
+
+                # removing NaN values from the stock data
                 stock.dropna(how="all", inplace=True)
+
                 signals = [ma, maS, maL, maWS, maWL, psar, psarAF, psarMA, adx, adxW, adxL, srsi, srsiW, srsiSm1,
                            srsiSm2, srsiOB, srsiOS, macd, macdS, macdF, macdSm]
 
                 # if no signals are selected:
                 if not (ma or psar or adx or srsi or macd):
+                    signalSelected = False
+                    selectedSignals = []
                     stock = stock.reset_index()
+
+                    # getting info for the result table
                     rec = "No signals selected"
                     daysSinceChange = "n/a"
-                    signalSelected = False
 
+
+                # if any of the signals are selected:
                 else:
                     signalSelected = True
+
+                    # adding columns with calculations for the selected signals
                     stock, selectedSignals = make_calculations(stock, signals)
-                    rec = stock.loc[stock.index[-1], "Final Rec"]  # .lower()
+
+                    # getting info for the result table
+                    rec = stock.loc[stock.index[-1], "Final Rec"]
                     daysSinceChange = stock.loc[stock.index[-1], "Days_Since_Change"]
 
-                for column in stock.columns:
-                    if column.startswith("SMA"):
-                        smaAdded = True
-                        smaCol = column
-                    else:
-                        smaAdded = False
-
-                if not smaAdded:
-                    stock["Table SMA"] = ta.trend.sma_indicator(stock["Close"], window=15)
-                    smaCol = "Table SMA"
-
-                latestDate = stock["Date"].max()
-                sma1 = get_previous_sma(stock, smaCol, latestDate, 7)
-                sma2 = get_previous_sma(stock, smaCol, latestDate, 30)
-                sma3 = get_previous_sma(stock, smaCol, latestDate, 90)
-
+                # getting last closing price for the ticker + price change information to display in the results window
                 closingPrice, priceChange = get_price_change(stock)
 
-                change1 = calculate_price_dif(closingPrice, sma1)[1] + "%"
-                change2 = calculate_price_dif(closingPrice, sma2)[1] + "%"
-                change3 = calculate_price_dif(closingPrice, sma3)[1] + "%"
+                # Check if an SMA column has already been added, and add one if it has not been
+                smaCol = check_for_sma_column(stock)
+                if not smaCol:
+                    stock, smaCol = add_sma_col(stock)
+
+                latestDate = stock["Date"].max()
+                smaPeriods = [7, 30, 90]
+                smaChanges = []
+
+                # getting the SMA value changes for the ticker going back the number of days indicated in the smaPeriods list
+                for noDays in smaPeriods:
+                    smaValue = get_previous_sma(stock, smaCol, latestDate, noDays)
+                    smaChanges.append(calculate_price_dif(closingPrice, smaValue)[1] + "%")
 
                 stock = adjust_start(stock, startDateDatetime)
                 graph = make_graph(stock, ticker, selectedSignals, height, width)
@@ -163,7 +165,8 @@ def index(request):
                 if signalSelected:
 
                     backtestResult, backtestData = backtest_signal(stock)
-                    htmlBacktestTable = backtestData.to_html(col_space=30, bold_rows=True, classes="table", justify="left")
+                    htmlBacktestTable = backtestData.to_html(col_space=30, bold_rows=True, classes="table",
+                                                             justify="left")
 
                 else:
                     backtestResult, htmlBacktestTable = None, None
@@ -172,11 +175,7 @@ def index(request):
                 for signal in selectedSignals:
                     signalResults.append(format_float(stock.loc[stock.index.max()][signal]))
 
-                data = [rec,
-                        daysSinceChange,
-                        change1,
-                        change2,
-                        change3] + signalResults
+                data = [rec, daysSinceChange] + smaChanges + signalResults
 
                 resultTable = pd.DataFrame([data],
                                            columns=['Analysis Outcome',
@@ -188,7 +187,6 @@ def index(request):
                 resultTable = resultTable.transpose()
                 # resultTable.rename_axis(None, inplace=True)
                 htmlResultTable = resultTable.to_html(col_space=30, bold_rows=True, classes="table", justify="left")
-
 
                 watchlisted = False
                 tickerID = None
@@ -520,27 +518,22 @@ def watchlist(request):
                     watchlist_item["rec"] = "No signals selected"
                     watchlist_item["daysSinceChange"] = "n/a"
 
-                for column in data.columns:
-                    if column.startswith("SMA"):
-                        smaAdded = True
-                        smaCol = column
-                    else:
-                        smaAdded = False
-
-                if not smaAdded:
-                    data["Table SMA"] = ta.trend.sma_indicator(data["Close"], window=15)
-                    smaCol = "Table SMA"
-
-                latestDate = data["Date"].max()
-                sma1 = get_previous_sma(data, smaCol, latestDate, 7)
-                sma2 = get_previous_sma(data, smaCol, latestDate, 30)
-                sma3 = get_previous_sma(data, smaCol, latestDate, 90)
-
                 closingPrice, priceChange = get_price_change(data)
 
-                change1 = calculate_price_dif(closingPrice, sma1)[1] + "%"
-                change2 = calculate_price_dif(closingPrice, sma2)[1] + "%"
-                change3 = calculate_price_dif(closingPrice, sma3)[1] + "%"
+                # Check if an SMA column has already been added, and add one if it has not been
+                smaCol = check_for_sma_column(data)
+                if not smaCol:
+                    data, smaCol = add_sma_col(data)
+
+                latestDate = data["Date"].max()
+                smaPeriods = [7, 30, 90]
+                smaChanges = []
+
+                # getting the SMA value changes for the ticker
+                # going back the number of days indicated in the smaPeriods list
+                for noDays in smaPeriods:
+                    smaValue = get_previous_sma(data, smaCol, latestDate, noDays)
+                    smaChanges.append(calculate_price_dif(closingPrice, smaValue)[1] + "%")
 
                 closingPrice = format_float(closingPrice)
                 data = adjust_start(data, startDateDatetime)
@@ -556,10 +549,7 @@ def watchlist(request):
                     [ticker,
                      watchlist_item["rec"],
                      watchlist_item["daysSinceChange"],
-                     closingPrice,
-                     change1,
-                     change2,
-                     change3] \
+                     closingPrice] + smaChanges \
                     + signalResults + [f"<button class = 'graph-button' data-ticker={ticker}>See graph</button>"]
                 # '''<a href="https://www.google.co.uk/" target="blank"> Graph </a>''']
 
