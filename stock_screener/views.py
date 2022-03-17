@@ -159,24 +159,25 @@ def index(request):
                     smaValue = get_previous_sma(stock, smaCol, latestDate, noDays)
                     smaChanges.append(calculate_price_dif(closingPrice, smaValue)[1] + "%")
 
+                # adjusting the start date according to client requirements and preparing the graph
                 stock = adjust_start(stock, startDateDatetime)
                 graph = make_graph(stock, ticker, selectedSignals, height, width)
 
                 if signalSelected:
-
+                    # preparing backtesting information to be shown on search page
                     backtestResult, backtestData = backtest_signal(stock)
+                    backtestData.rename_axis(None, inplace=True)
+                    backtestData.columns = ["Closing Price", "Recommendation", "Profit/Loss"]
+                    backtestData["Profit/Loss"] = backtestData["Profit/Loss"].apply(lambda x: format_float(x))
                     htmlBacktestTable = backtestData.to_html(col_space=30, bold_rows=True, classes="table",
                                                              justify="left")
-
                 else:
                     backtestResult, htmlBacktestTable = None, None
 
-                print(selectedSignals)
+                # Preparing the results table to be shown on search page
                 for signal in selectedSignals:
                     signalResults.append(format_float(stock.loc[stock.index.max()][signal]))
-
                 data = [rec, daysSinceChange] + smaChanges + signalResults
-
                 resultTable = pd.DataFrame([data],
                                            columns=['Analysis Outcome',
                                                     'Days Since Trend Change',
@@ -185,7 +186,6 @@ def index(request):
                                                     '3 Months Change'] + selectedSignals)
                 resultTable.set_index('Analysis Outcome', inplace=True)
                 resultTable = resultTable.transpose()
-                # resultTable.rename_axis(None, inplace=True)
                 htmlResultTable = resultTable.to_html(col_space=30, bold_rows=True, classes="table", justify="left")
 
                 watchlisted = False
@@ -195,16 +195,19 @@ def index(request):
                 newSignal = None
 
                 if request.user.is_authenticated:
+                    # checking if the ticker user is searching for is in their watchlist
                     searchObj = SavedSearch.objects.filter(user=request.user, ticker=ticker)
                     if len(searchObj):
                         watchlisted = True
                         tickerID = searchObj[0].id
 
-                    constructorObj = SignalConstructor.objects.filter \
-                        (user=request.user)
+                    # checking if the user has previously saved any signal for their watchlist
+                    constructorObj = SignalConstructor.objects.filter(user=request.user)
                     if len(constructorObj):
                         savedConstructor = constructorObj[0]
 
+                        # checking if the signal user has previously saved
+                        # matches the signal being used for the current search
                         if (savedConstructor.ma == ma
                                 and savedConstructor.maS == maS
                                 and savedConstructor.maL == maL
@@ -233,7 +236,6 @@ def index(request):
                                  "srsi": srsi, "srsiW": srsiW, "srsiSm1": srsiSm1, "srsiSm2": srsiSm2,
                                  "srsiOB": srsiOB, "srsiOS": srsiOS, "macd": macd, "macdF": macdF,
                                  "macdS": macdS, "macdSm": macdSm}
-                print(newSignal)
 
                 print(stock.tail(15))
                 context = {
