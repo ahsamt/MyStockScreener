@@ -61,6 +61,7 @@ def prepare_ticker_info_update(current_tickers_info, ticker, ticker_name):
     dt = {'Ticker': [ticker], 'Name': [ticker_name]}
     dfUpdate = pd.DataFrame(data=dt).set_index('Ticker')
     df = current_tickers_info.append(dfUpdate, ignore_index=False)
+    df.drop_duplicates(subset=None, keep='first', inplace=True, ignore_index=False)
 
     return df
 

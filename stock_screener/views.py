@@ -84,11 +84,14 @@ def index(request):
                 width = 840
 
                 existingStocks = read_csv_from_S3(bucket, "Stocks")
+                tickerList = set(existingStocks.columns.get_level_values(0).tolist())
                 tickerInfo = get_current_tickers_info(bucket)
-                tickerList = list(tickerInfo.index)
+
 
                 if ticker not in tickerList:
-                    stock = yf.download(ticker, start=startDateInternal, end=endDate)
+                    latestDate = existingStocks.index.max().date()
+                    stock = yf.download(ticker, start=startDateInternal, end=latestDate)
+                    # check if teh above returns a df one day short
                     print(stock.tail())
                     if stock.empty:
                         message = f"Details for ticker {ticker} cannot be found"
