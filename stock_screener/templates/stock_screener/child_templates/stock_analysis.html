@@ -56,13 +56,15 @@
 
         {% if user.is_authenticated %}
 
-            {% if constructorAdded %}
+            {% if signalSelected %}
 
-                <div id = "existing_signal_message">You have previously saved this signal for your watchlisted items</div>
+                {% if constructorAdded %}
 
-            {% else %}
+                    <div id = "existing_signal_message">You have previously saved this signal for your watchlisted items</div>
 
-                <a  href="#" class="add-signal"
+                {% else %}
+
+                    <a  href="#" class="add-signal"
                     data-ma="{{ newSignal.ma }}"
                     data-maS="{{ newSignal.maS }}"
                     data-maL="{{ newSignal.maL }}"
@@ -94,11 +96,13 @@
                     {%  endif %}
                 </a>
 
-                <div id ="signal_saved_message">This signal has been saved for your watchlisted items</div>
-            {%  endif %}
+                    <div id ="signal_saved_message">This signal has been saved for your watchlisted items</div>
+                {%  endif %}
+            {% endif %}
         {% endif %}
     </div>
 
+    {% if signalSelected %}
     <div class="stock_info card mb-4">
         <div class="card-body">
             <h4 class="card-title" id="ticker_name">Backtesting this signal</h4>
@@ -109,7 +113,8 @@
 
             <div id="backtesting-table">{{ htmlBacktestTable | safe }}</div>
         </div>
-
     </div>
+
+    {% endif %}
 
 </div>

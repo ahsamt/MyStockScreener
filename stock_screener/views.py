@@ -89,8 +89,10 @@ def index(request):
 
 
                 if ticker not in tickerList:
-                    latestDate = existingStocks.index.max().date()
-                    stock = yf.download(ticker, start=startDateInternal, end=latestDate)
+                    firstDate = existingStocks.index.min().date() + relativedelta(days=1)
+                    lastDate = existingStocks.index.max().date() + relativedelta(days=1)
+
+                    stock = yf.download(ticker, start=firstDate, end=lastDate)
                     # check if teh above returns a df one day short
                     print(stock.tail())
                     if stock.empty:
@@ -125,8 +127,10 @@ def index(request):
                     stock = stock.reset_index()
                     rec = "No signals selected"
                     daysSinceChange = "n/a"
+                    signalSelected = False
 
                 else:
+                    signalSelected = True
                     stock, selectedSignals = make_calculations(stock, signals)
                     rec = stock.loc[stock.index[-1], "Final Rec"]  # .lower()
                     daysSinceChange = stock.loc[stock.index[-1], "Days_Since_Change"]
@@ -155,8 +159,15 @@ def index(request):
 
                 stock = adjust_start(stock, startDateDatetime)
                 graph = make_graph(stock, ticker, selectedSignals, height, width)
-                backtestResult, backtestData = backtest_signal(stock)
-                htmlBacktestTable = backtestData.to_html(col_space=30, bold_rows=True, classes="table", justify="left")
+
+                if signalSelected:
+
+                    backtestResult, backtestData = backtest_signal(stock)
+                    htmlBacktestTable = backtestData.to_html(col_space=30, bold_rows=True, classes="table", justify="left")
+
+                else:
+                    backtestResult, htmlBacktestTable = None, None
+
                 print(selectedSignals)
                 for signal in selectedSignals:
                     signalResults.append(format_float(stock.loc[stock.index.max()][signal]))
@@ -243,6 +254,7 @@ def index(request):
                     "newSignal": newSignal,
                     "backtestResult": backtestResult,
                     "htmlBacktestTable": htmlBacktestTable,
+                    "signalSelected": signalSelected,
                 }
 
                 return render(request, "stock_screener/index.html", context)
