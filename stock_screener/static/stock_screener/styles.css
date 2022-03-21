@@ -151,7 +151,7 @@ textarea {
   align-items: center;
 }
 
-.signal {
+.signal, .backtest-params {
   font-weight: bolder;
   box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;
   padding: 8px 30px;
@@ -163,14 +163,12 @@ textarea {
   color: var(--red-hover-color);
   font-weight: bolder;
 }
-.signals {
+.signals, .backtest  {
   padding:0 80px 0 80px;
   display: block;
   margin: auto;
   text-align: start;
   font-size: 15px;
-
-
 }
 
 .stock_link {

@@ -22,7 +22,7 @@
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav justify-content-end w-100">
         <li class="nav-item">
-          <a class="nav-link active" href="{% url 'index' %}">Search</a>
+          <a class="nav-link" href="{% url 'index' %}">Search</a>
         </li>
 
         {%  if user.is_authenticated %}
@@ -32,8 +32,9 @@
         </li>
 
         <li class="nav-item">
-          <a class="nav-link" href="{% url 'backtest' %}">BackTest</a>
+          <a class="nav-link active" href="{% url 'backtest' %}">BackTest</a>
         </li>
+
 
         <li class="nav-item">
           <a class="nav-link" href="{% url 'logout' %}">Log Out</a>
@@ -53,22 +54,60 @@
 </nav>
 
 <div class="container">
-  {% if not ticker %}
+  {% if not backtestResult %}
 
   <div class="welcome">
-    <h1>Welcome to StockScreener!</h1>
-    <h4>Please enter a ticker below and select the relevant signals</h4>
+    <h1>Back Test</h1>
+    <h4>Please select the relevant signals and parameters below</h4>
 
 
   </div>
-    <div class="search-form mt-2 mb-1">
+    <div class="stock_search mt-2 mb-1">
         <form action="" method="post">
         {% csrf_token %}
-            <div class="centre mb-3">
-                {{ stockForm.ticker }}
-            </div>
+
 
             {% include "stock_screener/child_templates/signal_builder.html" %}
+
+            <div class="backtest">
+
+                    <div class="backtest-params row mt-3">
+
+                            <div class="col-6">
+                                Days to Complete Buy Order  {{ stockForm.days_to_buy }}
+                            </div>
+
+                            <div class="col-6">
+                                Days to Complete Sell Order  {{ stockForm.days_to_sell }}
+                            </div>
+
+
+                    </div>
+
+                    <div class="backtest-params row mt-3">
+
+                            <div class="col-6">
+                                Buy Price Adjustment  {{ stockForm.buy_price_adjustment }}
+                            </div>
+
+                            <div class="col-6">
+                                Sell Price Adjustment  {{ stockForm.sell_price_adjustment }}
+                            </div>
+
+
+                    </div>
+
+
+
+                </div>
+
+
+
+
+
+
+
+
 
             <div class = "mt-3">
                 <button type="submit" id="searchButton" >Get Results</button>
@@ -87,7 +126,6 @@
   <div class="row mt-5">
       <div class="col">
 
-          {% include "stock_screener/child_templates/stock_analysis.html" with ticker=ticker priceChange=priceChange closingPrice=closingPrice recommendation=recommendation htmlResultTable=htmlResultTable savedConstructor=savedConstructor constructorAdded=constructorAdded newSignal=newSignal %}
 
       </div>
 
@@ -95,7 +133,7 @@
 
       <div class="col">
         <div class="col d-flex align-items-center justify-content-center">
-            {{ graph | safe }}
+
         </div>
       </div>
   </div>

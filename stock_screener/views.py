@@ -5,7 +5,7 @@ from django.urls import reverse
 
 from .models import User, SavedSearch, SignalConstructor
 from django.db import IntegrityError
-from .forms import StockForm
+from .forms import StockForm, BacktestForm
 from .utils import read_csv_from_S3, adjust_start, make_graph, get_price_change, get_current_tickers_info, \
     upload_csv_to_S3, stock_tidy_up, prepare_ticker_info_update, get_company_name_from_yf, get_previous_sma, \
     calculate_price_dif, format_float, backtest_signal, check_for_sma_column, add_sma_col
@@ -585,3 +585,56 @@ def watchlist(request):
 
         return render(request, "stock_screener/watchlist.html",
                       {'watched_tickers': watched_tickers, "htmlResultTable": htmlResultTable})
+
+
+def backtest(request):
+    if request.method == "GET":
+        watchedTickersObjs = SavedSearch.objects.filter(user=request.user)
+        watchedTickersObjs = sorted(watchedTickersObjs, key=lambda p: p.ticker)
+        watchedTickersNames = [t.ticker for t in watchedTickersObjs]
+
+
+        return render(request, "stock_screener/backtest.html", {"stockForm": BacktestForm(), "watchedTickersNames": watchedTickersNames })
+    if request.method == "POST":
+        if 'tickers' in request.POST:
+            backtestForm = BacktestForm(request.POST)
+
+            # Get all the form data
+            if backtestForm.is_valid():
+                ticker = backtestForm.cleaned_data['ticker'].upper()
+                ma = backtestForm.cleaned_data['ma']
+                maS = backtestForm.cleaned_data['maS']
+                maL = backtestForm.cleaned_data['maL']
+                maWS = backtestForm.cleaned_data['maWS']
+                maWL = backtestForm.cleaned_data['maWL']
+
+                psar = backtestForm.cleaned_data['psar']
+                psarAF = backtestForm.cleaned_data['psarAF']
+                psarMA = backtestForm.cleaned_data['psarMA']
+                adx = backtestForm.cleaned_data['adx']
+                adxW = backtestForm.cleaned_data['adxW']
+                adxL = backtestForm.cleaned_data['adxL']
+
+                srsi = backtestForm.cleaned_data['srsi']
+                srsiW = backtestForm.cleaned_data['srsiW']
+                srsiSm1 = backtestForm.cleaned_data['srsiSm1']
+                srsiSm2 = backtestForm.cleaned_data['srsiSm2']
+                srsiOB = backtestForm.cleaned_data['srsiOB']
+                srsiOS = backtestForm.cleaned_data['srsiOS']
+
+                macd = backtestForm.cleaned_data['macd']
+                macdF = backtestForm.cleaned_data['macdF']
+                macdS = backtestForm.cleaned_data['macdS']
+                macdSm = backtestForm.cleaned_data['macdSm']
+
+                # Calculating the start date according to client requirements
+                endDate = date.today()
+                startDate = endDate + relativedelta(months=-numMonths)
+                startDateDatetime = datetime.combine(startDate, datetime.min.time())
+
+                signalResults = []
+
+                # getting stocks data from S3
+                existingStocks = read_csv_from_S3(bucket, "Stocks")
+                tickerList = set(existingStocks.columns.get_level_values(0).tolist())
+                tickerInfo = get_current_tickers_info(bucket)
