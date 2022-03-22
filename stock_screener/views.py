@@ -587,15 +587,17 @@ def watchlist(request):
                       {'watched_tickers': watched_tickers, "htmlResultTable": htmlResultTable})
 
 
-def backtest(request):
+def backtester(request):
     if request.method == "GET":
-        watchedTickersObjs = SavedSearch.objects.filter(user=request.user)
-        watchedTickersObjs = sorted(watchedTickersObjs, key=lambda p: p.ticker)
-        watchedTickersNames = [t.ticker for t in watchedTickersObjs]
+        user = request.user
+        # watchedTickersObjs = SavedSearch.objects.filter(user=request.user)
+        # watchedTickersObjs = sorted(watchedTickersObjs, key=lambda p: p.ticker)
+        # watchedTickersNames = [t.ticker for t in watchedTickersObjs]
 
+        return render(request, "stock_screener/backtester.html", {"stockForm": BacktestForm(user)})
 
-        return render(request, "stock_screener/backtest.html", {"stockForm": BacktestForm(), "watchedTickersNames": watchedTickersNames })
     if request.method == "POST":
+
         if 'tickers' in request.POST:
             backtestForm = BacktestForm(request.POST)
 

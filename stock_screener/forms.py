@@ -1,5 +1,7 @@
 from django import forms
 
+from stock_screener.models import SavedSearch
+
 ma1_choices = [('SMA', 'Simple Moving Average'), ('EMA', 'Exponential Moving Average')]
 ma2_choices = [('SMA', 'Simple Moving Average'), ('EMA', 'Exponential Moving Average')]
 
@@ -99,4 +101,13 @@ class BacktestForm(forms.Form):
     buy_price_adjustment = forms.IntegerField(label='Days to Complete a Sell Order', max_value=10, initial="0",
                                               widget=forms.NumberInput(attrs={'style': 'width:9ch'}))
     sell_price_adjustment = forms.IntegerField(label='Days to Complete a Sell Order', max_value=10, initial="0",
-                                              widget=forms.NumberInput(attrs={'style': 'width:9ch'}))
+                                               widget=forms.NumberInput(attrs={'style': 'width:9ch'}))
+
+    # watchedTickersNames = {}
+    # tickers = forms.MultipleChoiceField(choices=watchedTickersNames, widget=forms.CheckboxSelectMultiple)
+
+    def __init__(self, user,  *args, **kwargs):
+        super(BacktestForm, self).__init__(*args, *kwargs)
+        self.fields['tickers'] = forms.MultipleChoiceField(choices=([("ALL", "All watchlisted tickers")] + sorted([(o.ticker, o.ticker)
+                                                                    for o in SavedSearch.objects.filter(user=user)], key = lambda elt: elt[1])),
+                                                           widget=forms.CheckboxSelectMultiple)

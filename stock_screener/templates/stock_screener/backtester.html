@@ -32,7 +32,7 @@
         </li>
 
         <li class="nav-item">
-          <a class="nav-link active" href="{% url 'backtest' %}">BackTest</a>
+          <a class="nav-link active" href="{% url 'backtester' %}">Back Tester</a>
         </li>
 
 
@@ -57,7 +57,7 @@
   {% if not backtestResult %}
 
   <div class="welcome">
-    <h1>Back Test</h1>
+    <h1>Back Tester</h1>
     <h4>Please select the relevant signals and parameters below</h4>
 
 
@@ -69,6 +69,7 @@
 
             {% include "stock_screener/child_templates/signal_builder.html" %}
 
+            <h3 class="centre mb-3 mt-3">Additional parameters</h3>
             <div class="backtest">
 
                     <div class="backtest-params row mt-3">
@@ -93,6 +94,12 @@
                             <div class="col-6">
                                 Sell Price Adjustment  {{ stockForm.sell_price_adjustment }}
                             </div>
+                    </div>
+                    <h3 class="centre mt-3">Tickers to include in back test</h3>
+                    <div class="backtest-params row mt-3">
+                        {%  for t in stockForm.tickers %}
+                            <div class="col-lg-3 col-sm-6 col-md-4">{{ t }}</div>
+                        {% endfor %}
 
 
                     </div>
