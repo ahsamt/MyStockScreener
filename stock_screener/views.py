@@ -166,11 +166,12 @@ def index(request):
                 if signalSelected:
                     # preparing backtesting information to be shown on search page
                     backtestResult, backtestData = backtest_signal(stock)
-                    backtestData.rename_axis(None, inplace=True)
-                    backtestData.columns = ["Closing Price", "Recommendation", "Profit/Loss"]
+                    backtestData.reset_index(inplace=True)
+                    #backtestData.rename_axis(None, inplace=True)
+                    backtestData.columns = ["Date", "Closing Price", "Recommendation", "Profit/Loss"]
                     backtestData["Profit/Loss"] = backtestData["Profit/Loss"].apply(lambda x: format_float(x))
                     htmlBacktestTable = backtestData.to_html(col_space=30, bold_rows=True, classes="table",
-                                                             justify="left")
+                                                             justify="left", index=False)
                 else:
                     backtestResult, htmlBacktestTable = None, None
 
@@ -597,13 +598,14 @@ def backtester(request):
         return render(request, "stock_screener/backtester.html", {"stockForm": BacktestForm(user)})
 
     if request.method == "POST":
+        print(request.POST)
 
         if 'tickers' in request.POST:
-            backtestForm = BacktestForm(request.POST)
+            backtestForm = BacktestForm(request.user, request.POST)
 
             # Get all the form data
             if backtestForm.is_valid():
-                ticker = backtestForm.cleaned_data['ticker'].upper()
+
                 ma = backtestForm.cleaned_data['ma']
                 maS = backtestForm.cleaned_data['maS']
                 maL = backtestForm.cleaned_data['maL']
@@ -629,6 +631,16 @@ def backtester(request):
                 macdS = backtestForm.cleaned_data['macdS']
                 macdSm = backtestForm.cleaned_data['macdSm']
 
+                days_to_buy = backtestForm.cleaned_data["days_to_buy"]
+                days_to_sell = backtestForm.cleaned_data["days_to_sell"]
+                buy_price_adjustment = backtestForm.cleaned_data["buy_price_adjustment"]
+                sell_price_adjustment = backtestForm.cleaned_data["sell_price_adjustment"]
+
+                tickers = backtestForm.cleaned_data['tickers']
+                print("tickers are" + str(tickers))
+                if "ALL" in tickers:
+                    tickers = sorted([o.ticker for o in SavedSearch.objects.filter(user=request.user)])
+
                 # Calculating the start date according to client requirements
                 endDate = date.today()
                 startDate = endDate + relativedelta(months=-numMonths)
@@ -640,3 +652,53 @@ def backtester(request):
                 existingStocks = read_csv_from_S3(bucket, "Stocks")
                 tickerList = set(existingStocks.columns.get_level_values(0).tolist())
                 tickerInfo = get_current_tickers_info(bucket)
+
+                signals = [ma, maS, maL, maWS, maWL, psar, psarAF, psarMA, adx, adxW, adxL, srsi, srsiW, srsiSm1,
+                           srsiSm2, srsiOB, srsiOS, macd, macdS, macdF, macdSm]
+                if not (ma or psar or adx or srsi or macd):
+                    context = {
+                        "message": "Please select the signals to back test",
+                        "stockForm": BacktestForm(request.user)
+                    }
+                    return render(request, "stock_screener/backtester.html", context)
+
+                allResults = {}
+
+                for ticker in tickers:
+                    stock = existingStocks[ticker].copy()
+
+                    # getting full company name for the selected ticker
+                    tickerName = tickerInfo.loc[ticker]["Name"]
+
+                    # removing NaN values from the stock data
+                    stock.dropna(how="all", inplace=True)
+
+                    # adding columns with calculations for the selected signals
+                    stock, selectedSignals = make_calculations(stock, signals)
+
+                    stock = adjust_start(stock, startDateDatetime)
+
+                    # preparing backtesting information for the ticker
+                    backtestResult, backtestData = backtest_signal(stock, format_outcome=False)
+                    backtestData.rename_axis(None, inplace=True)
+                    backtestData.columns = ["Closing Price", "Recommendation", "Profit/Loss"]
+                    backtestData["Profit/Loss"] = backtestData["Profit/Loss"].apply(lambda x: format_float(x))
+                    allResults[ticker] = backtestResult
+
+                print(allResults)
+                backtesterTable = pd.DataFrame.from_dict(allResults, orient="index")
+                backtesterTable.reset_index(inplace=True)
+                backtesterTable.columns = ["Ticker", "Profit/Loss"]
+                #backtesterTable.set_index("Ticker", inplace=True)
+                backtesterTable["Profit/Loss"] = backtesterTable["Profit/Loss"].apply(lambda x: format_float(x))
+                htmlJointTable = backtesterTable.to_html(col_space=30, bold_rows=True, classes="table", justify="left",
+                                                         escape=False, index=False)
+
+                overallResult = format_float(sum(allResults.values()) / len(allResults)) + "%"
+
+                context = {
+                    "overallResult": overallResult,
+                    "htmlJointTable": htmlJointTable
+                }
+
+                return render(request, "stock_screener/backtester.html", context)

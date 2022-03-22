@@ -283,7 +283,7 @@ def get_previous_sma(df, sma_col, latest_date, no_of_days):
     return prevSma
 
 
-def backtest_signal(df):
+def backtest_signal(df, format_outcome=True):
     flags = ['Buy', 'Sell']
     columnsBacktest = ["Date", "Close", "Final Rec"]
     backTest = df.loc[(df['Days_Since_Change'] == 0) & df['Final Rec'].isin(flags)].copy(deep=True)
@@ -301,7 +301,9 @@ def backtest_signal(df):
             backTestClean.loc[i, 'Profit/Loss'] = (backTestClean.loc[i, 'Close'] - backTestClean.loc[i - 1, "Close"]) / \
                                                   backTestClean.loc[i - 1, "Close"] * 100
     backTestClean.set_index("Date", inplace=True)
-    outcome = str(round(sum(backTestClean["Profit/Loss"]), 2)) + "%"
+    outcome = sum(backTestClean["Profit/Loss"])
+    if format_outcome:
+        outcome = str(round(outcome, 2)) + "%"
 
     return outcome, backTestClean
 

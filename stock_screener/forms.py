@@ -103,11 +103,9 @@ class BacktestForm(forms.Form):
     sell_price_adjustment = forms.IntegerField(label='Days to Complete a Sell Order', max_value=10, initial="0",
                                                widget=forms.NumberInput(attrs={'style': 'width:9ch'}))
 
-    # watchedTickersNames = {}
-    # tickers = forms.MultipleChoiceField(choices=watchedTickersNames, widget=forms.CheckboxSelectMultiple)
-
-    def __init__(self, user,  *args, **kwargs):
+    def __init__(self, user, *args, **kwargs):
         super(BacktestForm, self).__init__(*args, *kwargs)
-        self.fields['tickers'] = forms.MultipleChoiceField(choices=([("ALL", "All watchlisted tickers")] + sorted([(o.ticker, o.ticker)
-                                                                    for o in SavedSearch.objects.filter(user=user)], key = lambda elt: elt[1])),
-                                                           widget=forms.CheckboxSelectMultiple)
+        self.fields['tickers'] = forms.MultipleChoiceField(
+            choices=([("ALL", "All watchlisted tickers")] + sorted([(o.ticker, o.ticker)
+                                                                    for o in SavedSearch.objects.filter(user=user)])),
+            widget=forms.CheckboxSelectMultiple)
