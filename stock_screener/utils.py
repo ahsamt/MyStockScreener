@@ -290,22 +290,25 @@ def backtest_signal(df, format_outcome=True):
     backTest.reset_index(drop=True, inplace=True)
     backTest = add_days_since_change(backTest, "Final Rec")
     backTestClean = backTest.loc[backTest["Change_Flag"].isin([True, "None"]), columnsBacktest]
-    backTestClean.reset_index(drop=True, inplace=True)
-    backTestClean["Profit/Loss"] = 0
-    start = 0
-    if backTestClean.loc[start, "Final Rec"] == "Sell":
-        start += 1
-    for i in range(start, len(backTestClean)):
-        rec = backTestClean.loc[i, "Final Rec"]
-        if (rec == "Sell"):
-            backTestClean.loc[i, 'Profit/Loss'] = (backTestClean.loc[i, 'Close'] - backTestClean.loc[i - 1, "Close"]) / \
-                                                  backTestClean.loc[i - 1, "Close"] * 100
-    backTestClean.set_index("Date", inplace=True)
-    outcome = sum(backTestClean["Profit/Loss"])
-    if format_outcome:
-        outcome = str(round(outcome, 2)) + "%"
+    if backTestClean.empty:
+        return None, None
+    else:
+        backTestClean.reset_index(drop=True, inplace=True)
+        backTestClean["Profit/Loss"] = 0
+        start = 0
+        if backTestClean.loc[start, "Final Rec"] == "Sell":
+            start += 1
+        for i in range(start, len(backTestClean)):
+            rec = backTestClean.loc[i, "Final Rec"]
+            if (rec == "Sell"):
+                backTestClean.loc[i, 'Profit/Loss'] = (backTestClean.loc[i, 'Close'] - backTestClean.loc[i - 1, "Close"]) / \
+                                                      backTestClean.loc[i - 1, "Close"] * 100
+        backTestClean.set_index("Date", inplace=True)
+        outcome = sum(backTestClean["Profit/Loss"])
+        if format_outcome:
+            outcome = str(round(outcome, 2)) + "%"
 
-    return outcome, backTestClean
+        return outcome, backTestClean
 
 
 def check_for_sma_column(df):

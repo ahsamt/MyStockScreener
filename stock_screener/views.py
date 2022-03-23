@@ -166,12 +166,17 @@ def index(request):
                 if signalSelected:
                     # preparing backtesting information to be shown on search page
                     backtestResult, backtestData = backtest_signal(stock)
-                    backtestData.reset_index(inplace=True)
-                    #backtestData.rename_axis(None, inplace=True)
-                    backtestData.columns = ["Date", "Closing Price", "Recommendation", "Profit/Loss"]
-                    backtestData["Profit/Loss"] = backtestData["Profit/Loss"].apply(lambda x: format_float(x))
-                    htmlBacktestTable = backtestData.to_html(col_space=30, bold_rows=True, classes="table",
-                                                             justify="left", index=False)
+
+                    if backtestData is not None:
+                        backtestData.reset_index(inplace=True)
+                        # backtestData.rename_axis(None, inplace=True)
+                        backtestData.columns = ["Date", "Closing Price", "Recommendation", "Profit/Loss"]
+                        backtestData["Profit/Loss"] = backtestData["Profit/Loss"].apply(lambda x: format_float(x))
+                        backtestData["Closing Price"] = backtestData["Closing Price"].apply(lambda x: format_float(x))
+                        htmlBacktestTable = backtestData.to_html(col_space=30, bold_rows=True, classes="table",
+                                                                 justify="left", index=False)
+                    else:
+                        htmlBacktestTable = None
                 else:
                     backtestResult, htmlBacktestTable = None, None
 
@@ -554,7 +559,7 @@ def watchlist(request):
                      watchlist_item["daysSinceChange"],
                      closingPrice] + smaChanges \
                     + signalResults + [f"<button class = 'graph-button' data-ticker={ticker}>See graph</button>"]
-                # '''<a href="https://www.google.co.uk/" target="blank"> Graph </a>''']
+                # ['''<a href="{% url 'graph' %}" target="blank"> Graph </a>''']
 
                 watchlist_item["resultTable"] = pd.DataFrame([tableEntries],
                                                              columns=['Ticker',
@@ -677,6 +682,7 @@ def backtester(request):
                     stock, selectedSignals = make_calculations(stock, signals)
 
                     stock = adjust_start(stock, startDateDatetime)
+                    print(stock.tail(5))
 
                     # preparing backtesting information for the ticker
                     backtestResult, backtestData = backtest_signal(stock, format_outcome=False)
@@ -689,9 +695,9 @@ def backtester(request):
                 backtesterTable = pd.DataFrame.from_dict(allResults, orient="index")
                 backtesterTable.reset_index(inplace=True)
                 backtesterTable.columns = ["Ticker", "Profit/Loss"]
-                #backtesterTable.set_index("Ticker", inplace=True)
+                # backtesterTable.set_index("Ticker", inplace=True)
                 backtesterTable["Profit/Loss"] = backtesterTable["Profit/Loss"].apply(lambda x: format_float(x))
-                htmlJointTable = backtesterTable.to_html(col_space=30, bold_rows=True, classes="table", justify="left",
+                htmlJointTable = backtesterTable.to_html(col_space=20, bold_rows=True, classes="table", justify="left",
                                                          escape=False, index=False)
 
                 overallResult = format_float(sum(allResults.values()) / len(allResults)) + "%"
@@ -702,3 +708,6 @@ def backtester(request):
                 }
 
                 return render(request, "stock_screener/backtester.html", context)
+
+# def graph(request):
+# return render(request, "stock_screener/graph.html")

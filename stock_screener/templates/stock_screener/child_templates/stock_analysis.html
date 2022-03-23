@@ -103,17 +103,29 @@
     </div>
 
     {% if signalSelected %}
-    <div class="stock_info card mb-4">
-        <div class="card-body">
-            <h4 class="card-title" id="ticker_name">Backtesting this signal</h4>
-            <h5 class="card-subtitle mb-2">
-                <span class="text-muted">Outcome for {{ ticker }}</span>
-                <span class="closing_price">{{ backtestResult }}</span>
-            </h5>
+        {% if backtestResult is not None %}
+        <div class="stock_info card mb-4">
+            <div class="card-body">
+                <h4 class="card-title" id="ticker_name">Backtesting this signal</h4>
+                <h5 class="card-subtitle mb-2">
+                    <span class="text-muted">Outcome for {{ ticker }}</span>
+                    <span class="closing_price">{{ backtestResult }}</span>
+                </h5>
 
-            <div id="backtesting-table">{{ htmlBacktestTable | safe }}</div>
+                <div id="backtesting-table">{{ htmlBacktestTable | safe }}</div>
+            </div>
         </div>
-    </div>
+        {% else %}
+            <div class="stock_info card mb-4">
+            <div class="card-body">
+                <h4 class="card-title" id="ticker_name">Please review the signal</h4>
+                <h5 class="card-subtitle mb-2">
+                    Could not locate buy or sell triggers for the period indicated
+                </h5>
+            </div>
+        </div>
+        {% endif %}
+
 
     {% endif %}
 
