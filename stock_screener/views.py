@@ -165,14 +165,14 @@ def index(request):
 
                 if signalSelected:
                     # preparing backtesting information to be shown on search page
-                    backtestResult, backtestData = backtest_signal(stock)
+                    backtestResult, backtestDataFull = backtest_signal(stock)
 
-                    if backtestData is not None:
+                    if backtestDataFull is not None:
+                        backtestData = backtestDataFull.loc[:, ["Close", "Final Rec", "Profit/Loss"]]
                         backtestData.reset_index(inplace=True)
                         # backtestData.rename_axis(None, inplace=True)
                         backtestData.columns = ["Date", "Closing Price", "Recommendation", "Profit/Loss"]
-                        backtestData["Profit/Loss"] = backtestData["Profit/Loss"].apply(lambda x: format_float(x))
-                        backtestData["Closing Price"] = backtestData["Closing Price"].apply(lambda x: format_float(x))
+
                         htmlBacktestTable = backtestData.to_html(col_space=30, bold_rows=True, classes="table",
                                                                  justify="left", index=False)
                     else:
@@ -685,18 +685,30 @@ def backtester(request):
                     print(stock.tail(5))
 
                     # preparing backtesting information for the ticker
-                    backtestResult, backtestData = backtest_signal(stock, format_outcome=False)
-                    backtestData.rename_axis(None, inplace=True)
-                    backtestData.columns = ["Closing Price", "Recommendation", "Profit/Loss"]
-                    backtestData["Profit/Loss"] = backtestData["Profit/Loss"].apply(lambda x: format_float(x))
-                    allResults[ticker] = backtestResult
+                    backtestResult, backtestDataFull = backtest_signal(stock,
+                                                                       format_outcome=False,
+                                                                       days_to_buy=days_to_buy,
+                                                                       days_to_sell=days_to_sell,
+                                                                       buy_price_adjustment=buy_price_adjustment,
+                                                                       sell_price_adjustment=sell_price_adjustment)
+                    if backtestDataFull is not None:
+                        backtestData = backtestDataFull.loc[:, ["Close", "Final Rec", "Price After Delay",
+                                                                "Adjusted Price After Delay", "Profit/Loss"]]
+                        backtestData.rename_axis(None, inplace=True)
+                        # backtestData["Price After Delay"] = backtestData["Price After Delay"].apply(lambda x: format_float(x))
+                        # backtestData["Adjusted Price After Delay"] = backtestData["Adjusted Price After Delay"].apply(lambda x: format_float(x))
+                        backtestData.columns = ["Closing Price", "Recommendation", "Price After Delay",
+                                                "Adjusted Price After Delay", "Profit/Loss"]
+
+                        allResults[ticker] = backtestResult
 
                 print(allResults)
                 backtesterTable = pd.DataFrame.from_dict(allResults, orient="index")
                 backtesterTable.reset_index(inplace=True)
                 backtesterTable.columns = ["Ticker", "Profit/Loss"]
                 # backtesterTable.set_index("Ticker", inplace=True)
-                backtesterTable["Profit/Loss"] = backtesterTable["Profit/Loss"].apply(lambda x: format_float(x))
+                backtesterTable["Profit/Loss"] = backtesterTable["Profit/Loss"].apply(
+                    lambda x: (format_float(x) + " %"))
                 htmlJointTable = backtesterTable.to_html(col_space=20, bold_rows=True, classes="table", justify="left",
                                                          escape=False, index=False)
 
