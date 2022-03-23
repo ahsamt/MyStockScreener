@@ -296,8 +296,8 @@ def backtest_signal(df, format_outcome=True, days_to_buy=0, days_to_sell=0, buy_
         return None, None
     else:
         backTestClean.reset_index(drop=True, inplace=True)
-        backTestClean["Price After Delay"] = None
-        backTestClean["Adjusted Price After Delay"] = None
+        backTestClean["Price After Delay"] = np.NaN
+        backTestClean["Adjusted Price After Delay"] = np.NaN
 
         backTestClean["Profit/Loss"] = 0
 
@@ -305,39 +305,51 @@ def backtest_signal(df, format_outcome=True, days_to_buy=0, days_to_sell=0, buy_
         if backTestClean.loc[start, "Final Rec"] == "Sell":
             start += 1
 
+        max_index = df.index.max()
+
         for i in range(start, len(backTestClean)):
 
             rec = backTestClean.loc[i, "Final Rec"]
+
             if rec == "Sell":
                 dfIndexAdjusted = backTestClean.loc[i, "Old_Index"] + days_to_sell
-                unadjustedPrice = df.loc[dfIndexAdjusted, "Close"]
-                backTestClean.loc[i, "Price After Delay"] = unadjustedPrice
-                backTestClean.loc[
-                    i, "Adjusted Price After Delay"] = unadjustedPrice - sell_price_adjustment * unadjustedPrice / 10000
+                if dfIndexAdjusted <= max_index:
+                    unadjustedPrice = df.loc[dfIndexAdjusted, "Close"]
+                    backTestClean.loc[i, "Price After Delay"] = unadjustedPrice
+                    backTestClean.loc[i, "Adjusted Price After Delay"] = \
+                        unadjustedPrice - sell_price_adjustment * unadjustedPrice / 10000
 
-                backTestClean.loc[i, 'Profit/Loss'] = (backTestClean.loc[i, 'Adjusted Price After Delay'] -
-                                                       backTestClean.loc[i - 1, "Adjusted Price After Delay"]) / \
-                                                      backTestClean.loc[i - 1, "Adjusted Price After Delay"] * 100
+                    backTestClean.loc[i, 'Profit/Loss'] = (backTestClean.loc[i, 'Adjusted Price After Delay'] -
+                                                           backTestClean.loc[i - 1, "Adjusted Price After Delay"]) / \
+                                                          backTestClean.loc[i - 1, "Adjusted Price After Delay"] * 100
+
+
 
             elif rec == "Buy":
                 dfIndexAdjusted = backTestClean.loc[i, "Old_Index"] + days_to_buy
-                unadjustedPrice = df.loc[dfIndexAdjusted, "Close"]
-                backTestClean.loc[i, "Price After Delay"] = unadjustedPrice
-                backTestClean.loc[
-                    i, "Adjusted Price After Delay"] = unadjustedPrice + buy_price_adjustment * unadjustedPrice / 10000
+                if dfIndexAdjusted <= max_index:
+                    unadjustedPrice = df.loc[dfIndexAdjusted, "Close"]
+                    backTestClean.loc[i, "Price After Delay"] = unadjustedPrice
+                    backTestClean.loc[i, "Adjusted Price After Delay"] \
+                        = unadjustedPrice + buy_price_adjustment * unadjustedPrice / 10000
 
         backTestClean.set_index("Date", inplace=True)
+
+        mask = (backTestClean["Adjusted Price After Delay"] != np.NaN)
+
+        backTestClean = backTestClean.loc[mask]
         outcome = sum(backTestClean["Profit/Loss"])
 
         if format_outcome:
             outcome = str(round(outcome, 2)) + "%"
 
         print(backTestClean.tail())
+
         backTestClean["Profit/Loss"] = backTestClean["Profit/Loss"].apply(lambda x: (format_float(x)) + " %")
         backTestClean["Close"] = backTestClean["Close"].apply(lambda x: format_float(x))
 
-        #for col_title in ["Close", "Price After Delay", "Adjusted Price After Delay"]:
-            #backTestClean[col_title] = backTestClean[col_title].apply(lambda x: format_float(x))
+        # for col_title in ["Close", "Price After Delay", "Adjusted Price After Delay"]:
+        # backTestClean[col_title] = backTestClean[col_title].apply(lambda x: format_float(x))
 
         return outcome, backTestClean
 
