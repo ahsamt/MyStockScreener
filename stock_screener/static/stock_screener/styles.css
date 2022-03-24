@@ -229,6 +229,25 @@ textarea {
   display: block;
 }
 
+#positive_outcome, #negative_outcome{
+
+  font-weight: bold;
+  padding-bottom: 30px;
+}
+#negative_outcome {
+    color: var(--red-font-color);
+}
+#positive_outcome {
+    color: var(--green-font-color);
+}
+
+
+
+#outcome_card {
+  width: 700px;
+  display: block;
+  margin: 0 auto;
+}
 #searchButton {
 
   display: block;

@@ -123,11 +123,27 @@
 
    {% else %}
 
-      <h3 class="centre mt-5">
-      The outcome for this testing is {{ overallResult }}
-      </h3>
 
-      {{ htmlJointTable | safe }}
+      {% if overallResult > 0 %}
+      <h2 class="centre mt-5" id="positive_outcome">
+          Using this signal would have earned you {{ overallResult }}%
+      </h2>
+          {% else %}
+
+      <h2 class="centre mt-5" id="negative_outcome">
+          Using this signal would have lost you {{ overallResult }}%
+      </h2>
+       {% endif %}
+
+
+       <div class="stock_info card mb-4" id="outcome_card">
+            <div class="card-body">
+
+                {{ htmlJointTable | safe }}
+            </div>
+        </div>
+
+
 
    {% endif %}
 </div >

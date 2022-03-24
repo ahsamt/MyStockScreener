@@ -721,7 +721,7 @@ def backtester(request):
                 htmlJointTable = backtesterTable.to_html(col_space=20, bold_rows=True, classes="table", justify="left",
                                                          escape=False, index=False)
 
-                overallResult = format_float(sum(allResults.values()) / len(allResults)) + "%"
+                overallResult = round(sum(allResults.values()) / len(allResults), 2)
 
                 context = {
                     "overallResult": overallResult,
