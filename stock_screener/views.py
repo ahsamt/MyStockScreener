@@ -677,6 +677,7 @@ def backtester(request):
                     return render(request, "stock_screener/backtester.html", context)
 
                 allResults = {}
+                allTables = {}
 
                 for ticker in tickers:
                     stock = existingStocks[ticker].copy()
@@ -709,6 +710,9 @@ def backtester(request):
                         backtestData.columns = ["Closing Price", "Recommendation", "Price After Delay",
                                                 "Adjusted Price After Delay", "Profit/Loss"]
 
+                        allTables[ticker] = backtestData.to_html(col_space=20, bold_rows=True, classes="table",
+                                                                 justify="left", index=False)
+
                         allResults[ticker] = backtestResult
 
                 print(allResults)
@@ -725,7 +729,8 @@ def backtester(request):
 
                 context = {
                     "overallResult": overallResult,
-                    "htmlJointTable": htmlJointTable
+                    "htmlJointTable": htmlJointTable,
+                    "allTables": allTables
                 }
 
                 return render(request, "stock_screener/backtester.html", context)
