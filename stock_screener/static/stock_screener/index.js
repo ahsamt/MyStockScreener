@@ -21,6 +21,32 @@ document.addEventListener("DOMContentLoaded", () => {
     graph_button.addEventListener("click", (event) => hide_graphs(event));
   });
 
+  document.querySelectorAll(".ind_outcome_button").forEach((outcome_button) => {
+    outcome_button.addEventListener("click", (event) => show_outcome_table(event));
+  });
+
+  document.querySelectorAll(".close_ind_outcome_button").forEach((close_ind_outcome_button)=> {
+    close_ind_outcome_button.addEventListener("click", (event) => hide_outcome_table(event));
+  });
+
+  function show_outcome_table(event) {
+    event.preventDefault();
+    let ticker = event.target.dataset.ticker;
+    let ind_outcome_table = document.getElementById(`${ticker}_card`);
+    let main_outcome_table = document.getElementById("main_outcome_section");
+    ind_outcome_table.style.display = "block";
+    main_outcome_table.style.display = "none";
+
+  }
+
+  function hide_outcome_table(event) {
+    event.preventDefault();
+    let main_outcome_table = document.getElementById("main_outcome_section");
+    document.querySelectorAll(".ind_result").forEach((table) => {table.style.display = "none"});
+    main_outcome_table.style.display = "block";
+  }
+
+
 
 
 

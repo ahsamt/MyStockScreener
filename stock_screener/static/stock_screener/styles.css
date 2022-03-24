@@ -107,6 +107,10 @@ textarea {
 #signal_saved_message {
   display: none;
 }
+
+.ind_result{
+  display: none;
+}
 .navbar {
   background-color: var(--blue-font-color);
 }

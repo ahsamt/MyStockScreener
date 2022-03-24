@@ -123,26 +123,26 @@
 
    {% else %}
 
+      <div id="main_outcome_section">
+        {% if overallResult > 0 %}
+        <h2 class="centre mt-5" id="positive_outcome">
+            Using this signal would have earned you {{ overallResult }}%
+        </h2>
+        {% else %}
 
-      {% if overallResult > 0 %}
-      <h2 class="centre mt-5" id="positive_outcome">
-          Using this signal would have earned you {{ overallResult }}%
-      </h2>
-          {% else %}
-
-      <h2 class="centre mt-5" id="negative_outcome">
-          Using this signal would have lost you {{ overallResult }}%
-      </h2>
-       {% endif %}
+        <h2 class="centre mt-5" id="negative_outcome">
+            Using this signal would have lost you {{ overallResult }}%
+        </h2>
+        {% endif %}
 
 
-       <div class="stock_info card mb-4" id="outcome_card">
+        <div class="stock_info card mb-4" id="outcome_card">
             <div class="card-body">
 
                 {{ htmlJointTable | safe }}
             </div>
         </div>
-
+      </div>
 
         {% for name, table in allTables.items %}
         <div class="ind_result card mb-4" id="{{ name }}_card">
@@ -151,6 +151,9 @@
 
                 {{ table | safe }}
             </div>
+        <button class="close_ind_outcome_button">
+            Back to results summary
+        </button>
         </div>
 
 

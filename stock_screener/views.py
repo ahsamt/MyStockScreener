@@ -646,8 +646,6 @@ def backtester(request):
                 if "ALL" in tickers:
                     tickers = sorted([o.ticker for o in SavedSearch.objects.filter(user=request.user)])
 
-
-
                 # Calculating the start date according to client requirements
                 endDate = date.today()
                 startDate = endDate + relativedelta(months=-numMonths)
@@ -679,7 +677,6 @@ def backtester(request):
                 allResults = {}
                 allTables = {}
 
-
                 for ticker in tickers:
                     stock = existingStocks[ticker].copy()
 
@@ -705,21 +702,22 @@ def backtester(request):
 
                     allResults[ticker] = backtestResult
 
-
                     if backtestDataFull is not None:
                         backtestData = backtestDataFull.loc[:, ["Close", "Final Rec", "Price After Delay",
                                                                 "Adjusted Price After Delay", "Profit/Loss"]]
-                        backtestData.rename_axis(None, inplace=True)
+                        backtestData.reset_index(inplace=True)
+                        # backtestData.rename_axis(None, inplace=True)
                         # backtestData["Price After Delay"] = backtestData["Price After Delay"].apply(lambda x: format_float(x))
                         # backtestData["Adjusted Price After Delay"] = backtestData["Adjusted Price After Delay"].apply(lambda x: format_float(x))
-                        backtestData.columns = ["Closing Price", "Recommendation", "Price After Delay",
+                        backtestData.columns = ["Date", "Closing Price", "Recommendation", "Price After Delay",
                                                 "Adjusted Price After Delay", "Profit/Loss"]
 
                         allTables[ticker] = backtestData.to_html(col_space=20, bold_rows=True, classes="table",
                                                                  justify="left", index=False)
 
                     else:
-                        allTables[ticker] = "The signal has not generated a sufficient number of buy/sell recommendations"
+                        allTables[
+                            ticker] = "The signal has not generated a sufficient number of buy/sell recommendations"
 
                 print(allResults)
                 backtesterTable = pd.DataFrame.from_dict(allResults, orient="index")
@@ -730,13 +728,14 @@ def backtester(request):
                     lambda x: (format_float(x) + " %"))
 
                 backtesterTable["Details"] = ""
-                for i in range (backtesterTable.index.max() + 1):
-                    nextTicker = backtesterTable.loc[i,"Ticker"]
-                    backtesterTable.loc[i, "Details"] = f"<button class = 'ind_outcome-button' data-ticker={nextTicker}>See details</button>"
+                for i in range(backtesterTable.index.max() + 1):
+                    nextTicker = backtesterTable.loc[i, "Ticker"]
+                    backtesterTable.loc[
+                        i, "Details"] = f"<button class = 'ind_outcome_button' data-ticker={nextTicker}>See details</button>"
 
-                htmlJointTable = backtesterTable.to_html(col_space=[150, 200, 150], bold_rows=True, classes=["table", "backtest_table"],
+                htmlJointTable = backtesterTable.to_html(col_space=[150, 200, 150], bold_rows=True,
+                                                         classes=["table", "backtest_table"],
                                                          escape=False, index=False)
-
 
                 overallResult = round(sum(allResults.values()) / len(allResults), 2)
 
