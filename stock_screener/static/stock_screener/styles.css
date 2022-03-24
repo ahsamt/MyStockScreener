@@ -199,7 +199,7 @@ textarea {
   animation-play-state: paused;
 }
 
-.stock_info {
+.stock_info, .ind_result {
   border-radius: 4px;
   box-shadow: var(--custom-shadow);
   margin: 0px 0 10px 0;
@@ -241,7 +241,9 @@ textarea {
     color: var(--green-font-color);
 }
 
-
+.backtest_table td, .backtest_table th {
+  text-align: center;
+}
 
 #outcome_card {
   width: 700px;

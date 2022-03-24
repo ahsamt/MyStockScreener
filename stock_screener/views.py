@@ -679,6 +679,7 @@ def backtester(request):
                 allResults = {}
                 allTables = {}
 
+
                 for ticker in tickers:
                     stock = existingStocks[ticker].copy()
 
@@ -704,6 +705,7 @@ def backtester(request):
 
                     allResults[ticker] = backtestResult
 
+
                     if backtestDataFull is not None:
                         backtestData = backtestDataFull.loc[:, ["Close", "Final Rec", "Price After Delay",
                                                                 "Adjusted Price After Delay", "Profit/Loss"]]
@@ -726,8 +728,15 @@ def backtester(request):
                 # backtesterTable.set_index("Ticker", inplace=True)
                 backtesterTable["Profit/Loss"] = backtesterTable["Profit/Loss"].apply(
                     lambda x: (format_float(x) + " %"))
-                htmlJointTable = backtesterTable.to_html(col_space=20, bold_rows=True, classes="table", justify="left",
+
+                backtesterTable["Details"] = ""
+                for i in range (backtesterTable.index.max() + 1):
+                    nextTicker = backtesterTable.loc[i,"Ticker"]
+                    backtesterTable.loc[i, "Details"] = f"<button class = 'ind_outcome-button' data-ticker={nextTicker}>See details</button>"
+
+                htmlJointTable = backtesterTable.to_html(col_space=[150, 200, 150], bold_rows=True, classes=["table", "backtest_table"],
                                                          escape=False, index=False)
+
 
                 overallResult = round(sum(allResults.values()) / len(allResults), 2)
 
