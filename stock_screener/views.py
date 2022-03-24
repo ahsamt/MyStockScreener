@@ -701,6 +701,9 @@ def backtester(request):
                                                                        days_to_sell=days_to_sell,
                                                                        buy_price_adjustment=buy_price_adjustment,
                                                                        sell_price_adjustment=sell_price_adjustment)
+
+                    allResults[ticker] = backtestResult
+
                     if backtestDataFull is not None:
                         backtestData = backtestDataFull.loc[:, ["Close", "Final Rec", "Price After Delay",
                                                                 "Adjusted Price After Delay", "Profit/Loss"]]
@@ -713,7 +716,8 @@ def backtester(request):
                         allTables[ticker] = backtestData.to_html(col_space=20, bold_rows=True, classes="table",
                                                                  justify="left", index=False)
 
-                        allResults[ticker] = backtestResult
+                    else:
+                        allTables[ticker] = "The signal has not generated a sufficient number of buy/sell recommendations"
 
                 print(allResults)
                 backtesterTable = pd.DataFrame.from_dict(allResults, orient="index")

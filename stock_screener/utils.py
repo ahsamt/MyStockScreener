@@ -293,7 +293,7 @@ def backtest_signal(df, format_outcome=True, days_to_buy=0, days_to_sell=0, buy_
     backTest = add_days_since_change(backTest, "Final Rec")
     backTestClean = backTest.loc[backTest["Change_Flag"].isin([True]), columnsBacktest]
     if backTestClean.empty:
-        return None, None
+        return 0, None
     else:
         backTestClean.reset_index(drop=True, inplace=True)
         backTestClean["Price After Delay"] = np.NaN
@@ -335,9 +335,10 @@ def backtest_signal(df, format_outcome=True, days_to_buy=0, days_to_sell=0, buy_
 
         backTestClean.set_index("Date", inplace=True)
 
-        mask = (backTestClean["Adjusted Price After Delay"] != np.NaN)
+        backTestClean.dropna(subset=['Price After Delay', 'Adjusted Price After Delay'], inplace=True)
+        if backTestClean.empty:
+            return 0, None
 
-        backTestClean = backTestClean.loc[mask]
         outcome = sum(backTestClean["Profit/Loss"])
 
         if format_outcome:
@@ -347,6 +348,8 @@ def backtest_signal(df, format_outcome=True, days_to_buy=0, days_to_sell=0, buy_
 
         backTestClean["Profit/Loss"] = backTestClean["Profit/Loss"].apply(lambda x: (format_float(x)) + " %")
         backTestClean["Close"] = backTestClean["Close"].apply(lambda x: format_float(x))
+        backTestClean["Price After Delay"] = backTestClean["Price After Delay"].apply(lambda x: format_float(x))
+        backTestClean["Adjusted Price After Delay"] = backTestClean["Adjusted Price After Delay"].apply(lambda x: format_float(x))
 
         # for col_title in ["Close", "Price After Delay", "Adjusted Price After Delay"]:
         # backTestClean[col_title] = backTestClean[col_title].apply(lambda x: format_float(x))
