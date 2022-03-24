@@ -646,6 +646,8 @@ def backtester(request):
                 if "ALL" in tickers:
                     tickers = sorted([o.ticker for o in SavedSearch.objects.filter(user=request.user)])
 
+
+
                 # Calculating the start date according to client requirements
                 endDate = date.today()
                 startDate = endDate + relativedelta(months=-numMonths)
@@ -663,6 +665,13 @@ def backtester(request):
                 if not (ma or psar or adx or srsi or macd):
                     context = {
                         "message": "Please select the signals to back test",
+                        "stockForm": BacktestForm(request.user)
+                    }
+                    return render(request, "stock_screener/backtester.html", context)
+
+                elif (adx and not (ma or psar or srsi or macd)):
+                    context = {
+                        "message": "Please add another signal - ADX alone does not provide buy/sell recommendations",
                         "stockForm": BacktestForm(request.user)
                     }
                     return render(request, "stock_screener/backtester.html", context)

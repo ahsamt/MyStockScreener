@@ -108,4 +108,4 @@ class BacktestForm(forms.Form):
         self.fields['tickers'] = forms.MultipleChoiceField(
             choices=([("ALL", "All watchlisted tickers")] + sorted([(o.ticker, o.ticker)
                                                                     for o in SavedSearch.objects.filter(user=user)])),
-            widget=forms.CheckboxSelectMultiple)
+            widget=forms.CheckboxSelectMultiple, initial="ALL")
