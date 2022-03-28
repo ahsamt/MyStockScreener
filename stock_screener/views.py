@@ -603,7 +603,7 @@ def watchlist(request):
             jointTable.sort_values(by=['Days Since Trend Change', 'Ticker'], inplace=True)
             jointTable.rename_axis(None, inplace=True)
 
-            htmlResultTable = jointTable.to_html(col_space=30, bold_rows=True, classes="table", justify="left",
+            htmlResultTable = jointTable.to_html(col_space=30, bold_rows=True, classes=["table","result_table"], justify="left",
                                                  escape=False)
 
         return render(request, "stock_screener/watchlist.html",
@@ -665,7 +665,7 @@ def backtester(request):
 
                 # Calculating the start date according to client requirements
                 endDate = date.today()
-                startDate = endDate + relativedelta(months=-numMonths)
+                startDate = endDate + relativedelta(years=-5)
                 startDateDatetime = datetime.combine(startDate, datetime.min.time())
 
                 signalResults = []

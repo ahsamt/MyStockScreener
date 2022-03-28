@@ -55,11 +55,12 @@
 
 {% else %}
 
+
     <div id="result-table">{{ htmlResultTable | safe }}</div>
 
     {% for item in watched_tickers  %}
             <div class = "graphs" id="{{ item.ticker }}_graph">
-                <button class="close-graph">Close graph and notes</button>
+
                 <div class="row">
 
                     <div class="col" > {{ item.graph | safe }}</div>
@@ -85,6 +86,8 @@
                                 >
                                     Save notes
                                 </button>
+                                <br />
+                                <button class="close-graph mt-1">Close graph and notes</button>
 
                             </div>
                         </form>

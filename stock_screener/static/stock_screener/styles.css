@@ -96,6 +96,14 @@ textarea {
 
 .graphs {
   display: none;
+  margin: 30px;
+}
+
+.graph-button, .remove-ticker-button{
+  font-size: 13px;
+  margin-top: 5px;
+
+
 }
 #existing_signal_message, #signal_saved_message {
   color: var(--green-font-color);
@@ -146,6 +154,8 @@ textarea {
   color: var(--red-hover-color);
   font-weight: bolder;
 }
+
+
 .centre {
   display: block;
   margin: auto;
@@ -188,18 +198,14 @@ textarea {
   font-size: 12px;
   color: var(--blue-font-color);
 }
+
+
 .tickers {
   font-weight: 800;
   color: var(--red-hover-color);
 }
 
-.watched_item {
-  margin-bottom: 20px;
-  animation-name: hide;
-  animation-duration: 2s;
-  animation-fill-mode: forwards;
-  animation-play-state: paused;
-}
+
 
 .stock_info, .ind_result {
   border-radius: 4px;
@@ -243,10 +249,18 @@ textarea {
     color: var(--green-font-color);
 }
 
-.backtest_table td, .backtest_table th {
+.result_table td, .result_table th, .backtest_table td, .backtest_table th {
   text-align: center;
+  font-size: 14px;
+  vertical-align: middle;
+
 }
 
+
+.result_table th {
+  font-weight: bold;
+  color: #262A33;
+}
 #outcome_card {
   width: 700px;
   display: block;
@@ -262,6 +276,13 @@ textarea {
   text-align: center;
 }
 
+#result-table {
+  margin:30px;
+  box-shadow: var(--custom-shadow);
+  padding: 10px;
+  background: white;
+
+  }
 #stock_name {
   color: var(--grey-font-color);
   font-weight: 900;
@@ -286,10 +307,6 @@ textarea {
   display: none;
 }
 
-#result-table th{
-  font-weight: bold;
-
-}
 
 @media (max-width: 991px) {
   body {
@@ -304,25 +321,3 @@ textarea {
   }
 }
 
-@keyframes hide {
-  0% {
-    opacity: 1;
-    height: 100%;
-    line-height: 100%;
-    margin-bottom: 20px;
-  }
-  50% {
-    opacity: 0;
-    height: 50%;
-    line-height: 100%;
-    margin-bottom: 20px;
-  }
-
-  100% {
-    opacity: 0;
-    height: 0px;
-    line-height: 0px;
-    padding: 0px;
-    margin-bottom: 0px;
-  }
-}
