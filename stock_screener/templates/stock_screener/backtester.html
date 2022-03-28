@@ -126,12 +126,12 @@
       <div id="main_outcome_section">
         {% if overallResult > 0 %}
         <h2 class="centre mt-5" id="positive_outcome">
-            Using this signal would have earned you {{ overallResult }}%
+            Outcome of backtesting the signal: +{{ overallResult }}%
         </h2>
         {% else %}
 
         <h2 class="centre mt-5" id="negative_outcome">
-            Using this signal would have lost you {{ overallResult }}%
+            Outcome of backtesting the signal: {{ overallResult }}%
         </h2>
         {% endif %}
 
