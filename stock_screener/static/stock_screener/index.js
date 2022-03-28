@@ -29,6 +29,43 @@ document.addEventListener("DOMContentLoaded", () => {
     close_ind_outcome_button.addEventListener("click", (event) => hide_outcome_table(event));
   });
 
+   document.querySelectorAll(".remove-ticker-button").forEach((remove_button) => {
+    remove_button.addEventListener("click", (event) => {remove_from_watchlist(event)
+
+ } );
+  });
+
+
+   function remove_from_watchlist(event) {
+      let confirm = prompt(
+      `Are you sure you want to remove this stock from your watchlist? This will permanently delete any notes you have saved. (y/n)`
+      );
+      if (confirm === "y") {
+      update_watchlist(event);
+
+        } else if (confirm === "n") {
+      alert("No problem, we'll keep it where it is!");
+      } else {
+      alert("Sorry, we didn't get it! Please try again.");
+    }
+  }
+
+  function update_watchlist(event) {
+  event.preventDefault();
+
+  let tickerID = event.target.dataset.ticker_id;
+  let user = document.getElementById("username").innerHTML;
+  let section_to_remove = event.target.parentElement.parentElement;
+  fetch(`/saved_searches/${tickerID}`, {
+      method: "DELETE",
+    }).then((response) => {
+      if (response.ok) {
+        section_to_remove.remove();
+        }
+      }
+    );
+  }
+
   function show_outcome_table(event) {
     event.preventDefault();
     let ticker = event.target.dataset.ticker;

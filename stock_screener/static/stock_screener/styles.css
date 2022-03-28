@@ -101,9 +101,7 @@ textarea {
   color: var(--green-font-color);
   margin: 10px 0;
 }
-#backtesting-table {
 
-}
 #signal_saved_message {
   display: none;
 }
@@ -286,6 +284,11 @@ textarea {
 
 #username {
   display: none;
+}
+
+#result-table th{
+  font-weight: bold;
+
 }
 
 @media (max-width: 991px) {

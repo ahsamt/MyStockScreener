@@ -49,43 +49,50 @@
   </div>
 </nav>
 
-<div id="result-table">{{ htmlResultTable | safe }}</div>
+{% if empty_message %}
+
+    <h4 class="mt-5 ms-5">{{ empty_message }}</h4>
+
+{% else %}
+
+    <div id="result-table">{{ htmlResultTable | safe }}</div>
 
     {% for item in watched_tickers  %}
-        <div class = "graphs" id="{{ item.ticker }}_graph">
-            <button class="close-graph">Close graph and notes</button>
-            <div class="row">
+            <div class = "graphs" id="{{ item.ticker }}_graph">
+                <button class="close-graph">Close graph and notes</button>
+                <div class="row">
 
-                <div class="col" > {{ item.graph | safe }}</div>
-                <div class="col">
-                    <h4>Your notes for {{ item.ticker }}:</h4>
-                    <form
-                        class="edit_notes"
-                        id="editNotes{{ item.tickerID }}"
-                        data-stock_id="{{ item.tickerID }}"
-                        >
-                        <div class="form-group">
-                            <textarea
-                                class="edit_content form-control"
-                                id="editContent{{ item.tickerID }}"
-                                rows="12"
-                                >
-                                    {{ item.notes }}
-                            </textarea>
-                            <button
-                                class="save_notes_button"
-                                type="submit"
-                                data-ticker_id="{{ item.tickerID }}"
+                    <div class="col" > {{ item.graph | safe }}</div>
+                    <div class="col">
+                        <h4>Your notes for {{ item.ticker }}:</h4>
+                        <form
+                            class="edit_notes"
+                            id="editNotes{{ item.tickerID }}"
+                            data-stock_id="{{ item.tickerID }}"
                             >
-                                Save notes
-                            </button>
+                            <div class="form-group">
+                                <textarea
+                                    class="edit_content form-control"
+                                    id="editContent{{ item.tickerID }}"
+                                    rows="12"
+                                    >
+                                        {{ item.notes }}
+                                </textarea>
+                                <button
+                                    class="save_notes_button"
+                                    type="submit"
+                                    data-ticker_id="{{ item.tickerID }}"
+                                >
+                                    Save notes
+                                </button>
 
-                        </div>
-                    </form>
-                    <p class="message mt-2 mb-3" id="messageNotes{{ item.tickerID }}"></p>
+                            </div>
+                        </form>
+                        <p class="message mt-2 mb-3" id="messageNotes{{ item.tickerID }}"></p>
+                    </div>
                 </div>
             </div>
-        </div>
 
     {% endfor %}
+    {% endif %}
 {% endblock %}

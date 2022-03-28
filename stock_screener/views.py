@@ -60,6 +60,14 @@ def index(request):
                 macdS = stockForm.cleaned_data['macdS']
                 macdSm = stockForm.cleaned_data['macdSm']
 
+
+                if (adx and not (ma or psar or srsi or macd)):
+                    context = {
+                        "message": "Please add another signal - ADX alone does not provide buy/sell recommendations",
+                        "stockForm": stockForm
+                    }
+                    return render(request, "stock_screener/index.html", context)
+
                 # Calculating the start date according to client requirements
                 endDate = date.today()
                 startDate = endDate + relativedelta(months=-numMonths)
@@ -129,6 +137,7 @@ def index(request):
                     # getting info for the result table
                     rec = "No signals selected"
                     daysSinceChange = "n/a"
+
 
 
                 # if any of the signals are selected:
@@ -473,6 +482,9 @@ def watchlist(request):
             watched_tickers = []
             graphs = []
             watchlist = SavedSearch.objects.filter(user=request.user)
+            if len(watchlist) == 0:
+                return render(request, "stock_screener/watchlist.html", {"empty_message": "You do not have any tickers added to your watchlist"})
+
             watchlist = sorted(watchlist, key=lambda p: p.date, reverse=True)
             allStocks = read_csv_from_S3(bucket, "Stocks")
 
@@ -508,6 +520,7 @@ def watchlist(request):
             # can i pass it to html as an object instead?
             for item in watchlist:
                 ticker = item.ticker
+                ticker_id = item.id
                 watchlist_item = {}
                 watchlist_item["ticker"] = ticker
                 watchlist_item["tickerFull"] = item.ticker_full
@@ -558,7 +571,8 @@ def watchlist(request):
                      watchlist_item["rec"],
                      watchlist_item["daysSinceChange"],
                      closingPrice] + smaChanges \
-                    + signalResults + [f"<button class = 'graph-button' data-ticker={ticker}>See graph</button>"]
+                    + signalResults + [f"<button class = 'graph-button' data-ticker={ticker}>See graph</button>"] \
+                    + [f"<button class = 'remove-ticker-button' data-ticker_id={ticker_id}>Remove</button>"]
                 # ['''<a href="{% url 'graph' %}" target="blank"> Graph </a>''']
 
                 watchlist_item["resultTable"] = pd.DataFrame([tableEntries],
@@ -568,7 +582,8 @@ def watchlist(request):
                                                                       'Closing Price',
                                                                       '1 Week Change',
                                                                       '1 Month Change',
-                                                                      '3 Months Change'] + selectedSignals + ["Graph"])
+                                                                      '3 Months Change'] + selectedSignals + ["Graph"] +
+                                                                     ["Remove From Watchlist?"])
 
                 # resultTable.set_index('Analysis Outcome', inplace=True)
                 watched_tickers.append(watchlist_item)
@@ -578,7 +593,8 @@ def watchlist(request):
                                                'Closing Price',
                                                '1 Week Change',
                                                '1 Month Change',
-                                               '3 Months Change'] + selectedSignals + ["Graph"])
+                                               '3 Months Change'] + selectedSignals + ["Graph"] +
+                                              ["Remove From Watchlist?"])
             for elt in watched_tickers:
                 jointTable = pd.concat([jointTable, elt["resultTable"]], axis=0)
 
