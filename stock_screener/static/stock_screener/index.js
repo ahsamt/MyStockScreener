@@ -30,18 +30,18 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
    document.querySelectorAll(".remove-ticker-button").forEach((remove_button) => {
-    remove_button.addEventListener("click", (event) => {remove_from_watchlist(event)
+    remove_button.addEventListener("click", (event) => {remove_ticker_from_watchlist(event)
 
  } );
   });
 
 
-   function remove_from_watchlist(event) {
+   function remove_ticker_from_watchlist(event) {
       let confirm = prompt(
       `Are you sure you want to remove this stock from your watchlist? This will permanently delete any notes you have saved. (y/n)`
       );
       if (confirm === "y") {
-      update_watchlist(event);
+      async_delete_from_watchlist(event);
 
         } else if (confirm === "n") {
       alert("No problem, we'll keep it where it is!");
@@ -50,8 +50,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  function update_watchlist(event) {
-  event.preventDefault();
+  function async_delete_from_watchlist(event) {
+    event.preventDefault();
 
   let tickerID = event.target.dataset.ticker_id;
   let user = document.getElementById("username").innerHTML;
@@ -105,7 +105,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
   // update watchlist when the relevant button is clicked on the index page
   document.querySelectorAll(".watchlist").forEach((watch_button) => {
-    watch_button.addEventListener("click", (event) => update_watchlist(event));
+    watch_button.addEventListener("click", (event) => async_update_watchlist_index_page(event));
   });
 
   // remove stock from watchlist when the relevant button is clicked on the watchlist page
@@ -179,9 +179,8 @@ function update_notes(event) {
   });
 }
 
-function update_watchlist(event) {
+function async_update_watchlist_index_page(event) {
   event.preventDefault();
-  console.log("Hello")
   let ticker = event.target.dataset.ticker_name;
   let tickerID = event.target.dataset.ticker_id;
   let tickerFull = event.target.dataset.ticker_full;

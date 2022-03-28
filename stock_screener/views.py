@@ -520,12 +520,13 @@ def watchlist(request):
             # can i pass it to html as an object instead?
             for item in watchlist:
                 ticker = item.ticker
-                ticker_id = item.id
+                tickerId = item.id
                 watchlist_item = {}
                 watchlist_item["ticker"] = ticker
                 watchlist_item["tickerFull"] = item.ticker_full
                 watchlist_item["notes"] = item.notes
                 watchlist_item["tickerID"] = item.id
+
 
                 data = allStocks[ticker].copy()
                 data.dropna(how="all", inplace=True)
@@ -572,7 +573,7 @@ def watchlist(request):
                      watchlist_item["daysSinceChange"],
                      closingPrice] + smaChanges \
                     + signalResults + [f"<button class = 'graph-button' data-ticker={ticker}>See graph</button>"] \
-                    + [f"<button class = 'remove-ticker-button' data-ticker_id={ticker_id}>Remove</button>"]
+                    + [f"<button class = 'remove-ticker-button' data-ticker_id={tickerId}>Remove</button>"]
                 # ['''<a href="{% url 'graph' %}" target="blank"> Graph </a>''']
 
                 watchlist_item["resultTable"] = pd.DataFrame([tableEntries],
