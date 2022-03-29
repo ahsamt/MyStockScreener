@@ -55,6 +55,10 @@
 
 {% else %}
 
+    <h3 class="rec-watchlist mt-5">Recommendations for {{ user }}'s watchlisted tickers</h3>
+    <h5 class="show_signal_section centre">(Please click <a href="/" class="view_saved_signal">here</a> to view the signal these recommendations are based on)</h5>
+    {% include "stock_screener/child_templates/saved_signal.html" with signals=signals signalHeaders=signalHeaders %}
+
 
     <div id="result-table">{{ htmlResultTable | safe }}</div>
 

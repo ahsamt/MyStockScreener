@@ -3,15 +3,14 @@ document.addEventListener("DOMContentLoaded", () => {
   window.addEventListener("scroll", () => top_scroll());
 
 
-  // add clarifying message re S&P 500 on the search page
-  if (document.querySelector(".question")) {
-    document.querySelector(".question").addEventListener("click", (event) => {
-      event.preventDefault();
-      alert(
-        "Please take a look at the Ticker List page of this application to see a full list of S&P 500 companies"
-      );
-    });
-  }
+
+  document.querySelectorAll (".view_saved_signal").forEach((view_signal_button) => {
+      view_signal_button.addEventListener("click", (event) => show_signal(event));
+  });
+
+    document.querySelectorAll (".hide_signal_details").forEach((hide_signal_button) => {
+      hide_signal_button.addEventListener("click", (event) => hide_signal(event));
+  });
 
   document.querySelectorAll(".graph-button").forEach((graph_button) => {
     graph_button.addEventListener("click", (event) => show_graph(event));
@@ -35,7 +34,17 @@ document.addEventListener("DOMContentLoaded", () => {
  } );
   });
 
+   function hide_signal(event) {
+        event.preventDefault();
+        event.target.parentElement.style.display = "none";
+        document.querySelector(".show_signal_section").style.display = "block";
+    }
 
+    function show_signal(event) {
+        event.preventDefault();
+        event.target.parentElement.style.display = "none";
+        document.querySelector(".saved-signal").style.display = "block";
+    }
    function remove_ticker_from_watchlist(event) {
       let confirm = prompt(
       `Are you sure you want to remove this stock from your watchlist? This will permanently delete any notes you have saved. (y/n)`

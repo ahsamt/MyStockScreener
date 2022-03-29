@@ -3,16 +3,6 @@ document.addEventListener("DOMContentLoaded", () => {
   window.addEventListener("scroll", () => top_scroll());
 
 
-  // add clarifying message re S&P 500 on the search page
-  if (document.querySelector(".question")) {
-    document.querySelector(".question").addEventListener("click", (event) => {
-      event.preventDefault();
-      alert(
-        "Please take a look at the Ticker List page of this application to see a full list of S&P 500 companies"
-      );
-    });
-  }
-
   // update watchlist when the relevant button is clicked on the index page
   document.querySelectorAll(".watchlist").forEach((watch_button) => {
     watch_button.addEventListener("click", (event) => update_watchlist(event));
@@ -84,12 +74,10 @@ function update_notes(event) {
 
 function update_watchlist(event) {
   event.preventDefault();
-  console.log("Hello")
   let ticker = event.target.dataset.ticker_name;
   let tickerID = event.target.dataset.ticker_id;
   let tickerFull = event.target.dataset.ticker_full;
   let user = document.getElementById("username").innerHTML;
-  console.log(tickerID)
   // Check via internal API if this stock is in user's watchlist
   if (tickerID === "None") {
     console.log("creating a post request")
@@ -138,11 +126,3 @@ function remove_from_watchlist(event) {
   }
 }
 
-function display_stock_list(event) {
-  event.preventDefault();
-  document.querySelectorAll(".abc_tickers").forEach((section) => {
-    section.style.display = "none";
-  });
-  document.getElementById(`${event.target.dataset.letter}`).style.display =
-    "block";
-}

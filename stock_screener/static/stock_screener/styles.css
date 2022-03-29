@@ -8,13 +8,22 @@
   --green-font-color: #40bc1e;
   --red-hover-color: #99103d;
   --grey-font-color: #333333;
+  --black-font-color: #231F20;
 }
 
+a {
+  color: var(--blue-font-color);
+}
+
+a:hover{
+  color: var(--red-hover-color);
+}
 body {
   background: var(--background-color);
   font-family: "Open Sans", sans-serif;
   font-size: 16px;
   padding-left: 0;
+  color: var(--black-font-color);
 }
 
 button {
@@ -33,9 +42,10 @@ button:hover {
 }
 
 h1 {
-  font-size: 30px;
+  font-size: 27px;
   font-weight: 530;
   padding: 60px 0px 20px 0px;
+  color: var(--blue-font-color);
 }
 
 h2 {
@@ -65,24 +75,21 @@ h6 {
   text-decoration: underline;
 }
 
-li > .nav-link {
-  margin: 0px 20px 0px 0px;
-  font-weight: bolder;
-}
-
 input,
 textarea {
   outline: none;
 }
 
-
+li > .nav-link {
+  margin: 0px 20px 0px 0px;
+  font-weight: bolder;
+}
 
 .about
  {
   line-height: 2;
   padding: 30px 20px 20px 20px;
 }
-
 
 .closing_price {
   color: var(--grey-font-color);
@@ -105,14 +112,7 @@ textarea {
 
 
 }
-#existing_signal_message, #signal_saved_message {
-  color: var(--green-font-color);
-  margin: 10px 0;
-}
 
-#signal_saved_message {
-  display: none;
-}
 
 .ind_result{
   display: none;
@@ -135,6 +135,7 @@ textarea {
   margin: 5px;
 
 
+
 }
 .price_change_green {
   color: var(--green-font-color);
@@ -155,6 +156,24 @@ textarea {
   font-weight: bolder;
 }
 
+.result_table td, .result_table th, .backtest_table td, .backtest_table th{
+  text-align: center;
+  font-size: 13px;
+  vertical-align: middle;
+
+}
+.result_table th {
+  font-size: 14px;
+
+}
+
+.rec-watchlist {
+  display: block;
+  text-align: center;
+  font-weight: 900;
+  color: var(--blue-font-color);
+}
+
 
 .centre {
   display: block;
@@ -172,9 +191,9 @@ textarea {
 }
 
 .stock_search {
-  color: var(--red-hover-color);
   font-weight: bolder;
 }
+
 .signals, .backtest  {
   padding:0 80px 0 80px;
   display: block;
@@ -204,8 +223,17 @@ textarea {
   font-weight: 800;
   color: var(--red-hover-color);
 }
-
-
+.saved-signal {
+  display: none;
+}
+.signal_table {
+  max-width: 400px;
+  padding: 5px;
+  box-shadow: var(--custom-shadow);
+  margin: 0 auto;
+  display: block;
+  background: white;
+}
 
 .stock_info, .ind_result {
   border-radius: 4px;
@@ -227,7 +255,11 @@ textarea {
   padding: 4px 8px;
   background-color: white;
 }
-
+.watchlist-ticker {
+  color: var(--red-hover-color);
+  font-weight: bold;
+  font-size: 14px;
+}
 .welcome {
   text-align: center;
   margin-bottom: 15px;
@@ -237,35 +269,36 @@ textarea {
   display: block;
 }
 
-#positive_outcome, #negative_outcome{
+#existing_signal_message, #signal_saved_message {
+  color: var(--green-font-color);
+  margin: 10px 0;
+}
 
+#positive_outcome, #negative_outcome {
   font-weight: bold;
   padding-bottom: 30px;
 }
+
 #negative_outcome {
     color: var(--red-font-color);
 }
+
 #positive_outcome {
     color: var(--green-font-color);
 }
 
-.result_table td, .result_table th, .backtest_table td, .backtest_table th {
-  text-align: center;
-  font-size: 14px;
-  vertical-align: middle;
-
-}
-
-
-.result_table th {
-  font-weight: bold;
-  color: #262A33;
-}
+.
 #outcome_card {
   width: 700px;
   display: block;
   margin: 0 auto;
 }
+
+#result-table {
+  margin:30px;
+  color: #231F20;
+  }
+
 #searchButton {
 
   display: block;
@@ -276,17 +309,15 @@ textarea {
   text-align: center;
 }
 
-#result-table {
-  margin:30px;
-  box-shadow: var(--custom-shadow);
-  padding: 10px;
-  background: white;
+#signal_saved_message {
+  display: none;
+}
 
-  }
 #stock_name {
   color: var(--grey-font-color);
   font-weight: 900;
 }
+
 #topButton {
   display: none;
   position: fixed;

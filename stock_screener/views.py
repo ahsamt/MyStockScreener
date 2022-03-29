@@ -517,6 +517,49 @@ def watchlist(request):
                            signal.macdF,
                            signal.macdSm]
 
+            signalData = []
+            signalHeaders = []
+            if signal.ma:
+                signalData += [signal.ma,
+                           signal.maS,
+                           signal.maL,
+                           signal.maWS,
+                           signal.maWL]
+                signalHeaders += ["Moving Average", "Moving Average - Short", "Moving Average - Long", "Moving Average Term - short", "Moving Average Term - Long"]
+
+            if signal.psar:
+                signalData += [signal.psar,
+                           signal.psarAF,
+                           signal.psarMA]
+                signalHeaders += ["Parabolic SAR", "Parabolic SAR - Acceleration Factor (AF)", "Parabolic SAR - Maximum Acceleration (MA)"]
+
+            if signal.adx:
+                signalData += [signal.adx,
+                           signal.adxW,
+                           signal.adxL]
+                signalHeaders += ["ADX", "ADX Term", "ADX Limit"]
+
+            if signal.srsi:
+                signalData +=  [signal.srsi,
+                           signal.srsiW,
+                           signal.srsiSm1,
+                           signal.srsiSm2,
+                           signal.srsiOB,
+                           signal.srsiOS]
+                signalHeaders += ["Stochastic RSI", "Stochastic RSI - Term", "Stochastic RSI - Smooth 1",
+                       "Stochastic RSI - Smooth 2", "Stochastic RSI - Overbought Limit", "Stochastic RSI - Oversold Limit"]
+
+            if signal.macd:
+                signalData += [signal.macd,
+                           signal.macdS,
+                           signal.macdF,
+                           signal.macdSm]
+                signalHeaders += ["MACD", "MACD Slow", "MACD Fast", "MACD Smoothing Period"]
+
+            signalTable = pd.DataFrame([signalData], columns=signalHeaders).transpose().reset_index()
+
+            signalTable = signalTable.to_html(col_space=[400, 100],  classes=["table", "signal_table"],
+                                              bold_rows=False, justify="left", header=False, index=False)
             # can i pass it to html as an object instead?
             for item in watchlist:
                 ticker = item.ticker
@@ -568,7 +611,7 @@ def watchlist(request):
                     signalResults.append(format_float(data.loc[data.index.max()][signal]))
 
                 tableEntries = \
-                    [ticker,
+                    [f"<span class='watchlist-ticker'>{ticker}</span>",
                      watchlist_item["rec"],
                      watchlist_item["daysSinceChange"],
                      closingPrice] + smaChanges \
@@ -607,7 +650,7 @@ def watchlist(request):
                                                  escape=False)
 
         return render(request, "stock_screener/watchlist.html",
-                      {'watched_tickers': watched_tickers, "htmlResultTable": htmlResultTable})
+                      {'watched_tickers': watched_tickers, "htmlResultTable": htmlResultTable, "signalTable": signalTable})
 
 
 def backtester(request):
