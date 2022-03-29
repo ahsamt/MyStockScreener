@@ -78,18 +78,22 @@ document.addEventListener("DOMContentLoaded", () => {
   function show_outcome_table(event) {
     event.preventDefault();
     let ticker = event.target.dataset.ticker;
+
     let ind_outcome_table = document.getElementById(`${ticker}_card`);
     let main_outcome_table = document.getElementById("main_outcome_section");
     ind_outcome_table.style.display = "block";
     main_outcome_table.style.display = "none";
+
 
   }
 
   function hide_outcome_table(event) {
     event.preventDefault();
     let main_outcome_table = document.getElementById("main_outcome_section");
+
     document.querySelectorAll(".ind_result").forEach((table) => {table.style.display = "none"});
     main_outcome_table.style.display = "block";
+
   }
 
 
@@ -101,8 +105,10 @@ document.addEventListener("DOMContentLoaded", () => {
     let ticker = event.target.dataset.ticker;
     let graph = document.getElementById(`${ticker}_graph`);
     let table = document.getElementById("result-table");
+    let headings = document.getElementById("watchlist-headings");
     graph.style.display = "block";
     table.style.display = "none";
+    headings.style.display = "none";
   }
 
   function hide_graphs(event) {
@@ -110,6 +116,8 @@ document.addEventListener("DOMContentLoaded", () => {
     document.querySelectorAll(`.graphs`).forEach((g) => {
       g.style.display = "none"});
     document.getElementById("result-table").style.display = "block";
+    let headings = document.getElementById("watchlist-headings");
+    headings.style.display = "block";
 
   }
   // update watchlist when the relevant button is clicked on the index page
@@ -243,14 +251,7 @@ function remove_from_watchlist(event) {
   }
 }
 
-function display_stock_list(event) {
-  event.preventDefault();
-  document.querySelectorAll(".abc_tickers").forEach((section) => {
-    section.style.display = "none";
-  });
-  document.getElementById(`${event.target.dataset.letter}`).style.display =
-    "block";
-}
+
 
 function add_signal(event) {
   event.preventDefault();

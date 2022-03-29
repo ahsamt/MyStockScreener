@@ -370,3 +370,53 @@ def add_sma_col(df):
     df["Table SMA"] = ta.trend.sma_indicator(df["Close"], window=15)
     column = "Table SMA"
     return df, column
+
+def prepare_signal_table(signal):
+    signalData = []
+    signalHeaders = []
+    if signal.ma:
+        signalData += [signal.ma,
+                       signal.maS,
+                       signal.maL,
+                       signal.maWS,
+                       signal.maWL]
+        signalHeaders += ["Moving Average", "Moving Average - Short", "Moving Average - Long",
+                          "Moving Average Term - short", "Moving Average Term - Long"]
+
+    if signal.psar:
+        signalData += [signal.psar,
+                       signal.psarAF,
+                       signal.psarMA]
+        signalHeaders += ["Parabolic SAR", "Parabolic SAR - Acceleration Factor (AF)",
+                          "Parabolic SAR - Maximum Acceleration (MA)"]
+
+    if signal.adx:
+        signalData += [signal.adx,
+                       signal.adxW,
+                       signal.adxL]
+        signalHeaders += ["ADX", "ADX Term", "ADX Limit"]
+
+    if signal.srsi:
+        signalData += [signal.srsi,
+                       signal.srsiW,
+                       signal.srsiSm1,
+                       signal.srsiSm2,
+                       signal.srsiOB,
+                       signal.srsiOS]
+        signalHeaders += ["Stochastic RSI", "Stochastic RSI - Term", "Stochastic RSI - Smooth 1",
+                          "Stochastic RSI - Smooth 2", "Stochastic RSI - Overbought Limit",
+                          "Stochastic RSI - Oversold Limit"]
+
+    if signal.macd:
+        signalData += [signal.macd,
+                       signal.macdS,
+                       signal.macdF,
+                       signal.macdSm]
+        signalHeaders += ["MACD", "MACD Slow", "MACD Fast", "MACD Smoothing Period"]
+
+    signalTable = pd.DataFrame([signalData], columns=signalHeaders).transpose().reset_index()
+
+    signalTable = signalTable.to_html(col_space=[400, 100], classes=["table", "signal_table"],
+                                      bold_rows=False, justify="left", header=False, index=False)
+
+    return signalTable

@@ -8,7 +8,7 @@ from django.db import IntegrityError
 from .forms import StockForm, BacktestForm
 from .utils import read_csv_from_S3, adjust_start, make_graph, get_price_change, get_current_tickers_info, \
     upload_csv_to_S3, stock_tidy_up, prepare_ticker_info_update, get_company_name_from_yf, get_previous_sma, \
-    calculate_price_dif, format_float, backtest_signal, check_for_sma_column, add_sma_col
+    calculate_price_dif, format_float, backtest_signal, check_for_sma_column, add_sma_col, prepare_signal_table
 from .calculations import make_calculations
 from datetime import date, datetime
 from dateutil.relativedelta import relativedelta
@@ -517,49 +517,9 @@ def watchlist(request):
                            signal.macdF,
                            signal.macdSm]
 
-            signalData = []
-            signalHeaders = []
-            if signal.ma:
-                signalData += [signal.ma,
-                           signal.maS,
-                           signal.maL,
-                           signal.maWS,
-                           signal.maWL]
-                signalHeaders += ["Moving Average", "Moving Average - Short", "Moving Average - Long", "Moving Average Term - short", "Moving Average Term - Long"]
+            # prepare a table to display the saved signal to the user
+            signalTable = prepare_signal_table(signal)
 
-            if signal.psar:
-                signalData += [signal.psar,
-                           signal.psarAF,
-                           signal.psarMA]
-                signalHeaders += ["Parabolic SAR", "Parabolic SAR - Acceleration Factor (AF)", "Parabolic SAR - Maximum Acceleration (MA)"]
-
-            if signal.adx:
-                signalData += [signal.adx,
-                           signal.adxW,
-                           signal.adxL]
-                signalHeaders += ["ADX", "ADX Term", "ADX Limit"]
-
-            if signal.srsi:
-                signalData +=  [signal.srsi,
-                           signal.srsiW,
-                           signal.srsiSm1,
-                           signal.srsiSm2,
-                           signal.srsiOB,
-                           signal.srsiOS]
-                signalHeaders += ["Stochastic RSI", "Stochastic RSI - Term", "Stochastic RSI - Smooth 1",
-                       "Stochastic RSI - Smooth 2", "Stochastic RSI - Overbought Limit", "Stochastic RSI - Oversold Limit"]
-
-            if signal.macd:
-                signalData += [signal.macd,
-                           signal.macdS,
-                           signal.macdF,
-                           signal.macdSm]
-                signalHeaders += ["MACD", "MACD Slow", "MACD Fast", "MACD Smoothing Period"]
-
-            signalTable = pd.DataFrame([signalData], columns=signalHeaders).transpose().reset_index()
-
-            signalTable = signalTable.to_html(col_space=[400, 100],  classes=["table", "signal_table"],
-                                              bold_rows=False, justify="left", header=False, index=False)
             # can i pass it to html as an object instead?
             for item in watchlist:
                 ticker = item.ticker
