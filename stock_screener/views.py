@@ -660,6 +660,7 @@ def backtester(request):
                 days_to_sell = backtestForm.cleaned_data["days_to_sell"]
                 buy_price_adjustment = backtestForm.cleaned_data["buy_price_adjustment"]
                 sell_price_adjustment = backtestForm.cleaned_data["sell_price_adjustment"]
+                num_years = backtestForm.cleaned_data["num_years"]
 
                 tickers = backtestForm.cleaned_data['tickers']
                 print("tickers are" + str(tickers))
@@ -668,7 +669,7 @@ def backtester(request):
 
                 # Calculating the start date according to client requirements
                 endDate = date.today()
-                startDate = endDate + relativedelta(years=-5)
+                startDate = endDate + relativedelta(years=-int(num_years))
                 startDateDatetime = datetime.combine(startDate, datetime.min.time())
 
                 signalResults = []
@@ -767,5 +768,5 @@ def backtester(request):
 
                 return render(request, "stock_screener/backtester.html", context)
 
-# def graph(request):
-# return render(request, "stock_screener/graph.html")
+#def graph(request):
+    #return render(request, "stock_screener/graph.html")

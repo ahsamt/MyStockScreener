@@ -98,6 +98,13 @@
                             </div>
                     </div>
 
+                    <div class="backtest-params row mt-3">
+
+                            <div class="col-6">
+                                Number of years back test should cover {{ stockForm.num_years }}
+                            </div>
+                    </div>
+
                     <h3 class="centre mt-3">Tickers to include in back test</h3>
 
                     <div class="backtest-params row mt-3">
@@ -146,7 +153,7 @@
 
         {% for name, table in allTables.items %}
         <div class="ind_result card mb-4" id="{{ name }}_card">
-        <h4 class="card-title" >{{ name }}</h4>
+        <h4 class="card-title mt-3 ms-3 red" >{{ name }}</h4>
             <div class="card-body">
 
                 {{ table | safe }}

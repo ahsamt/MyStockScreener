@@ -19,15 +19,17 @@ class StockForm(forms.Form):
                               widget=forms.NumberInput(attrs={'style': 'width:9ch'}))
 
     psar = forms.BooleanField(label='Parabolic Stop And Reverse (Parabolic SAR)', required=False)
-    psarAF = forms.FloatField(label='Parabolic SAR Acceleration Factor (AF)', min_value=0, max_value=100, initial="0.02",
+    psarAF = forms.FloatField(label='Parabolic SAR Acceleration Factor (AF)', min_value=0, max_value=100,
+                              initial="0.02",
                               widget=forms.NumberInput(attrs={'style': 'width:9ch'}))
-    psarMA = forms.FloatField(label='Parabolic SAR Maximum Acceleration (MA)', min_value=0, max_value=100, initial="0.2",
+    psarMA = forms.FloatField(label='Parabolic SAR Maximum Acceleration (MA)', min_value=0, max_value=100,
+                              initial="0.2",
                               widget=forms.NumberInput(attrs={'style': 'width:9ch'}))
 
     adx = forms.BooleanField(label='Average Directional Movement Index (ADX)', required=False)
-    adxW = forms.IntegerField(label='ADX window',min_value=0, max_value=100, initial="18",
+    adxW = forms.IntegerField(label='ADX window', min_value=0, max_value=100, initial="18",
                               widget=forms.NumberInput(attrs={'style': 'width:9ch'}))
-    adxL = forms.IntegerField(label='ADX linit', min_value=0,max_value=100, initial="20",
+    adxL = forms.IntegerField(label='ADX linit', min_value=0, max_value=100, initial="20",
                               widget=forms.NumberInput(attrs={'style': 'width:9ch'}))
 
     srsi = forms.BooleanField(label='Stochastic RSI (SRSI)', required=False)
@@ -54,7 +56,7 @@ class StockForm(forms.Form):
 class BacktestForm(forms.Form):
     ma = forms.BooleanField(label='Moving Average (SMA)', required=False)
     maS = forms.ChoiceField(label='Choice of Moving Average - short term', required=False, choices=ma1_choices)
-    maWS = forms.IntegerField(label='Moving Average window size - short', min_value=0,max_value=100, initial="15",
+    maWS = forms.IntegerField(label='Moving Average window size - short', min_value=0, max_value=100, initial="15",
                               widget=forms.NumberInput(attrs={'style': 'width:9ch'}))
     maL = forms.ChoiceField(label='Choice of Moving Average - long term', required=False, choices=ma2_choices)
 
@@ -62,9 +64,11 @@ class BacktestForm(forms.Form):
                               widget=forms.NumberInput(attrs={'style': 'width:9ch'}))
 
     psar = forms.BooleanField(label='Parabolic Stop And Reverse (Parabolic SAR)', required=False)
-    psarAF = forms.FloatField(label='Parabolic SAR Acceleration Factor (AF)', min_value=0, max_value=100, initial="0.02",
+    psarAF = forms.FloatField(label='Parabolic SAR Acceleration Factor (AF)', min_value=0, max_value=100,
+                              initial="0.02",
                               widget=forms.NumberInput(attrs={'style': 'width:9ch'}))
-    psarMA = forms.FloatField(label='Parabolic SAR Maximum Acceleration (MA)', min_value=0, max_value=100, initial="0.2",
+    psarMA = forms.FloatField(label='Parabolic SAR Maximum Acceleration (MA)', min_value=0, max_value=100,
+                              initial="0.2",
                               widget=forms.NumberInput(attrs={'style': 'width:9ch'}))
 
     adx = forms.BooleanField(label='Average Directional Movement Index (ADX)', required=False)
@@ -98,10 +102,15 @@ class BacktestForm(forms.Form):
     days_to_sell = forms.IntegerField(label='Days to Complete a Sell Order', min_value=0, max_value=10, initial="0",
                                       widget=forms.NumberInput(attrs={'style': 'width:9ch'}))
 
-    buy_price_adjustment = forms.IntegerField(label='Days to Complete a Sell Order', min_value=0, max_value=10, initial="0",
+    buy_price_adjustment = forms.IntegerField(label='Days to Complete a Sell Order', min_value=0, max_value=10,
+                                              initial="0",
                                               widget=forms.NumberInput(attrs={'style': 'width:9ch'}))
-    sell_price_adjustment = forms.IntegerField(label='Days to Complete a Sell Order', min_value=0, max_value=10, initial="0",
+    sell_price_adjustment = forms.IntegerField(label='Days to Complete a Sell Order', min_value=0, max_value=10,
+                                               initial="0",
                                                widget=forms.NumberInput(attrs={'style': 'width:9ch'}))
+
+    num_years = forms.ChoiceField(label='Number of years backtest should cover', initial=1,
+                                  choices=[(1, 1), (2, 2), (3, 3), (4, 4), (5, 5)])
 
     def __init__(self, user, *args, **kwargs):
         super(BacktestForm, self).__init__(*args, *kwargs)
