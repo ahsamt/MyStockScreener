@@ -339,7 +339,7 @@ def backtest_signal(df, format_outcome=True, days_to_buy=0, days_to_sell=0, buy_
         if backTestClean.empty:
             return 0, None
 
-        outcome = sum(backTestClean["Profit/Loss"])
+        outcome = calc_average_percentage(backTestClean["Profit/Loss"])
 
         if format_outcome:
             outcome = str(round(outcome, 2)) + "%"
@@ -349,7 +349,8 @@ def backtest_signal(df, format_outcome=True, days_to_buy=0, days_to_sell=0, buy_
         backTestClean["Profit/Loss"] = backTestClean["Profit/Loss"].apply(lambda x: (format_float(x)) + " %")
         backTestClean["Close"] = backTestClean["Close"].apply(lambda x: format_float(x))
         backTestClean["Price After Delay"] = backTestClean["Price After Delay"].apply(lambda x: format_float(x))
-        backTestClean["Adjusted Price After Delay"] = backTestClean["Adjusted Price After Delay"].apply(lambda x: format_float(x))
+        backTestClean["Adjusted Price After Delay"] = backTestClean["Adjusted Price After Delay"].apply(
+            lambda x: format_float(x))
 
         # for col_title in ["Close", "Price After Delay", "Adjusted Price After Delay"]:
         # backTestClean[col_title] = backTestClean[col_title].apply(lambda x: format_float(x))
@@ -370,6 +371,7 @@ def add_sma_col(df):
     df["Table SMA"] = ta.trend.sma_indicator(df["Close"], window=15)
     column = "Table SMA"
     return df, column
+
 
 def prepare_signal_table(signal):
     signalData = []
@@ -420,3 +422,13 @@ def prepare_signal_table(signal):
                                       bold_rows=False, justify="left", header=False, index=False)
 
     return signalTable
+
+
+def calc_average_percentage(perc_iterable):
+    result = 1
+    for v in perc_iterable:
+        adj_v = (v + 100) / 100
+        print(adj_v)
+        result *= adj_v
+
+    return round((result * 100 - 100), 2)

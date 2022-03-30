@@ -145,6 +145,11 @@
         {%  if overallAverageTimeBetweenTransactions %}
             <h4 class="centre mb-2">Average time between transactions: {{ overallAverageTimeBetweenTransactions }} days</h4>
         {% endif %}
+
+        {%  if overallAverageTimeHoldingStock %}
+            <h4 class="centre mb-2">Average time holding stock: {{ overallAverageTimeHoldingStock }} days</h4>
+        {% endif %}
+
         <div class="stock_info card mb-4" id="outcome_card">
             <div class="card-body">
 
@@ -163,9 +168,12 @@
             {% if item.2 %}
             <h5 class="card-subtitle mt-3 ms-3 " >Average time between transactions: {{ item.2 }} days</h5>
             {% endif %}
+            {% if item.3 %}
+            <h5 class="card-subtitle mt-3 ms-3 " >Average time holdings stock: {{ item.3 }} days</h5>
+            {% endif %}
             <div class="card-body">
 
-                {{ item.3 | safe }}
+                {{ item.4 | safe }}
             </div>
         <button class="close_ind_outcome_button">
             Back to results summary

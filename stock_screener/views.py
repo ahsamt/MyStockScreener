@@ -8,7 +8,7 @@ from django.db import IntegrityError
 from .forms import StockForm, BacktestForm
 from .utils import read_csv_from_S3, adjust_start, make_graph, get_price_change, get_current_tickers_info, \
     upload_csv_to_S3, stock_tidy_up, prepare_ticker_info_update, get_company_name_from_yf, get_previous_sma, \
-    calculate_price_dif, format_float, backtest_signal, check_for_sma_column, add_sma_col, prepare_signal_table
+    calculate_price_dif, format_float, backtest_signal, check_for_sma_column, add_sma_col, prepare_signal_table, calc_average_percentage
 from .calculations import make_calculations
 from datetime import date, datetime
 from dateutil.relativedelta import relativedelta
@@ -685,7 +685,7 @@ def backtester(request):
                     }
                     return render(request, "stock_screener/backtester.html", context)
 
-                elif (adx and not (ma or psar or srsi or macd)):
+                elif adx and not (ma or psar or srsi or macd):
                     context = {
                         "message": "Please add another signal - ADX alone does not provide buy/sell recommendations",
                         "stockForm": BacktestForm(request.user)
@@ -695,6 +695,7 @@ def backtester(request):
                 allResults = {}
                 allDetails = []
                 averageIndTimesBetweenTransactions = []
+                averageIndTimesHoldingStock = []
 
                 for ticker in tickers:
 
@@ -717,10 +718,10 @@ def backtester(request):
                                                                        buy_price_adjustment=buy_price_adjustment,
                                                                        sell_price_adjustment=sell_price_adjustment)
 
+                    # Creating a dictionary of profits/losses for individual tickers
                     allResults[ticker] = backtestResult
 
-
-                    # if backtesting returned any results
+                    # if backtesting returned a dataframe with buy/sell prompts:
                     if backtestDataFull is not None:
                         # create a smaller DataFrame with the relevant column titles
                         backtestData = backtestDataFull.loc[:, ["Close", "Final Rec", "Price After Delay",
@@ -734,19 +735,28 @@ def backtester(request):
                         # if there is more than 1 transaction in the backtest DataFrame
                         if numTransactions > 1:
                             days_between_stock_transactions = []
+                            days_holding_stock = []
 
                             # get the number of days between each two transactions, append results to the list for the stock
                             for i in range(1, numTransactions):
                                 days_between_2_transactions = (backtestData.Date[i] - backtestData.Date[i - 1]).days
                                 days_between_stock_transactions.append(days_between_2_transactions)
 
+                                if backtestData.loc[i - 1, "Recommendation"] == "Buy":
+                                    days_holding_stock.append(days_between_2_transactions)
+
+
+
                             average_time_between_stock_transactions = round(sum(days_between_stock_transactions) / (numTransactions - 1), 2)
                             averageIndTimesBetweenTransactions.append(average_time_between_stock_transactions)
-                            print(averageIndTimesBetweenTransactions)
+
+                            average_time_holding_stock = round(sum(days_holding_stock) / len(days_holding_stock), 2)
+                            averageIndTimesHoldingStock.append(average_time_holding_stock)
 
                         # if only one ("buy") transaction has taken place
                         else:
                             average_time_between_stock_transactions = None
+                            average_time_holding_stock = None
 
                         # prepare an individual backtesting table per stock
                         indTable = backtestData.to_html(col_space=20, bold_rows=True, classes="table",
@@ -757,27 +767,33 @@ def backtester(request):
                     else:
                         numTransactions = None
                         average_time_between_stock_transactions = None
+                        average_time_holding_stock = None
                         indTable = "The selected signal has not generated a sufficient number of buy/sell recommendations for this ticker"
 
                     # Prepare details and table to be displayed per ticker
-                    allIndTickerDetails = (ticker, numTransactions, average_time_between_stock_transactions, indTable)
+                    allIndTickerDetails = (ticker, numTransactions, average_time_between_stock_transactions,
+                                           average_time_holding_stock, indTable)
 
                     # Prepare a list of all ticker info and tables to iterate through
                     allDetails.append(allIndTickerDetails)
 
-
+                # Calculate average time between transactions for all the selected stocks
                 if len(averageIndTimesBetweenTransactions) > 0:
-
                     overallAverageTimeBetweenTransactions = round(sum(averageIndTimesBetweenTransactions)/len(averageIndTimesBetweenTransactions), 2)
                 else:
                     overallAverageTimeBetweenTransactions = None
 
-                    print(averageIndTimesBetweenTransactions)
 
+                if len(averageIndTimesHoldingStock) > 0:
+                    overallAverageTimeHoldingStock = round(sum(averageIndTimesHoldingStock)/len(averageIndTimesHoldingStock), 2)
+                else:
+                    overallAverageTimeBetweenTransactions = None
+
+
+                # Preparing a main joint table with the results of backtesting
                 backtesterTable = pd.DataFrame.from_dict(allResults, orient="index")
                 backtesterTable.reset_index(inplace=True)
                 backtesterTable.columns = ["Ticker", "Profit/Loss"]
-                # backtesterTable.set_index("Ticker", inplace=True)
                 backtesterTable["Profit/Loss"] = backtesterTable["Profit/Loss"].apply(
                     lambda x: (format_float(x) + " %"))
 
@@ -791,13 +807,15 @@ def backtester(request):
                                                          classes=["table", "backtest_table"],
                                                          escape=False, index=False)
 
-                overallResult = round(sum(allResults.values()) / len(allResults), 2)
+                overallResult = calc_average_percentage(allResults.values())
+                print(allResults)
 
                 context = {
                     "overallResult": overallResult,
                     "htmlJointTable": htmlJointTable,
                     "allDetails": allDetails,
                     "overallAverageTimeBetweenTransactions":overallAverageTimeBetweenTransactions,
+                    "overallAverageTimeHoldingStock": overallAverageTimeHoldingStock
                 }
 
                 return render(request, "stock_screener/backtester.html", context)
