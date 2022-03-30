@@ -60,7 +60,6 @@ def index(request):
                 macdS = stockForm.cleaned_data['macdS']
                 macdSm = stockForm.cleaned_data['macdSm']
 
-
                 if (adx and not (ma or psar or srsi or macd)):
                     context = {
                         "message": "Please add another signal - ADX alone does not provide buy/sell recommendations",
@@ -483,7 +482,8 @@ def watchlist(request):
             graphs = []
             watchlist = SavedSearch.objects.filter(user=request.user)
             if len(watchlist) == 0:
-                return render(request, "stock_screener/watchlist.html", {"empty_message": "You do not have any tickers added to your watchlist"})
+                return render(request, "stock_screener/watchlist.html",
+                              {"empty_message": "You do not have any tickers added to your watchlist"})
 
             watchlist = sorted(watchlist, key=lambda p: p.date, reverse=True)
             allStocks = read_csv_from_S3(bucket, "Stocks")
@@ -529,7 +529,6 @@ def watchlist(request):
                 watchlist_item["tickerFull"] = item.ticker_full
                 watchlist_item["notes"] = item.notes
                 watchlist_item["tickerID"] = item.id
-
 
                 data = allStocks[ticker].copy()
                 data.dropna(how="all", inplace=True)
@@ -606,20 +605,18 @@ def watchlist(request):
             jointTable.sort_values(by=['Days Since Trend Change', 'Ticker'], inplace=True)
             jointTable.rename_axis(None, inplace=True)
 
-            htmlResultTable = jointTable.to_html(col_space=30, bold_rows=True, classes=["table","result_table"], justify="left",
+            htmlResultTable = jointTable.to_html(col_space=30, bold_rows=True, classes=["table", "result_table"],
+                                                 justify="left",
                                                  escape=False)
 
         return render(request, "stock_screener/watchlist.html",
-                      {'watched_tickers': watched_tickers, "htmlResultTable": htmlResultTable, "signalTable": signalTable})
+                      {'watched_tickers': watched_tickers, "htmlResultTable": htmlResultTable,
+                       "signalTable": signalTable})
 
 
 def backtester(request):
     if request.method == "GET":
         user = request.user
-        # watchedTickersObjs = SavedSearch.objects.filter(user=request.user)
-        # watchedTickersObjs = sorted(watchedTickersObjs, key=lambda p: p.ticker)
-        # watchedTickersNames = [t.ticker for t in watchedTickersObjs]
-
         return render(request, "stock_screener/backtester.html", {"stockForm": BacktestForm(user)})
 
     if request.method == "POST":
@@ -663,7 +660,7 @@ def backtester(request):
                 num_years = backtestForm.cleaned_data["num_years"]
 
                 tickers = backtestForm.cleaned_data['tickers']
-                print("tickers are" + str(tickers))
+                #print("tickers are" + str(tickers))
                 if "ALL" in tickers:
                     tickers = sorted([o.ticker for o in SavedSearch.objects.filter(user=request.user)])
 
@@ -696,13 +693,12 @@ def backtester(request):
                     return render(request, "stock_screener/backtester.html", context)
 
                 allResults = {}
-                allTables = {}
+                allDetails = []
+                averageIndTimesBetweenTransactions = []
 
                 for ticker in tickers:
-                    stock = existingStocks[ticker].copy()
 
-                    # getting full company name for the selected ticker
-                    tickerName = tickerInfo.loc[ticker]["Name"]
+                    stock = existingStocks[ticker].copy()
 
                     # removing NaN values from the stock data
                     stock.dropna(how="all", inplace=True)
@@ -711,7 +707,7 @@ def backtester(request):
                     stock, selectedSignals = make_calculations(stock, signals)
 
                     stock = adjust_start(stock, startDateDatetime)
-                    print(stock.tail(5))
+                    #print(stock.tail(5))
 
                     # preparing backtesting information for the ticker
                     backtestResult, backtestDataFull = backtest_signal(stock,
@@ -723,24 +719,61 @@ def backtester(request):
 
                     allResults[ticker] = backtestResult
 
+
+                    # if backtesting returned any results
                     if backtestDataFull is not None:
+                        # create a smaller DataFrame with the relevant column titles
                         backtestData = backtestDataFull.loc[:, ["Close", "Final Rec", "Price After Delay",
                                                                 "Adjusted Price After Delay", "Profit/Loss"]]
                         backtestData.reset_index(inplace=True)
-                        # backtestData.rename_axis(None, inplace=True)
-                        # backtestData["Price After Delay"] = backtestData["Price After Delay"].apply(lambda x: format_float(x))
-                        # backtestData["Adjusted Price After Delay"] = backtestData["Adjusted Price After Delay"].apply(lambda x: format_float(x))
                         backtestData.columns = ["Date", "Closing Price", "Recommendation", "Price After Delay",
                                                 "Adjusted Price After Delay", "Profit/Loss"]
 
-                        allTables[ticker] = backtestData.to_html(col_space=20, bold_rows=True, classes="table",
-                                                                 justify="left", index=False)
+                        numTransactions = len(backtestData.index)
 
+                        # if there is more than 1 transaction in the backtest DataFrame
+                        if numTransactions > 1:
+                            days_between_stock_transactions = []
+
+                            # get the number of days between each two transactions, append results to the list for the stock
+                            for i in range(1, numTransactions):
+                                days_between_2_transactions = (backtestData.Date[i] - backtestData.Date[i - 1]).days
+                                days_between_stock_transactions.append(days_between_2_transactions)
+
+                            average_time_between_stock_transactions = round(sum(days_between_stock_transactions) / (numTransactions - 1), 2)
+                            averageIndTimesBetweenTransactions.append(average_time_between_stock_transactions)
+                            print(averageIndTimesBetweenTransactions)
+
+                        # if only one ("buy") transaction has taken place
+                        else:
+                            average_time_between_stock_transactions = None
+
+                        # prepare an individual backtesting table per stock
+                        indTable = backtestData.to_html(col_space=20, bold_rows=True, classes="table",
+                                                        justify="left", index=False)
+
+
+                    # If backtest returns no data (sell/buy prompts not generated by teh signal selected)
                     else:
-                        allTables[
-                            ticker] = "The signal has not generated a sufficient number of buy/sell recommendations"
+                        numTransactions = None
+                        average_time_between_stock_transactions = None
+                        indTable = "The selected signal has not generated a sufficient number of buy/sell recommendations for this ticker"
 
-                print(allResults)
+                    # Prepare details and table to be displayed per ticker
+                    allIndTickerDetails = (ticker, numTransactions, average_time_between_stock_transactions, indTable)
+
+                    # Prepare a list of all ticker info and tables to iterate through
+                    allDetails.append(allIndTickerDetails)
+
+
+                if len(averageIndTimesBetweenTransactions) > 0:
+
+                    overallAverageTimeBetweenTransactions = round(sum(averageIndTimesBetweenTransactions)/len(averageIndTimesBetweenTransactions), 2)
+                else:
+                    overallAverageTimeBetweenTransactions = None
+
+                    print(averageIndTimesBetweenTransactions)
+
                 backtesterTable = pd.DataFrame.from_dict(allResults, orient="index")
                 backtesterTable.reset_index(inplace=True)
                 backtesterTable.columns = ["Ticker", "Profit/Loss"]
@@ -763,10 +796,11 @@ def backtester(request):
                 context = {
                     "overallResult": overallResult,
                     "htmlJointTable": htmlJointTable,
-                    "allTables": allTables
+                    "allDetails": allDetails,
+                    "overallAverageTimeBetweenTransactions":overallAverageTimeBetweenTransactions,
                 }
 
                 return render(request, "stock_screener/backtester.html", context)
 
-#def graph(request):
-    #return render(request, "stock_screener/graph.html")
+# def graph(request):
+# return render(request, "stock_screener/graph.html")

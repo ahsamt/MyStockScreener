@@ -142,7 +142,9 @@
         </h2>
         {% endif %}
 
-
+        {%  if overallAverageTimeBetweenTransactions %}
+            <h4 class="centre mb-2">Average time between transactions: {{ overallAverageTimeBetweenTransactions }} days</h4>
+        {% endif %}
         <div class="stock_info card mb-4" id="outcome_card">
             <div class="card-body">
 
@@ -151,12 +153,19 @@
         </div>
       </div>
 
-        {% for name, table in allTables.items %}
-        <div class="ind_result card mb-4" id="{{ name }}_card">
-        <h4 class="card-title mt-3 ms-3 red" >{{ name }}</h4>
+
+        {% for item in allDetails %}
+        <div class="ind_result card mb-4" id="{{ item.0 }}_card">
+        <h4 class="card-title mt-3 ms-3 red" >{{ item.0 }}</h4>
+            {% if item.1 %}
+            <h5 class="card-subtitle mt-3 ms-3 " >Number of transactions: {{ item.1 }}</h5>
+            {%  endif %}
+            {% if item.2 %}
+            <h5 class="card-subtitle mt-3 ms-3 " >Average time between transactions: {{ item.2 }} days</h5>
+            {% endif %}
             <div class="card-body">
 
-                {{ table | safe }}
+                {{ item.3 | safe }}
             </div>
         <button class="close_ind_outcome_button">
             Back to results summary
