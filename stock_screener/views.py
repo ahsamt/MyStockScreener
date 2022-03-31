@@ -8,7 +8,8 @@ from django.db import IntegrityError
 from .forms import StockForm, BacktestForm
 from .utils import read_csv_from_S3, adjust_start, make_graph, get_price_change, get_current_tickers_info, \
     upload_csv_to_S3, stock_tidy_up, prepare_ticker_info_update, get_company_name_from_yf, get_previous_sma, \
-    calculate_price_dif, format_float, backtest_signal, check_for_sma_column, add_sma_col, prepare_signal_table, calc_average_percentage
+    calculate_price_dif, format_float, backtest_signal, check_for_sma_column, add_sma_col, prepare_signal_table, \
+    calc_average_percentage
 from .calculations import make_calculations
 from datetime import date, datetime
 from dateutil.relativedelta import relativedelta
@@ -20,11 +21,11 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 
-numMonths = 12
 bucket = 'stockscreener-data'
 
 
 def index(request):
+    numMonths = 12
     if request.method == "GET":
         return render(request, "stock_screener/index.html", {"stockForm": StockForm()})
 
@@ -70,6 +71,7 @@ def index(request):
                 # Calculating the start date according to client requirements
                 endDate = date.today()
                 startDate = endDate + relativedelta(months=-numMonths)
+                startDateInternal = startDate + relativedelta(months=-6)
                 startDateDatetime = datetime.combine(startDate, datetime.min.time())
 
                 signalResults = []
@@ -121,8 +123,15 @@ def index(request):
                 # getting full company name for the selected ticker
                 tickerName = tickerInfo.loc[ticker]["Name"]
 
+                # Getting the slice of the data starting from 18 months back
+                # (12 required for display + 6 extra for analysis)
+                stock = stock.loc[startDateInternal:, :]
+
                 # removing NaN values from the stock data
                 stock.dropna(how="all", inplace=True)
+
+                # converting column data types to float
+                stock = stock.apply(pd.to_numeric)
 
                 signals = [ma, maS, maL, maWS, maWL, psar, psarAF, psarMA, adx, adxW, adxL, srsi, srsiW, srsiSm1,
                            srsiSm2, srsiOB, srsiOS, macd, macdS, macdF, macdSm]
@@ -136,8 +145,6 @@ def index(request):
                     # getting info for the result table
                     rec = "No signals selected"
                     daysSinceChange = "n/a"
-
-
 
                 # if any of the signals are selected:
                 else:
@@ -178,7 +185,6 @@ def index(request):
                     if backtestDataFull is not None:
                         backtestData = backtestDataFull.loc[:, ["Close", "Final Rec", "Profit/Loss"]]
                         backtestData.reset_index(inplace=True)
-                        # backtestData.rename_axis(None, inplace=True)
                         backtestData.columns = ["Date", "Closing Price", "Recommendation", "Profit/Loss"]
 
                         htmlBacktestTable = backtestData.to_html(col_space=30, bold_rows=True, classes="table",
@@ -251,7 +257,6 @@ def index(request):
                                  "srsiOB": srsiOB, "srsiOS": srsiOS, "macd": macd, "macdF": macdF,
                                  "macdS": macdS, "macdSm": macdSm}
 
-                print(stock.tail(15))
                 context = {
                     "ticker": ticker,
                     "tickerName": tickerName,
@@ -332,9 +337,8 @@ def saved_searches(request):
     if request.method != "POST":
         return JsonResponse({"error": "POST request required."}, status=400)
 
-    # Check received data emails
+    # Check received data
     data = json.loads(request.body)
-
     ticker = data.get("ticker")
     if ticker == [""]:
         return JsonResponse({
@@ -469,159 +473,176 @@ def saved_signals(request):
     return JsonResponse({"message": "Signal saved successfully", "id": signal_id}, status=201)
 
 
+@login_required
 def watchlist(request):
+    numMonths = 12
     endDate = date.today()
     startDate = endDate + relativedelta(months=-numMonths)
     startDateInternal = startDate + relativedelta(months=-6)
     startDateDatetime = datetime.combine(startDate, datetime.min.time())
+
     if request.method == "GET":
+        watched_tickers = []
+        watchlist = SavedSearch.objects.filter(user=request.user)
+        if len(watchlist) == 0:
+            return render(request, "stock_screener/watchlist.html",
+                          {"empty_message": "You do not have any tickers added to your watchlist"})
 
-        if request.user.is_authenticated:
+        # watchlist = sorted(watchlist, key=lambda p: p.date, reverse=True)
+        allStocksFull = read_csv_from_S3(bucket, "Stocks")
 
-            watched_tickers = []
-            graphs = []
-            watchlist = SavedSearch.objects.filter(user=request.user)
-            if len(watchlist) == 0:
-                return render(request, "stock_screener/watchlist.html",
-                              {"empty_message": "You do not have any tickers added to your watchlist"})
+        # Getting the slice of the data starting from 18 months back (12 required for display + 6 extra for analysis)
+        allStocks = allStocksFull.loc[startDateInternal:, :]
 
-            watchlist = sorted(watchlist, key=lambda p: p.date, reverse=True)
-            allStocks = read_csv_from_S3(bucket, "Stocks")
+        # Check if the user has a signal saved in their profile
+        try:
+            signal = SignalConstructor.objects.get(user=request.user)
 
-            try:
-                signal = SignalConstructor.objects.get(user=request.user)
+        except SignalConstructor.DoesNotExist:
+            signal = None
 
-            except SignalConstructor.DoesNotExist:
-                signal = None
+        if signal:
+            signals = [signal.ma,
+                       signal.maS,
+                       signal.maL,
+                       signal.maWS,
+                       signal.maWL,
+                       signal.psar,
+                       signal.psarAF,
+                       signal.psarMA,
+                       signal.adx,
+                       signal.adxW,
+                       signal.adxL,
+                       signal.srsi,
+                       signal.srsiW,
+                       signal.srsiSm1,
+                       signal.srsiSm2,
+                       signal.srsiOB,
+                       signal.srsiOS,
+                       signal.macd,
+                       signal.macdS,
+                       signal.macdF,
+                       signal.macdSm]
 
-            if signal:
-                signals = [signal.ma,
-                           signal.maS,
-                           signal.maL,
-                           signal.maWS,
-                           signal.maWL,
-                           signal.psar,
-                           signal.psarAF,
-                           signal.psarMA,
-                           signal.adx,
-                           signal.adxW,
-                           signal.adxL,
-                           signal.srsi,
-                           signal.srsiW,
-                           signal.srsiSm1,
-                           signal.srsiSm2,
-                           signal.srsiOB,
-                           signal.srsiOS,
-                           signal.macd,
-                           signal.macdS,
-                           signal.macdF,
-                           signal.macdSm]
+        else:
+            return render(request, "stock_screener/watchlist.html",
+                          {"empty_message": "Please create and save a signal on the 'Search' page to view "
+                                            "recommendations for your watchlist"})
 
-            # prepare a table to display the saved signal to the user
-            signalTable = prepare_signal_table(signal)
+        # prepare a table to display the saved signal to the user
+        signalTable = prepare_signal_table(signal)
 
-            # can i pass it to html as an object instead?
-            for item in watchlist:
-                ticker = item.ticker
-                tickerId = item.id
-                watchlist_item = {}
-                watchlist_item["ticker"] = ticker
-                watchlist_item["tickerFull"] = item.ticker_full
-                watchlist_item["notes"] = item.notes
-                watchlist_item["tickerID"] = item.id
+        # can i pass it to html as an object instead?
+        for item in watchlist:
+            ticker = item.ticker
+            tickerId = item.id
+            watchlist_item = {}
+            watchlist_item["ticker"] = ticker
+            watchlist_item["notes"] = item.notes
+            watchlist_item["tickerID"] = item.id
 
-                data = allStocks[ticker].copy()
-                data.dropna(how="all", inplace=True)
-                if signal:
+            # Creating a separate dataframe for each stock, dropping n/a values and converting data to numeric
+            data = allStocks[ticker].copy()
+            data.dropna(how="all", inplace=True)
+            data = data.apply(pd.to_numeric)
 
-                    data, selectedSignals = make_calculations(data, signals)
-                    watchlist_item["rec"] = data.loc[data.index[-1], "Final Rec"]
-                    watchlist_item["daysSinceChange"] = data.loc[data.index[-1], "Days_Since_Change"]
-                else:
-                    data = data.reset_index()
-                    watchlist_item["rec"] = "No signals selected"
-                    watchlist_item["daysSinceChange"] = "n/a"
+            # make relevant calculations for each ticker to get current recommendations on selling/buying
 
-                closingPrice, priceChange = get_price_change(data)
+            # Get an updated dataframe + names of the signal columns added
+            data, selectedSignals = make_calculations(data, signals)
 
-                # Check if an SMA column has already been added, and add one if it has not been
-                smaCol = check_for_sma_column(data)
-                if not smaCol:
-                    data, smaCol = add_sma_col(data)
+            # Get an overall buy/sell/wait recommendation based on the signals selected
+            rec = data.loc[data.index[-1], "Final Rec"]
 
-                latestDate = data["Date"].max()
-                smaPeriods = [7, 30, 90]
-                smaChanges = []
+            # Get the number of days since the current recommendation became active
+            daysSinceChange = data.loc[data.index[-1], "Days_Since_Change"]
 
-                # getting the SMA value changes for the ticker
-                # going back the number of days indicated in the smaPeriods list
-                for noDays in smaPeriods:
-                    smaValue = get_previous_sma(data, smaCol, latestDate, noDays)
-                    smaChanges.append(calculate_price_dif(closingPrice, smaValue)[1] + "%")
+            # else:
+            #     data = data.reset_index()
+            #     rec = "No signals selected"
+            #     daysSinceChange = "n/a"
 
-                closingPrice = format_float(closingPrice)
-                data = adjust_start(data, startDateDatetime)
-                graph = make_graph(data, ticker, selectedSignals, 600, 800)
-                watchlist_item["graph"] = graph
+            closingPrice = data["Close"].iloc[-1]
 
-                signalResults = []
-                print(selectedSignals)
-                for signal in selectedSignals:
-                    signalResults.append(format_float(data.loc[data.index.max()][signal]))
+            # Check if an SMA column has already been added, and add one if it has not been
+            smaCol = check_for_sma_column(data)
+            if not smaCol:
+                data, smaCol = add_sma_col(data)
 
-                tableEntries = \
-                    [f"<span class='watchlist-ticker'>{ticker}</span>",
-                     watchlist_item["rec"],
-                     watchlist_item["daysSinceChange"],
-                     closingPrice] + smaChanges \
-                    + signalResults + [f"<button class = 'graph-button' data-ticker={ticker}>See graph</button>"] \
-                    + [f"<button class = 'remove-ticker-button' data-ticker_id={tickerId}>Remove</button>"]
-                # ['''<a href="{% url 'graph' %}" target="blank"> Graph </a>''']
+            latestDate = data["Date"].max()
+            smaPeriods = [7, 30, 90]
+            smaChanges = []
 
-                watchlist_item["resultTable"] = pd.DataFrame([tableEntries],
-                                                             columns=['Ticker',
-                                                                      'Analysis Outcome',
-                                                                      'Days Since Trend Change',
-                                                                      'Closing Price',
-                                                                      '1 Week Change',
-                                                                      '1 Month Change',
-                                                                      '3 Months Change'] + selectedSignals + ["Graph"] +
-                                                                     ["Remove From Watchlist?"])
+            # Get the SMA changes for the ticker to show how much on average the price has dropped/increased
+            # over the number of days indicated in the smaPeriods list above
+            for noDays in smaPeriods:
+                smaValue = get_previous_sma(data, smaCol, latestDate, noDays)
+                smaChanges.append(calculate_price_dif(closingPrice, smaValue)[1] + "%")
 
-                # resultTable.set_index('Analysis Outcome', inplace=True)
-                watched_tickers.append(watchlist_item)
-            jointTable = pd.DataFrame(columns=['Ticker',
-                                               'Analysis Outcome',
-                                               'Days Since Trend Change',
-                                               'Closing Price',
-                                               '1 Week Change',
-                                               '1 Month Change',
-                                               '3 Months Change'] + selectedSignals + ["Graph"] +
-                                              ["Remove From Watchlist?"])
-            for elt in watched_tickers:
-                jointTable = pd.concat([jointTable, elt["resultTable"]], axis=0)
+            # Format the closing price for each ticker for table display
+            closingPrice = format_float(closingPrice)
 
-            jointTable.set_index("Ticker", inplace=True)
-            jointTable.sort_values(by=['Days Since Trend Change', 'Ticker'], inplace=True)
-            jointTable.rename_axis(None, inplace=True)
+            # Prepare a graph for each ticker
+            data = adjust_start(data, startDateDatetime)
+            graph = make_graph(data, ticker, selectedSignals, 600, 800)
+            watchlist_item["graph"] = graph
 
-            htmlResultTable = jointTable.to_html(col_space=30, bold_rows=True, classes=["table", "result_table"],
-                                                 justify="left",
-                                                 escape=False)
+            signalResults = []
 
-        return render(request, "stock_screener/watchlist.html",
-                      {'watched_tickers': watched_tickers, "htmlResultTable": htmlResultTable,
-                       "signalTable": signalTable})
+            for signal in selectedSignals:
+                signalResults.append(format_float(data.loc[data.index.max()][signal]))
 
+            tableEntries = \
+                [f"<span class='watchlist-ticker'>{ticker}</span>",
+                 rec, daysSinceChange, closingPrice] \
+                + smaChanges + signalResults + \
+                [f"<button class = 'graph-button' data-ticker={ticker}>See graph</button>",
+                 f"<button class = 'remove-ticker-button' data-ticker_id={tickerId}>Remove</button>"]
+            # ['''<a href="{% url 'graph' %}" target="blank"> Graph </a>''']
 
+            watchlist_item["resultTable"] = pd.DataFrame([tableEntries],
+                                                         columns=['Ticker',
+                                                                  'Analysis Outcome',
+                                                                  'Days Since Trend Change',
+                                                                  'Closing Price',
+                                                                  '1 Week Change',
+                                                                  '1 Month Change',
+                                                                  '3 Months Change'] + selectedSignals + ["Graph"] +
+                                                                 ["Remove From Watchlist?"])
+
+            watched_tickers.append(watchlist_item)
+
+        # Create a joint table with recommendations for each ticker to be displayed on the watchlist page
+        jointTable = pd.DataFrame(columns=['Ticker',
+                                           'Analysis Outcome',
+                                           'Days Since Trend Change',
+                                           'Closing Price',
+                                           '1 Week Change',
+                                           '1 Month Change',
+                                           '3 Months Change'] + selectedSignals + ["Graph"] +
+                                          ["Remove From Watchlist?"])
+        for elt in watched_tickers:
+            jointTable = pd.concat([jointTable, elt["resultTable"]], axis=0)
+
+        jointTable.set_index("Ticker", inplace=True)
+        jointTable.sort_values(by=['Days Since Trend Change', 'Ticker'], inplace=True)
+        jointTable.rename_axis(None, inplace=True)
+
+        htmlResultTable = jointTable.to_html(col_space=30, bold_rows=True, classes=["table", "result_table"],
+                                             justify="left",
+                                             escape=False)
+
+    return render(request, "stock_screener/watchlist.html",
+                  {'watched_tickers': watched_tickers, "htmlResultTable": htmlResultTable,
+                   "signalTable": signalTable})
+
+@login_required
 def backtester(request):
     if request.method == "GET":
         user = request.user
         return render(request, "stock_screener/backtester.html", {"stockForm": BacktestForm(user)})
 
     if request.method == "POST":
-        print(request.POST)
-
         if 'tickers' in request.POST:
             backtestForm = BacktestForm(request.user, request.POST)
 
@@ -660,24 +681,23 @@ def backtester(request):
                 num_years = backtestForm.cleaned_data["num_years"]
 
                 tickers = backtestForm.cleaned_data['tickers']
-                #print("tickers are" + str(tickers))
+
                 if "ALL" in tickers:
                     tickers = sorted([o.ticker for o in SavedSearch.objects.filter(user=request.user)])
 
                 # Calculating the start date according to client requirements
                 endDate = date.today()
                 startDate = endDate + relativedelta(years=-int(num_years))
+                startDateInternal = startDate + relativedelta(months=-6)
                 startDateDatetime = datetime.combine(startDate, datetime.min.time())
-
-                signalResults = []
 
                 # getting stocks data from S3
                 existingStocks = read_csv_from_S3(bucket, "Stocks")
-                tickerList = set(existingStocks.columns.get_level_values(0).tolist())
-                tickerInfo = get_current_tickers_info(bucket)
 
                 signals = [ma, maS, maL, maWS, maWL, psar, psarAF, psarMA, adx, adxW, adxL, srsi, srsiW, srsiSm1,
                            srsiSm2, srsiOB, srsiOS, macd, macdS, macdF, macdSm]
+
+                # if no signals have been selected, remind the user to select signals
                 if not (ma or psar or adx or srsi or macd):
                     context = {
                         "message": "Please select the signals to back test",
@@ -698,17 +718,19 @@ def backtester(request):
                 averageIndTimesHoldingStock = []
 
                 for ticker in tickers:
-
-                    stock = existingStocks[ticker].copy()
+                    # Preparing a dataframe for the period of time indicated by teh user + 6 months for calculations
+                    stock = existingStocks[ticker].copy().loc[startDateInternal:, :]
 
                     # removing NaN values from the stock data
                     stock.dropna(how="all", inplace=True)
+
+                    # converting column data types to float
+                    stock = stock.apply(pd.to_numeric)
 
                     # adding columns with calculations for the selected signals
                     stock, selectedSignals = make_calculations(stock, signals)
 
                     stock = adjust_start(stock, startDateDatetime)
-                    #print(stock.tail(5))
 
                     # preparing backtesting information for the ticker
                     backtestResult, backtestDataFull = backtest_signal(stock,
@@ -745,9 +767,8 @@ def backtester(request):
                                 if backtestData.loc[i - 1, "Recommendation"] == "Buy":
                                     days_holding_stock.append(days_between_2_transactions)
 
-
-
-                            average_time_between_stock_transactions = round(sum(days_between_stock_transactions) / (numTransactions - 1), 2)
+                            average_time_between_stock_transactions = round(
+                                sum(days_between_stock_transactions) / (numTransactions - 1), 2)
                             averageIndTimesBetweenTransactions.append(average_time_between_stock_transactions)
 
                             average_time_holding_stock = round(sum(days_holding_stock) / len(days_holding_stock), 2)
@@ -779,16 +800,16 @@ def backtester(request):
 
                 # Calculate average time between transactions for all the selected stocks
                 if len(averageIndTimesBetweenTransactions) > 0:
-                    overallAverageTimeBetweenTransactions = round(sum(averageIndTimesBetweenTransactions)/len(averageIndTimesBetweenTransactions), 2)
+                    overallAverageTimeBetweenTransactions = round(
+                        sum(averageIndTimesBetweenTransactions) / len(averageIndTimesBetweenTransactions), 2)
                 else:
                     overallAverageTimeBetweenTransactions = None
-
 
                 if len(averageIndTimesHoldingStock) > 0:
-                    overallAverageTimeHoldingStock = round(sum(averageIndTimesHoldingStock)/len(averageIndTimesHoldingStock), 2)
+                    overallAverageTimeHoldingStock = round(
+                        sum(averageIndTimesHoldingStock) / len(averageIndTimesHoldingStock), 2)
                 else:
                     overallAverageTimeBetweenTransactions = None
-
 
                 # Preparing a main joint table with the results of backtesting
                 backtesterTable = pd.DataFrame.from_dict(allResults, orient="index")
@@ -814,7 +835,7 @@ def backtester(request):
                     "overallResult": overallResult,
                     "htmlJointTable": htmlJointTable,
                     "allDetails": allDetails,
-                    "overallAverageTimeBetweenTransactions":overallAverageTimeBetweenTransactions,
+                    "overallAverageTimeBetweenTransactions": overallAverageTimeBetweenTransactions,
                     "overallAverageTimeHoldingStock": overallAverageTimeHoldingStock
                 }
 

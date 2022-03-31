@@ -74,7 +74,7 @@ class BacktestForm(forms.Form):
     adx = forms.BooleanField(label='Average Directional Movement Index (ADX)', required=False)
     adxW = forms.IntegerField(label='ADX window', min_value=0, max_value=100, initial="18",
                               widget=forms.NumberInput(attrs={'style': 'width:9ch'}))
-    adxL = forms.IntegerField(label='ADX linit', min_value=0, max_value=100, initial="20",
+    adxL = forms.IntegerField(label='ADX limit', min_value=0, max_value=100, initial="20",
                               widget=forms.NumberInput(attrs={'style': 'width:9ch'}))
 
     srsi = forms.BooleanField(label='Stochastic RSI (SRSI)', required=False)

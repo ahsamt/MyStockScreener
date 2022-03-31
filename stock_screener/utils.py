@@ -1,23 +1,18 @@
-# import json
 import yfinance as yf
 import pandas as pd
 import boto3
 import numpy as np
-from datetime import date, datetime, timedelta
-from dateutil.relativedelta import relativedelta
 from io import StringIO
-import botocore
 import ta
-import json
-import urllib.request
-import urllib.parse
 import plotly.graph_objects as go
-import requests
 
 
 def adjust_start(df, start_date):
+    """pd DataFrame, date as datetime.datetime => pd DataFrame
+    Creates a copy of current dataframe with starting date matching the requirements"""
+
     mask = (df["Date"] >= start_date)
-    dfNew = df.loc[mask].copy(deep=True)
+    dfNew = df.loc[mask].copy()
     dfNew.reset_index(drop=True, inplace=True)
     return dfNew
 
@@ -38,6 +33,8 @@ def get_company_name_from_yf(ticker):
 
 
 def upload_csv_to_S3(bucket, df, file_name):
+    """string, pd DataFrame, string => None
+    converts dataframe  to CSV format and uploads it to S3"""
     csv_buffer = StringIO()
     df.to_csv(csv_buffer)
     s3_resource = boto3.resource('s3')
@@ -48,7 +45,6 @@ def upload_csv_to_S3(bucket, df, file_name):
         print('File Uploaded Successfully')
     else:
         print('File Not Uploaded')
-
     return None
 
 
@@ -67,17 +63,22 @@ def prepare_ticker_info_update(current_tickers_info, ticker, ticker_name):
 
 
 def read_csv_from_S3(bucket, file_name):
+    """string, string => pd DataFrame
+    Takes in the name of the S3 bucket and the name of the csv file to be read,
+    returns decoded CSV file as pd DataFrame"""
     s3_client = boto3.client("s3")
     object_key = f"{file_name}.csv"
     csv_obj = s3_client.get_object(Bucket=bucket, Key=object_key)
     body = csv_obj['Body']
     csv_string = body.read().decode('utf-8')
     df = pd.read_csv(StringIO(csv_string), header=[0, 1], index_col=[0], parse_dates=[0])
-
     return df
 
 
 def stocks_tidy_up(df):
+    """pd DataFrame => pd DataFrame
+    Takes in the DataFrame with data for multiple stocks,
+    prepares the data for upload on S3"""
     df.columns = df.columns.to_flat_index()
     df.columns = pd.MultiIndex.from_tuples(df.columns)
     df = df.swaplevel(axis=1).sort_index(axis=1)
@@ -85,27 +86,39 @@ def stocks_tidy_up(df):
 
 
 def stock_tidy_up(df, ticker):
+    """pd DataFrame, string => pd DataFrame
+    Takes in the DataFrame with data for one stock,
+    prepares the data for upload on S3"""
     newDF = df.copy(deep=True)
     columns = [(ticker, 'Open'), (ticker, 'High'), (ticker, "Low"), (ticker, "Close"), (ticker, "Adj Close"),
                (ticker, "Volume")]
     newDF.columns = pd.MultiIndex.from_tuples(columns)
     newDF = newDF.sort_index(axis=1)
-
     return newDF
 
 
 def get_current_tickers_info(bucket):
+    """string => pd DataFrame
+    Accesses the TickersInfo file on S3,
+    returns a DataFrame with the data contained in the file"""
     s3_client = boto3.client("s3")
     object_key = "TickersInfo.csv"
     csv_obj = s3_client.get_object(Bucket=bucket, Key=object_key)
     body = csv_obj['Body']
     csv_string = body.read().decode('utf-8')
     df = pd.read_csv(StringIO(csv_string), index_col=[0])
-
     return df
 
 
 def add_ma(df, ma_short, ma_long, window_short, window_long):
+    """pd DataFrame, string, string, integer, integer => pd DataFrame, string, string
+    Takes in :
+        - stock data,
+        - types of Moving Average signal (SMA/EMA) for a short and long window
+        - sizes of the window for short and long window
+    Returns a DataFrame with the Moving Average calculations and recommendations added,
+    name of the column representing short MA window, name of the column representing long MA window
+    """
     if ma_short == "SMA":
         colShort = f"SMA {window_short}"
         df[colShort] = ta.trend.sma_indicator(df["Close"], window=window_short)
@@ -137,24 +150,34 @@ def add_ma(df, ma_short, ma_long, window_short, window_long):
 
 
 def add_psar(df, psar_af, psar_ma):
+    """pd DataFrame, float, float => pd DataFrame
+    Takes in :
+        - stock data,
+        - Acceleration Factor,
+        - Maximum Acceleration
+    Returns a DataFrame with the Parabolic SAR calculations and recommendations added"""
     if 'Date' not in df.columns:
         df = df.reset_index()
     df["Parabolic SAR"] = ta.trend.PSARIndicator(df["High"], df["Low"], df["Close"], psar_af, psar_ma).psar()
     mask = df["Parabolic SAR"] > df["Close"]
     df["Parabolic SAR Rec"] = "Buy"
     df.loc[mask, "Parabolic SAR Rec"] = "Sell"
-
     return df
 
 
 def add_adx(df, window_size, limit):
+    """pd DataFrame, integer, integer => pd DataFrame
+    Takes in :
+        - stock data,
+        - window size,
+        - limit value above which an instrument is considered to be trending
+    Returns a DataFrame with the Average Directional Index calculations and recommendations added"""
     if 'Date' not in df.columns:
         df = df.reset_index()
     df["ADX"] = ta.trend.ADXIndicator(df["High"], df["Low"], df["Close"], window=window_size).adx()
     mask = df["ADX"] > limit
     df["ADX Rec"] = False
     df.loc[mask, "ADX Rec"] = True
-
     return df
 
 
@@ -200,9 +223,12 @@ def add_days_since_change(df, col_name):
 
 
 def make_graph(df, ticker, signal_names, height, width):
-    """(pd DataFrame, string, integer, integer) => string
-    Takes in Pandas DataFrame with stock prices and additional calculations,
-    stock ticker, desired height and width of the graph.
+    """(pd DataFrame, string, list, integer, integer) => string
+    Takes in:
+        - Pandas DataFrame with stock prices and additional calculations
+        - stock ticker
+        - names of the DataFrame columns to be plotted
+        - desired height and width of the graph
     Returns an HTML string representing the graph.
     """
     buttons = [{"count": 5, "label": "5D", "step": "day", "stepmode": "backward"},
@@ -210,7 +236,7 @@ def make_graph(df, ticker, signal_names, height, width):
                {"count": 3, "label": "3M", "step": "month", "stepmode": "backward"},
                {"count": 6, "label": "6M", "step": "month", "stepmode": "backward"},
                {"count": 1, "label": "1Y", "step": "year", "stepmode": "backward"}, ]
-    timestmp = date.today()
+
     fig = go.Figure()
 
     fig.add_trace(go.Scatter(name=ticker, x=df["Date"], y=df["Close"]))
@@ -246,8 +272,8 @@ def calculate_price_dif(newPrice, oldPrice):
 
 
 def get_price_change(df):
-    """(pd dfFrame) => (float, tuple)
-    Takes in Pandas dfFrame with stock prices for a specific instrument,
+    """(pd DataFrame) => (float, tuple)
+    Takes in Pandas DataFrame with stock prices for a specific instrument,
     returns:
     1 - a float for the last closing price
     2 - a tuple:
