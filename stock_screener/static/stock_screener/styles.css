@@ -109,14 +109,12 @@ li > .nav-link {
 .graph-button, .remove-ticker-button{
   font-size: 13px;
   margin-top: 5px;
-
-
 }
-
 
 .ind_result{
   display: none;
 }
+
 .navbar {
   background-color: var(--blue-font-color);
 }
@@ -131,12 +129,6 @@ li > .nav-link {
   color: var(--red-font-color);
 }
 
-.parameters{
-  margin: 5px;
-
-
-
-}
 .price_change_green {
   color: var(--green-font-color);
 }
@@ -188,14 +180,15 @@ li > .nav-link {
   padding: 8px 30px;
   background: #e0e3e5;
   border-radius: 4px;
+
 }
 
-.stock_search {
+.signal-checkbox {
   font-weight: bolder;
+  color: var(--red-hover-color);
 }
 
 .signals, .backtest  {
-  padding:0 80px 0 80px;
   display: block;
   margin: auto;
   text-align: start;
@@ -351,4 +344,5 @@ li > .nav-link {
     text-align: center;
   }
 }
+
 

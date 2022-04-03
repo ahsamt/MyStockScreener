@@ -5,7 +5,7 @@
 
 
           <div class="signal row mt-3">
-              <div class="stock_search col-2 mt-1 red">
+              <div class="signal-checkbox col-2 mt-1 red">
                   {{ stockForm.ma }} {{ stockForm.ma.label }}
               </div>
               <div class="col-10">
@@ -38,7 +38,7 @@
 
 
           <div class="signal row mt-3">
-              <div class="stock_search col-2 mt-1 red">
+              <div class="signal-checkbox col-2 mt-1 red">
                   {{ stockForm.psar }} {{ stockForm.psar.label }}
               </div>
               <div class="col-10">
@@ -54,7 +54,7 @@
           </div>
 
           <div class="signal row mt-3">
-              <div class="stock_search col-2 mt-1 red">
+              <div class="signal-checkbox col-2 mt-1 red">
                   {{ stockForm.adx }} {{ stockForm.adx.label }}
               </div>
               <div class="col-10">
@@ -71,7 +71,7 @@
 
 
           <div class="signal row mt-3">
-              <div class="stock_search col-2 mt-1 red">
+              <div class="signal-checkbox col-2 mt-1 red">
                   {{ stockForm.srsi }} {{ stockForm.srsi.label }}
               </div>
               <div class="col-10">
@@ -100,22 +100,21 @@
           </div>
 
           <div class="signal row mt-3">
-              <div class="stock_search col-3 mt-1 red">
-                  {{ stockForm.macd }}    MACD
+              <div class="signal-checkbox col-2 mt-1 red">
+                  {{ stockForm.macd }} {{ stockForm.macd.label }}
               </div>
-              <div class="col-9">
+              <div class="col-10">
                   <div class="row">
                       <div class="col">
-                          <span class="parameters">Fast</span>  {{ stockForm.macdF}}
+                          {{ stockForm.macdF.label }}  {{ stockForm.macdF}}
                       </div>
                       <div class="col">
-                          <span class="parameters">Slow</span>  {{ stockForm.macdS }}
+                          {{ stockForm.macdS.label }} {{ stockForm.macdS }}
                       </div>
                       <div class="col">
-                          <span class="parameters">Smoothing Period</span>  {{ stockForm.macdSm }}
+                          {{ stockForm.macdSm.label }} {{ stockForm.macdSm }}
                       </div>
                   </div>
-
               </div>
           </div>
       </div>

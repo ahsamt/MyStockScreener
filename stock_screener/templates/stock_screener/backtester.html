@@ -78,11 +78,11 @@
                     <div class="backtest-params row mt-3">
 
                             <div class="col-6">
-                                Days to Complete Buy Order  {{ stockForm.days_to_buy }}
+                                {{ stockForm.days_to_buy.label }}  {{ stockForm.days_to_buy }}
                             </div>
 
                             <div class="col-6">
-                                Days to Complete Sell Order  {{ stockForm.days_to_sell }}
+                                {{  stockForm.days_to_sell.label }}  {{ stockForm.days_to_sell }}
                             </div>
 
                     </div>
@@ -90,18 +90,18 @@
                     <div class="backtest-params row mt-3">
 
                             <div class="col-6">
-                                Buy Price Adjustment  {{ stockForm.buy_price_adjustment }}
+                                {{  stockForm.buy_price_adjustment.label }}  {{ stockForm.buy_price_adjustment }}
                             </div>
 
                             <div class="col-6">
-                                Sell Price Adjustment  {{ stockForm.sell_price_adjustment }}
+                                {{  stockForm.sell_price_adjustment.label }}  {{ stockForm.sell_price_adjustment }}
                             </div>
                     </div>
 
                     <div class="backtest-params row mt-3">
 
                             <div class="col-6">
-                                Number of years back test should cover {{ stockForm.num_years }}
+                                {{  stockForm.num_years.label }} {{ stockForm.num_years }}
                             </div>
                     </div>
 
