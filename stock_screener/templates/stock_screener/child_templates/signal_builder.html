@@ -5,107 +5,100 @@
 
 
           <div class="signal row mt-3">
-              <div class="stock_search col-3 mt-1 red">
-                  {{ stockForm.ma }}  Moving Average
+              <div class="stock_search col-2 mt-1 red">
+                  {{ stockForm.ma }} {{ stockForm.ma.label }}
               </div>
-              <div class="col-9">
+              <div class="col-10">
                   <div class="row mb-1">
-                    <div class="col">
-                        <div class="row">
-                            <div class="col-6"><span class="parameters">Short term</span></div>
-                            <div class="col">{{ stockForm.maWS }}  days</div>
-                        </div>
-
+                    <div class="col-4">
+                        {{ stockForm.maWS.label }}
+                        {{ stockForm.maWS }}
                     </div>
-                    <div class="col">
+
+                    <div class="col-6">
+                        {{ stockForm.maS.label }}
                         {{ stockForm.maS }}
                     </div>
+
                   </div>
                   <div class="row">
-                    <div class="col">
-                        <div class="row">
-                            <div class="col-6">
-                                <span class="parameters">Long term</span>
-                            </div>
-                            <div class="col">
-                                {{ stockForm.maWL }}  days
-                            </div>
-                        </div>
-
+                    <div class="col-4">
+                        {{ stockForm.maWL.label }}
+                        {{ stockForm.maWL }}
                     </div>
-                    <div class="col">
+                      <div class="col-6">
+                        {{ stockForm.maL.label }}
                         {{ stockForm.maL }}
                     </div>
                   </div>
               </div>
-
           </div>
 
 
+
+
           <div class="signal row mt-3">
-              <div class="stock_search col-3 mt-1 red">
-                  {{ stockForm.psar }}  Parabolic SAR
+              <div class="stock_search col-2 mt-1 red">
+                  {{ stockForm.psar }} {{ stockForm.psar.label }}
               </div>
-              <div class="col-9">
+              <div class="col-10">
                   <div class="row">
-                      <div class="col">
-                          <span class="parameters">Acceleration Factor (AF)</span>  {{ stockForm.psarAF }}
+                      <div class="col-4">
+                          {{ stockForm.psarAF.label}} {{ stockForm.psarAF }}
                       </div>
-                      <div class="col">
-                          <span class="parameters">Maximum Acceleration (MA)</span>  {{ stockForm.psarMA }}
+                      <div class="col-4">
+                          {{ stockForm.psarMA.label }} {{ stockForm.psarMA }}
                       </div>
                   </div>
               </div>
-
           </div>
+
           <div class="signal row mt-3">
-              <div class="stock_search col-3 mt-1 red">
-                  {{ stockForm.adx }}   ADX
+              <div class="stock_search col-2 mt-1 red">
+                  {{ stockForm.adx }} {{ stockForm.adx.label }}
               </div>
-              <div class="col-9">
+              <div class="col-10">
                   <div class="row">
-                      <div class="col">
-                          <span class="parameters">Term</span>  {{ stockForm.adxW }}  days
+                      <div class="col-4">
+                          {{ stockForm.adxW.label }} {{ stockForm.adxW }}
                       </div>
-                      <div class="col">
-                          <span class="parameters">Limit</span>  {{ stockForm.adxL }}
+                      <div class="col-4">
+                          {{ stockForm.adxL.label }} {{ stockForm.adxL }}
                       </div>
                   </div>
-
               </div>
           </div>
 
 
           <div class="signal row mt-3">
-              <div class="stock_search col-3 mt-1 red">
-                  {{ stockForm.srsi }}  Stochastic RSI
+              <div class="stock_search col-2 mt-1 red">
+                  {{ stockForm.srsi }} {{ stockForm.srsi.label }}
               </div>
-              <div class="col-9">
+              <div class="col-10">
                   <div class="row">
                       <div class="row mb-1">
                           <div class="col">
-                              <span class="parameters">Term</span>  {{ stockForm.srsiW }}  days
+                              {{ stockForm.srsiW.label }}  {{ stockForm.srsiW }}
                           </div>
                           <div class="col">
-                              <span class="parameters">Smooth 1</span>  {{ stockForm.srsiSm1 }}
+                              {{ stockForm.srsiSm1.label }} {{ stockForm.srsiSm1 }}
                           </div>
                           <div class="col">
-                              <span class="parameters">Smooth 2</span>  {{ stockForm.srsiSm2 }}
+                              {{ stockForm.srsiSm2.label }} {{ stockForm.srsiSm2 }}
                           </div>
                       </div>
                       <div class="row">
                           <div class="col">
-                              <span class="parameters">Overbought limit</span>  {{ stockForm.srsiOB }}
+                              {{ stockForm.srsiOB.label }} {{ stockForm.srsiOB }}
                           </div>
                           <div class="col">
-                              <span class="parameters">Oversold limit</span>  {{ stockForm.srsiOS }}
+                              {{ stockForm.srsiOS.label }} {{ stockForm.srsiOS }}
                           </div>
                       </div>
                   </div>
-
-
               </div>
           </div>
+
           <div class="signal row mt-3">
               <div class="stock_search col-3 mt-1 red">
                   {{ stockForm.macd }}    MACD

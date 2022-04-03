@@ -8,7 +8,7 @@ import plotly.graph_objects as go
 
 
 def adjust_start(df, start_date):
-    """pd DataFrame, date as datetime.datetime => pd DataFrame
+    """(pd DataFrame, date as datetime.datetime) => pd DataFrame
     Creates a copy of current dataframe with starting date matching the requirements"""
 
     mask = (df["Date"] >= start_date)
@@ -18,7 +18,7 @@ def adjust_start(df, start_date):
 
 
 def get_company_name_from_yf(ticker):
-    """string => string
+    """(string) => string
     Takes in a ticker as a string.
     Returns the matching company name found on yfinance.
     """
@@ -33,7 +33,7 @@ def get_company_name_from_yf(ticker):
 
 
 def upload_csv_to_S3(bucket, df, file_name):
-    """string, pd DataFrame, string => None
+    """(string, pd DataFrame), string => None
     converts dataframe  to CSV format and uploads it to S3"""
     csv_buffer = StringIO()
     df.to_csv(csv_buffer)
@@ -63,7 +63,7 @@ def prepare_ticker_info_update(current_tickers_info, ticker, ticker_name):
 
 
 def read_csv_from_S3(bucket, file_name):
-    """string, string => pd DataFrame
+    """(string, string) => pd DataFrame
     Takes in the name of the S3 bucket and the name of the csv file to be read,
     returns decoded CSV file as pd DataFrame"""
     s3_client = boto3.client("s3")
@@ -76,7 +76,7 @@ def read_csv_from_S3(bucket, file_name):
 
 
 def stocks_tidy_up(df):
-    """pd DataFrame => pd DataFrame
+    """(pd DataFrame) => pd DataFrame
     Takes in the DataFrame with data for multiple stocks,
     prepares the data for upload on S3"""
     df.columns = df.columns.to_flat_index()
@@ -86,7 +86,7 @@ def stocks_tidy_up(df):
 
 
 def stock_tidy_up(df, ticker):
-    """pd DataFrame, string => pd DataFrame
+    """(pd DataFrame, string) => pd DataFrame
     Takes in the DataFrame with data for one stock,
     prepares the data for upload on S3"""
     newDF = df.copy(deep=True)
@@ -98,7 +98,7 @@ def stock_tidy_up(df, ticker):
 
 
 def get_current_tickers_info(bucket):
-    """string => pd DataFrame
+    """(string) => pd DataFrame
     Accesses the TickersInfo file on S3,
     returns a DataFrame with the data contained in the file"""
     s3_client = boto3.client("s3")
@@ -111,7 +111,7 @@ def get_current_tickers_info(bucket):
 
 
 def add_ma(df, ma_short, ma_long, window_short, window_long):
-    """pd DataFrame, string, string, integer, integer => pd DataFrame, string, string
+    """(pd DataFrame, string, string, integer, integer) => pd DataFrame, string, string
     Takes in :
         - stock data,
         - types of Moving Average signal (SMA/EMA) for a short and long window
@@ -150,7 +150,7 @@ def add_ma(df, ma_short, ma_long, window_short, window_long):
 
 
 def add_psar(df, psar_af, psar_ma):
-    """pd DataFrame, float, float => pd DataFrame
+    """(pd DataFrame, float, float) => pd DataFrame
     Takes in :
         - stock data,
         - Acceleration Factor,
@@ -166,7 +166,7 @@ def add_psar(df, psar_af, psar_ma):
 
 
 def add_adx(df, window_size, limit):
-    """pd DataFrame, integer, integer => pd DataFrame
+    """(pd DataFrame, integer, integer) => pd DataFrame
     Takes in :
         - stock data,
         - window size,
@@ -182,6 +182,15 @@ def add_adx(df, window_size, limit):
 
 
 def add_srsi(df, window_size, smooth1, smooth2, overbought_limit, oversold_limit):
+    """(pd DataFrame, integer, integer, integer, float, float) => pd DataFrame
+    Takes in :
+        - stock data,
+        - window size,
+        - smooth 1 value,
+        - smooth 2 value,
+        - overbought limit,
+        - oversold limit
+    Returns a DataFrame with the Stochastic RSI calculations and recommendations added"""
     if 'Date' not in df.columns:
         df = df.reset_index()
     df["Stochastic RSI"] = ta.momentum.StochRSIIndicator(df["Close"], window=window_size,
@@ -191,11 +200,18 @@ def add_srsi(df, window_size, smooth1, smooth2, overbought_limit, oversold_limit
     df.loc[mask, "Stochastic RSI Rec"] = "Sell"
     mask = df["Stochastic RSI"] < oversold_limit
     df.loc[mask, "Stochastic RSI Rec"] = "Buy"
-
     return df
 
 
 def add_macd(df, window_slow, window_fast, smoothing_period):
+    """(pd DataFrame, integer, integer, integer) => pd DataFrame
+        Takes in :
+            - stock data,
+            - window size - slow,
+            - swindow size - fast,
+            - smoothing period
+        Returns a DataFrame with the Moving Average Convergence Divergence
+         calculations and recommendations added"""
     if 'Date' not in df.columns:
         df = df.reset_index()
     df["MACD"] = ta.trend.MACD(df["Close"], window_slow=window_slow, window_fast=window_fast,
@@ -203,11 +219,14 @@ def add_macd(df, window_slow, window_fast, smoothing_period):
     mask = df["MACD"] >= 0
     df["MACD Rec"] = "Sell"
     df.loc[mask, "MACD Rec"] = "Buy"
-
     return df
 
 
 def add_days_since_change(df, col_name):
+    """(pd DataFrame, string) => pd DataFrame
+    Takes in a dataframe and the name of the column in the dataframe that needs to be analysed.
+    Returns an updated dataframe with a "Days_Since_Change" column added that shows
+    the number of days since the value in the column indicated changed"""
     mask = df[col_name].eq(df[col_name].shift())
     df["Change_Flag"] = np.where(mask, False, True)
     df.loc[0, "Change_Flag"] = False
@@ -218,7 +237,6 @@ def add_days_since_change(df, col_name):
         a = df.loc[i - 1, "Days_Since_Change"]
         if (a is not None) & (df.loc[i, "Days_Since_Change"] != 0):
             df.loc[i, 'Days_Since_Change'] = df.loc[i - 1, 'Days_Since_Change'] + 1
-
     return df
 
 
@@ -252,7 +270,6 @@ def make_graph(df, ticker, signal_names, height, width):
                           }}, width=width, height=height,
                       )
     graph = fig.to_html(full_html=False)
-
     return graph
 
 
@@ -265,9 +282,11 @@ def format_float(number):
 
 
 def calculate_price_dif(newPrice, oldPrice):
+    """(float/integer, float/integer => float/integer, string
+    Takes an old price and a new price, returns the difference as a number
+    as well as percentage of the old price"""
     priceDif = newPrice - oldPrice
     percDif = format_float(priceDif / oldPrice * 100)
-
     return priceDif, percDif
 
 
