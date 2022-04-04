@@ -23,7 +23,7 @@ from django.contrib.auth.decorators import login_required
 
 bucket = 'stockscreener-data'
 constructorFields = ['ma', 'maS', 'maL', 'maWS', 'maWL', 'psar', 'psarAF', 'psarMA', 'adx', 'adxW', 'adxL', 'srsi',
-                     'srsiW', 'srsiSm1', 'srsiSm2', 'srsiOB', 'srsiOS', 'macd', 'macdF', 'macdS', 'macdS']
+                     'srsiW', 'srsiSm1', 'srsiSm2', 'srsiOB', 'srsiOS', 'macd', 'macdF', 'macdS', 'macdSm']
 
 
 def index(request):
@@ -411,8 +411,8 @@ def saved_signals(request):
     macdF = data.get("macdF")
     macdS = data.get("macdS")
     macdSm = data.get("macdSm")
-    previousSignal = data.get("previousSignal")
-
+    #previousSignal = data.get("previousSignal")
+    print("Got all the data, about to delete old and save new")
     # Create a saved search for the logged in user
     try:
         oldSignal = SignalConstructor.objects.get(user=request.user)
@@ -420,7 +420,7 @@ def saved_signals(request):
     except SignalConstructor.DoesNotExist:
         print("nothing to delete")
     print("creating constructor")
-    print("values are: ", previousSignal)
+
     newSignal = SignalConstructor(
         user=request.user,
         ma=ma,

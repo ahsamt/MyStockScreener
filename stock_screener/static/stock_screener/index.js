@@ -311,7 +311,7 @@ function add_signal(event) {
           macdF : macdF,
           macdS : macdS,
           macdSm : macdSm,
-          previousSignal: previousSignal,
+          //previousSignal: previousSignal,
       }),
     })
       .then((response) => response.json())
