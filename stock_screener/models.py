@@ -48,27 +48,27 @@ class SignalConstructor(models.Model):
                  ('EMA', 'Exponential Moving Average')],
         default='SMA')
     maWS = models.IntegerField(default=15)
-    maWL = models.IntegerField(default=45)
+    maWL = models.IntegerField(default=25)
 
     psar = models.BooleanField(default=False)
     psarAF = models.FloatField(default=0.02)
     psarMA = models.FloatField(default=0.2)
 
     adx = models.BooleanField(default=False)
-    adxW = models.IntegerField(default=18)
+    adxW = models.IntegerField(default=14)
     adxL = models.IntegerField(default=20)
 
     srsi = models.BooleanField(default=False)
-    srsiW = models.IntegerField(default=21)
+    srsiW = models.IntegerField(default=13)
     srsiSm1 = models.IntegerField(default=3)
     srsiSm2 = models.IntegerField(default=3)
     srsiOB = models.FloatField(default=0.8)
     srsiOS = models.FloatField(default=0.2)
 
     macd = models.BooleanField(default=False)
-    macdF = models.IntegerField(default=24)
-    macdS = models.IntegerField(default=52)
-    macdSm = models.IntegerField(default=9)
+    macdF = models.IntegerField(default=12)
+    macdS = models.IntegerField(default=26)
+    macdSm = models.IntegerField(default=210)
 
     user = models.ForeignKey("User", on_delete=models.CASCADE, related_name="savedSignal", blank=True, null=True)
     customName = models.CharField(max_length=15, default="Custom")
