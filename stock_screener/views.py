@@ -210,7 +210,6 @@ def index(request):
 
                     if len(constructorObj):
                         savedConstructor = constructorObj[0]
-                        print(savedConstructor.ma)
 
                         # checking if the signal user has previously saved
                         # matches the signal being used for the current search
@@ -483,29 +482,8 @@ def watchlist(request):
                           {"empty_message": "Please create and save a signal on the 'Search' page to view "
                                             "recommendations for your watchlist"})
 
-        # Later replace teh below by creating a dictionary from class instance
-        signalDict = {}
-        signalDict['ma'] = signal.ma
-        signalDict['maS'] = signal.maS
-        signalDict['maL'] = signal.maL
-        signalDict['maWS'] = signal.maWS
-        signalDict['maWL'] = signal.maWL
-        signalDict['psar'] = signal.psar
-        signalDict['psarAF'] = signal.psarAF
-        signalDict['psarMA'] = signal.psarMA
-        signalDict['adx'] = signal.adx
-        signalDict['adxW'] = signal.adxW
-        signalDict['adxL'] = signal.adxL
-        signalDict['srsi'] = signal.srsi
-        signalDict['srsiW'] = signal.srsiW
-        signalDict['srsiSm1'] = signal.srsiSm1
-        signalDict['srsiSm2'] = signal.srsiSm2
-        signalDict['srsiOB'] = signal.srsiOB
-        signalDict['srsiOS'] = signal.srsiOS
-        signalDict['macd'] = signal.macd
-        signalDict['macdS'] = signal.macdS
-        signalDict['macdF'] = signal.macdF
-        signalDict['macdSm'] = signal.macdSm
+        # Converting the saved signal object to dictionary
+        signalDict = vars(signal)
 
         # prepare a table to display the saved signal to the user
         signalTable = prepare_signal_table(signal)
