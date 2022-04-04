@@ -22,6 +22,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 
 bucket = 'stockscreener-data'
+constructorFields = ['ma', 'maS', 'maL', 'maWS', 'maWL', 'psar', 'psarAF', 'psarMA', 'adx', 'adxW', 'adxL', 'srsi',
+                     'srsiW', 'srsiSm1', 'srsiSm2', 'srsiOB', 'srsiOS', 'macd', 'macdF', 'macdS', 'macdS']
 
 
 def index(request):
@@ -36,32 +38,14 @@ def index(request):
             # Get all the form data
             if stockForm.is_valid():
                 ticker = stockForm.cleaned_data['ticker'].upper()
-                signalDict['ma'] = stockForm.cleaned_data['ma']
-                signalDict['maS'] = stockForm.cleaned_data['maS']
-                signalDict['maL'] = stockForm.cleaned_data['maL']
-                signalDict['maWS'] = stockForm.cleaned_data['maWS']
-                signalDict['maWL'] = stockForm.cleaned_data['maWL']
 
-                signalDict['psar'] = stockForm.cleaned_data['psar']
-                signalDict['psarAF'] = stockForm.cleaned_data['psarAF']
-                signalDict['psarMA'] = stockForm.cleaned_data['psarMA']
-                signalDict['adx'] = stockForm.cleaned_data['adx']
-                signalDict['adxW'] = stockForm.cleaned_data['adxW']
-                signalDict['adxL'] = stockForm.cleaned_data['adxL']
+                for k in constructorFields:
+                    signalDict[k] = stockForm.cleaned_data[k]
 
-                signalDict['srsi'] = stockForm.cleaned_data['srsi']
-                signalDict['srsiW'] = stockForm.cleaned_data['srsiW']
-                signalDict['srsiSm1'] = stockForm.cleaned_data['srsiSm1']
-                signalDict['srsiSm2'] = stockForm.cleaned_data['srsiSm2']
-                signalDict['srsiOB'] = stockForm.cleaned_data['srsiOB']
-                signalDict['srsiOS'] = stockForm.cleaned_data['srsiOS']
+                print(f"Signal dict data :{signalDict}")
 
-                signalDict['macd'] = stockForm.cleaned_data['macd']
-                signalDict['macdF'] = stockForm.cleaned_data['macdF']
-                signalDict['macdS'] = stockForm.cleaned_data['macdS']
-                signalDict['macdSm'] = stockForm.cleaned_data['macdSm']
-
-                if signalDict['adx'] and not (signalDict['ma'] or signalDict['psar'] or signalDict['srsi'] or signalDict['macd']):
+                if signalDict['adx'] and not (
+                        signalDict['ma'] or signalDict['psar'] or signalDict['srsi'] or signalDict['macd']):
                     context = {
                         "message": "Please add another signal - ADX alone does not provide buy/sell recommendations",
                         "stockForm": stockForm
@@ -124,7 +108,7 @@ def index(request):
                 tickerName = tickerInfo.loc[ticker]["Name"]
 
                 # Getting the slice of the data starting from 18 months back
-                # (12 required for display + 6 extra for analysis)
+                # (12 required for display + 12 extra for analysis)
                 stock = stock.loc[startDateInternal:, :]
 
                 # removing NaN values from the stock data
@@ -133,11 +117,9 @@ def index(request):
                 # converting column data types to float
                 stock = stock.apply(pd.to_numeric)
 
-                #signals = [ma, maS, maL, maWS, maWL, psar, psarAF, psarMA, adx, adxW, adxL, srsi, srsiW, srsiSm1,
-                           #srsiSm2, srsiOB, srsiOS, macd, macdS, macdF, macdSm]
-
                 # if no signals are selected:
-                if not (signalDict['ma'] or signalDict['psar'] or signalDict['adx'] or signalDict['srsi'] or signalDict['macd']):
+                if not (signalDict['ma'] or signalDict['psar'] or signalDict['adx'] or signalDict['srsi'] or signalDict[
+                    'macd']):
                     signalSelected = False
                     selectedSignals = []
                     stock = stock.reset_index()
@@ -181,6 +163,7 @@ def index(request):
                 if signalSelected:
                     # preparing backtesting information to be shown on search page
                     backtestResult, backtestDataFull = backtest_signal(stock)
+                    signalSelected = True
 
                     if backtestDataFull is not None:
                         backtestData = backtestDataFull.loc[:, ["Close", "Final Rec", "Profit/Loss"]]
@@ -191,8 +174,10 @@ def index(request):
                                                                  justify="left", index=False)
                     else:
                         htmlBacktestTable = None
+
                 else:
                     backtestResult, htmlBacktestTable = None, None
+                    signalSelected = False
 
                 # Preparing the results table to be shown on search page
                 for signal in selectedSignals:
@@ -212,7 +197,6 @@ def index(request):
                 tickerID = None
                 constructorAdded = False
                 savedConstructor = None
-                newSignal = None
 
                 if request.user.is_authenticated:
                     # checking if the ticker user is searching for is in their watchlist
@@ -223,8 +207,10 @@ def index(request):
 
                     # checking if the user has previously saved any signal for their watchlist
                     constructorObj = SignalConstructor.objects.filter(user=request.user)
+
                     if len(constructorObj):
                         savedConstructor = constructorObj[0]
+                        print(savedConstructor.ma)
 
                         # checking if the signal user has previously saved
                         # matches the signal being used for the current search
@@ -485,7 +471,7 @@ def watchlist(request):
         # watchlist = sorted(watchlist, key=lambda p: p.date, reverse=True)
         allStocksFull = read_csv_from_S3(bucket, "Stocks")
 
-        # Getting the slice of the data starting from 18 months back (12 required for display + 6 extra for analysis)
+        # Getting the slice of the data starting from 18 months back (12 required for display + 12 extra for analysis)
         allStocks = allStocksFull.loc[startDateInternal:, :]
 
         # Check if the user has a signal saved in their profile
@@ -520,9 +506,6 @@ def watchlist(request):
         signalDict['macdS'] = signal.macdS
         signalDict['macdF'] = signal.macdF
         signalDict['macdSm'] = signal.macdSm
-
-
-
 
         # prepare a table to display the saved signal to the user
         signalTable = prepare_signal_table(signal)
@@ -626,6 +609,7 @@ def watchlist(request):
                   {'watched_tickers': watched_tickers, "htmlResultTable": htmlResultTable,
                    "signalTable": signalTable})
 
+
 @login_required
 def backtester(request):
     if request.method == "GET":
@@ -638,31 +622,10 @@ def backtester(request):
 
             # Get all the form data
             if backtestForm.is_valid():
+                signalDict = {}
 
-                ma = backtestForm.cleaned_data['ma']
-                maS = backtestForm.cleaned_data['maS']
-                maL = backtestForm.cleaned_data['maL']
-                maWS = backtestForm.cleaned_data['maWS']
-                maWL = backtestForm.cleaned_data['maWL']
-
-                psar = backtestForm.cleaned_data['psar']
-                psarAF = backtestForm.cleaned_data['psarAF']
-                psarMA = backtestForm.cleaned_data['psarMA']
-                adx = backtestForm.cleaned_data['adx']
-                adxW = backtestForm.cleaned_data['adxW']
-                adxL = backtestForm.cleaned_data['adxL']
-
-                srsi = backtestForm.cleaned_data['srsi']
-                srsiW = backtestForm.cleaned_data['srsiW']
-                srsiSm1 = backtestForm.cleaned_data['srsiSm1']
-                srsiSm2 = backtestForm.cleaned_data['srsiSm2']
-                srsiOB = backtestForm.cleaned_data['srsiOB']
-                srsiOS = backtestForm.cleaned_data['srsiOS']
-
-                macd = backtestForm.cleaned_data['macd']
-                macdF = backtestForm.cleaned_data['macdF']
-                macdS = backtestForm.cleaned_data['macdS']
-                macdSm = backtestForm.cleaned_data['macdSm']
+                for k in constructorFields:
+                    signalDict[k] = backtestForm.cleaned_data[k]
 
                 days_to_buy = backtestForm.cleaned_data["days_to_buy"]
                 days_to_sell = backtestForm.cleaned_data["days_to_sell"]
@@ -678,24 +641,23 @@ def backtester(request):
                 # Calculating the start date according to client requirements
                 endDate = date.today()
                 startDate = endDate + relativedelta(years=-int(num_years))
-                startDateInternal = startDate + relativedelta(months=-6)
+                startDateInternal = startDate + relativedelta(months=-12)
                 startDateDatetime = datetime.combine(startDate, datetime.min.time())
 
                 # getting stocks data from S3
                 existingStocks = read_csv_from_S3(bucket, "Stocks")
 
-                signals = [ma, maS, maL, maWS, maWL, psar, psarAF, psarMA, adx, adxW, adxL, srsi, srsiW, srsiSm1,
-                           srsiSm2, srsiOB, srsiOS, macd, macdS, macdF, macdSm]
-
                 # if no signals have been selected, remind the user to select signals
-                if not (ma or psar or adx or srsi or macd):
+                if not (signalDict['ma'] or signalDict['psar'] or signalDict['adx'] or signalDict['srsi'] or signalDict[
+                    'macd']):
                     context = {
                         "message": "Please select the signals to back test",
                         "stockForm": BacktestForm(request.user)
                     }
                     return render(request, "stock_screener/backtester.html", context)
 
-                elif adx and not (ma or psar or srsi or macd):
+                elif signalDict['adx'] and not (
+                        signalDict['ma'] or signalDict['psar'] or signalDict['srsi'] or signalDict['macd']):
                     context = {
                         "message": "Please add another signal - ADX alone does not provide buy/sell recommendations",
                         "stockForm": BacktestForm(request.user)
@@ -708,7 +670,7 @@ def backtester(request):
                 averageIndTimesHoldingStock = []
 
                 for ticker in tickers:
-                    # Preparing a dataframe for the period of time indicated by teh user + 6 months for calculations
+                    # Preparing a dataframe for the period of time indicated by the user + 12 months for calculations
                     stock = existingStocks[ticker].copy().loc[startDateInternal:, :]
 
                     # removing NaN values from the stock data
@@ -718,7 +680,7 @@ def backtester(request):
                     stock = stock.apply(pd.to_numeric)
 
                     # adding columns with calculations for the selected signals
-                    stock, selectedSignals = make_calculations(stock, signals)
+                    stock, selectedSignals = make_calculations(stock, signalDict)
 
                     stock = adjust_start(stock, startDateDatetime)
 
