@@ -315,13 +315,27 @@ def get_price_change(df):
 
 
 def get_date_within_df(df, dt):
+    """(pd DataFrame, timestamp) => (timestamp)
+        Takes in Pandas DataFrame with a "Date" column and a timestamp for the date that needs to be located.
+        Returns the original timestamp if it is found in the "Date" column,
+        otherwise returns the closest earlier date
+        """
     allDates = list(df["Date"])
     while dt not in allDates:
         dt = dt - pd.DateOffset(1)
     return dt
 
 
-def get_previous_sma(df, sma_col, latest_date, no_of_days):
+def get_previous_sma(df, sma_col, no_of_days):
+    """(pd DataFrame, string, timestamp, integer) => (float)
+        Takes in Pandas DataFrame, name of teh Simple Moving Average column in the dataframe (such as "SMA 15"),
+        t
+
+             with a "Date" column and a timestamp for the date that needs to be located.
+            Returns the original timestamp if it is found in the "Date" column,
+            otherwise returns the closest earlier date
+            """
+    latest_date = df["Date"].max()
     reqDate = get_date_within_df(df, latest_date - pd.DateOffset(no_of_days))
     mask = df["Date"] == reqDate
     prevSma = list(df.loc[mask, sma_col])[0]

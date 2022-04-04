@@ -147,13 +147,13 @@ def index(request):
                 if not smaCol:
                     stock, smaCol = add_sma_col(stock)
 
-                latestDate = stock["Date"].max()
+                #latestDate = stock["Date"].max()
                 smaPeriods = [7, 30, 90]
                 smaChanges = []
 
                 # getting the SMA value changes for the ticker going back the number of days indicated in the smaPeriods list
                 for noDays in smaPeriods:
-                    smaValue = get_previous_sma(stock, smaCol, latestDate, noDays)
+                    smaValue = get_previous_sma(stock, smaCol, noDays)
                     smaChanges.append(calculate_price_dif(closingPrice, smaValue)[1] + "%")
 
                 # adjusting the start date according to client requirements and preparing the graph
@@ -520,14 +520,13 @@ def watchlist(request):
             if not smaCol:
                 data, smaCol = add_sma_col(data)
 
-            latestDate = data["Date"].max()
             smaPeriods = [7, 30, 90]
             smaChanges = []
 
             # Get the SMA changes for the ticker to show how much on average the price has dropped/increased
             # over the number of days indicated in the smaPeriods list above
             for noDays in smaPeriods:
-                smaValue = get_previous_sma(data, smaCol, latestDate, noDays)
+                smaValue = get_previous_sma(data, smaCol, noDays)
                 smaChanges.append(calculate_price_dif(closingPrice, smaValue)[1] + "%")
 
             # Format the closing price for each ticker for table display
