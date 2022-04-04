@@ -12,7 +12,7 @@ def adjust_start(df, start_date):
     Creates a copy of current dataframe with starting date matching the requirements"""
 
     mask = (df["Date"] >= start_date)
-    dfNew = df.loc[mask].copy()
+    dfNew = df.loc[mask] #.copy()
     dfNew.reset_index(drop=True, inplace=True)
     return dfNew
 

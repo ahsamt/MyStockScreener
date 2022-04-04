@@ -472,7 +472,7 @@ def watchlist(request):
     numMonths = 12
     endDate = date.today()
     startDate = endDate + relativedelta(months=-numMonths)
-    startDateInternal = startDate + relativedelta(months=-6)
+    startDateInternal = startDate + relativedelta(months=-12)
     startDateDatetime = datetime.combine(startDate, datetime.min.time())
 
     if request.method == "GET":
@@ -493,35 +493,36 @@ def watchlist(request):
             signal = SignalConstructor.objects.get(user=request.user)
 
         except SignalConstructor.DoesNotExist:
-            signal = None
-
-        if signal:
-            signals = [signal.ma,
-                       signal.maS,
-                       signal.maL,
-                       signal.maWS,
-                       signal.maWL,
-                       signal.psar,
-                       signal.psarAF,
-                       signal.psarMA,
-                       signal.adx,
-                       signal.adxW,
-                       signal.adxL,
-                       signal.srsi,
-                       signal.srsiW,
-                       signal.srsiSm1,
-                       signal.srsiSm2,
-                       signal.srsiOB,
-                       signal.srsiOS,
-                       signal.macd,
-                       signal.macdS,
-                       signal.macdF,
-                       signal.macdSm]
-
-        else:
             return render(request, "stock_screener/watchlist.html",
                           {"empty_message": "Please create and save a signal on the 'Search' page to view "
                                             "recommendations for your watchlist"})
+
+        # Later replace teh below by creating a dictionary from class instance
+        signalDict = {}
+        signalDict['ma'] = signal.ma
+        signalDict['maS'] = signal.maS
+        signalDict['maL'] = signal.maL
+        signalDict['maWS'] = signal.maWS
+        signalDict['maWL'] = signal.maWL
+        signalDict['psar'] = signal.psar
+        signalDict['psarAF'] = signal.psarAF
+        signalDict['psarMA'] = signal.psarMA
+        signalDict['adx'] = signal.adx
+        signalDict['adxW'] = signal.adxW
+        signalDict['adxL'] = signal.adxL
+        signalDict['srsi'] = signal.srsi
+        signalDict['srsiW'] = signal.srsiW
+        signalDict['srsiSm1'] = signal.srsiSm1
+        signalDict['srsiSm2'] = signal.srsiSm2
+        signalDict['srsiOB'] = signal.srsiOB
+        signalDict['srsiOS'] = signal.srsiOS
+        signalDict['macd'] = signal.macd
+        signalDict['macdS'] = signal.macdS
+        signalDict['macdF'] = signal.macdF
+        signalDict['macdSm'] = signal.macdSm
+
+
+
 
         # prepare a table to display the saved signal to the user
         signalTable = prepare_signal_table(signal)
@@ -543,18 +544,13 @@ def watchlist(request):
             # make relevant calculations for each ticker to get current recommendations on selling/buying
 
             # Get an updated dataframe + names of the signal columns added
-            data, selectedSignals = make_calculations(data, signals)
+            data, selectedSignals = make_calculations(data, signalDict)
 
             # Get an overall buy/sell/wait recommendation based on the signals selected
             rec = data.loc[data.index[-1], "Final Rec"]
 
             # Get the number of days since the current recommendation became active
             daysSinceChange = data.loc[data.index[-1], "Days_Since_Change"]
-
-            # else:
-            #     data = data.reset_index()
-            #     rec = "No signals selected"
-            #     daysSinceChange = "n/a"
 
             closingPrice = data["Close"].iloc[-1]
 
