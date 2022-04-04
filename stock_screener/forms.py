@@ -52,6 +52,12 @@ class StockForm(forms.Form):
     macdSm = forms.IntegerField(label='Smoothing period', min_value=1, max_value=220, initial="210",
                                 widget=forms.NumberInput(attrs={'style': 'width:7ch'}))
 
+    #bb = forms.BooleanField(label="Bollinger Bands", required=False)
+    #bbW = forms.IntegerField(label="Window length, days", min_value=1, max_value=220, initial=25,
+                             #widget=forms.NumberInput(attrs={'style': 'width:7ch'}))
+
+
+
 
 class BacktestForm(forms.Form):
     ma = forms.BooleanField(label='Moving Average', required=False)

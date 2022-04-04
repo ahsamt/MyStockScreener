@@ -2,10 +2,16 @@ import numpy as np
 import pandas as pd
 
 
-def add_final_rec_column(df, signalList):
-    signalNum = sum(signalList)
-    adx, ma, macd, psar, srsi = signalList
-    print(signalNum)
+def add_final_rec_column(df, bool_signal_dict):
+    print("adding final rec column")
+    signalNum = sum(bool_signal_dict.values())
+    adx = bool_signal_dict['adx']
+    ma = bool_signal_dict['ma']
+    macd = bool_signal_dict['macd']
+    psar = bool_signal_dict['psar']
+    srsi = bool_signal_dict['srsi']
+
+    #print(signalNum)
     if signalNum == 1:
         if adx:
             print("ADX only")

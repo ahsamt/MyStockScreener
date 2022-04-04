@@ -32,36 +32,36 @@ def index(request):
     if request.method == "POST":
         if 'ticker' in request.POST:
             stockForm = StockForm(request.POST)
-
+            signalDict = {}
             # Get all the form data
             if stockForm.is_valid():
                 ticker = stockForm.cleaned_data['ticker'].upper()
-                ma = stockForm.cleaned_data['ma']
-                maS = stockForm.cleaned_data['maS']
-                maL = stockForm.cleaned_data['maL']
-                maWS = stockForm.cleaned_data['maWS']
-                maWL = stockForm.cleaned_data['maWL']
+                signalDict['ma'] = stockForm.cleaned_data['ma']
+                signalDict['maS'] = stockForm.cleaned_data['maS']
+                signalDict['maL'] = stockForm.cleaned_data['maL']
+                signalDict['maWS'] = stockForm.cleaned_data['maWS']
+                signalDict['maWL'] = stockForm.cleaned_data['maWL']
 
-                psar = stockForm.cleaned_data['psar']
-                psarAF = stockForm.cleaned_data['psarAF']
-                psarMA = stockForm.cleaned_data['psarMA']
-                adx = stockForm.cleaned_data['adx']
-                adxW = stockForm.cleaned_data['adxW']
-                adxL = stockForm.cleaned_data['adxL']
+                signalDict['psar'] = stockForm.cleaned_data['psar']
+                signalDict['psarAF'] = stockForm.cleaned_data['psarAF']
+                signalDict['psarMA'] = stockForm.cleaned_data['psarMA']
+                signalDict['adx'] = stockForm.cleaned_data['adx']
+                signalDict['adxW'] = stockForm.cleaned_data['adxW']
+                signalDict['adxL'] = stockForm.cleaned_data['adxL']
 
-                srsi = stockForm.cleaned_data['srsi']
-                srsiW = stockForm.cleaned_data['srsiW']
-                srsiSm1 = stockForm.cleaned_data['srsiSm1']
-                srsiSm2 = stockForm.cleaned_data['srsiSm2']
-                srsiOB = stockForm.cleaned_data['srsiOB']
-                srsiOS = stockForm.cleaned_data['srsiOS']
+                signalDict['srsi'] = stockForm.cleaned_data['srsi']
+                signalDict['srsiW'] = stockForm.cleaned_data['srsiW']
+                signalDict['srsiSm1'] = stockForm.cleaned_data['srsiSm1']
+                signalDict['srsiSm2'] = stockForm.cleaned_data['srsiSm2']
+                signalDict['srsiOB'] = stockForm.cleaned_data['srsiOB']
+                signalDict['srsiOS'] = stockForm.cleaned_data['srsiOS']
 
-                macd = stockForm.cleaned_data['macd']
-                macdF = stockForm.cleaned_data['macdF']
-                macdS = stockForm.cleaned_data['macdS']
-                macdSm = stockForm.cleaned_data['macdSm']
+                signalDict['macd'] = stockForm.cleaned_data['macd']
+                signalDict['macdF'] = stockForm.cleaned_data['macdF']
+                signalDict['macdS'] = stockForm.cleaned_data['macdS']
+                signalDict['macdSm'] = stockForm.cleaned_data['macdSm']
 
-                if (adx and not (ma or psar or srsi or macd)):
+                if signalDict['adx'] and not (signalDict['ma'] or signalDict['psar'] or signalDict['srsi'] or signalDict['macd']):
                     context = {
                         "message": "Please add another signal - ADX alone does not provide buy/sell recommendations",
                         "stockForm": stockForm
@@ -71,7 +71,7 @@ def index(request):
                 # Calculating the start date according to client requirements
                 endDate = date.today()
                 startDate = endDate + relativedelta(months=-numMonths)
-                startDateInternal = startDate + relativedelta(months=-6)
+                startDateInternal = startDate + relativedelta(months=-12)
                 startDateDatetime = datetime.combine(startDate, datetime.min.time())
 
                 signalResults = []
@@ -133,11 +133,11 @@ def index(request):
                 # converting column data types to float
                 stock = stock.apply(pd.to_numeric)
 
-                signals = [ma, maS, maL, maWS, maWL, psar, psarAF, psarMA, adx, adxW, adxL, srsi, srsiW, srsiSm1,
-                           srsiSm2, srsiOB, srsiOS, macd, macdS, macdF, macdSm]
+                #signals = [ma, maS, maL, maWS, maWL, psar, psarAF, psarMA, adx, adxW, adxL, srsi, srsiW, srsiSm1,
+                           #srsiSm2, srsiOB, srsiOS, macd, macdS, macdF, macdSm]
 
                 # if no signals are selected:
-                if not (ma or psar or adx or srsi or macd):
+                if not (signalDict['ma'] or signalDict['psar'] or signalDict['adx'] or signalDict['srsi'] or signalDict['macd']):
                     signalSelected = False
                     selectedSignals = []
                     stock = stock.reset_index()
@@ -151,7 +151,7 @@ def index(request):
                     signalSelected = True
 
                     # adding columns with calculations for the selected signals
-                    stock, selectedSignals = make_calculations(stock, signals)
+                    stock, selectedSignals = make_calculations(stock, signalDict)
 
                     # getting info for the result table
                     rec = stock.loc[stock.index[-1], "Final Rec"]
@@ -228,34 +228,28 @@ def index(request):
 
                         # checking if the signal user has previously saved
                         # matches the signal being used for the current search
-                        if (savedConstructor.ma == ma
-                                and savedConstructor.maS == maS
-                                and savedConstructor.maL == maL
-                                and savedConstructor.maWS == maWS
-                                and savedConstructor.maWL == maWL
-                                and savedConstructor.psar == psar
-                                and savedConstructor.psarAF == psarAF
-                                and savedConstructor.psarMA == psarMA
-                                and savedConstructor.adx == adx
-                                and savedConstructor.adxW == adxW
-                                and savedConstructor.adxL == adxL
-                                and savedConstructor.srsi == srsi
-                                and savedConstructor.srsiW == srsiW
-                                and savedConstructor.srsiSm1 == srsiSm1
-                                and savedConstructor.srsiSm2 == srsiSm2
-                                and savedConstructor.srsiOB == srsiOB
-                                and savedConstructor.srsiOS == srsiOS
-                                and savedConstructor.macd == macd
-                                and savedConstructor.macdF == macdF
-                                and savedConstructor.macdS == macdS
-                                and savedConstructor.macdSm == macdSm):
+                        if (savedConstructor.ma == signalDict['ma']
+                                and savedConstructor.maS == signalDict['maS']
+                                and savedConstructor.maL == signalDict['maL']
+                                and savedConstructor.maWS == signalDict['maWS']
+                                and savedConstructor.maWL == signalDict['maWL']
+                                and savedConstructor.psar == signalDict['psar']
+                                and savedConstructor.psarAF == signalDict['psarAF']
+                                and savedConstructor.psarMA == signalDict['psarMA']
+                                and savedConstructor.adx == signalDict['adx']
+                                and savedConstructor.adxW == signalDict['adxW']
+                                and savedConstructor.adxL == signalDict['adxL']
+                                and savedConstructor.srsi == signalDict['srsi']
+                                and savedConstructor.srsiW == signalDict['srsiW']
+                                and savedConstructor.srsiSm1 == signalDict['srsiSm1']
+                                and savedConstructor.srsiSm2 == signalDict['srsiSm2']
+                                and savedConstructor.srsiOB == signalDict['srsiOB']
+                                and savedConstructor.srsiOS == signalDict['srsiOS']
+                                and savedConstructor.macd == signalDict['macd']
+                                and savedConstructor.macdF == signalDict['macdF']
+                                and savedConstructor.macdS == signalDict['macdS']
+                                and savedConstructor.macdSm == signalDict['macdSm']):
                             constructorAdded = True
-
-                    newSignal = {"ma": ma, "maS": maS, "maL": maL, "maWS": maWS, "maWL": maWL, "psar": psar,
-                                 "psarAF": psarAF, "psarMA": psarMA, "adx": adx, "adxW": adxW, "adxL": adxL,
-                                 "srsi": srsi, "srsiW": srsiW, "srsiSm1": srsiSm1, "srsiSm2": srsiSm2,
-                                 "srsiOB": srsiOB, "srsiOS": srsiOS, "macd": macd, "macdF": macdF,
-                                 "macdS": macdS, "macdSm": macdSm}
 
                 context = {
                     "ticker": ticker,
@@ -270,7 +264,7 @@ def index(request):
                     "tickerID": tickerID,
                     "savedConstructor": savedConstructor,
                     "constructorAdded": constructorAdded,
-                    "newSignal": newSignal,
+                    "newSignal": signalDict,
                     "backtestResult": backtestResult,
                     "htmlBacktestTable": htmlBacktestTable,
                     "signalSelected": signalSelected,
