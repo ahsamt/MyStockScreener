@@ -1,204 +1,80 @@
 import numpy as np
-import pandas as pd
 
 
-def add_final_rec_column(df, bool_signal_dict):
-    print("adding final rec column")
-    signalNum = sum(bool_signal_dict.values())
-    adx = bool_signal_dict['adx']
-    ma = bool_signal_dict['ma']
-    macd = bool_signal_dict['macd']
-    psar = bool_signal_dict['psar']
-    srsi = bool_signal_dict['srsi']
+def add_final_rec_column(df, active_signals):
+    recDict = {'ma': 'MA Rec',
+               'adx': 'ADX Rec',
+               'macd': 'MACD Rec',
+               'psar': 'Parabolic SAR Rec',
+               'srsi': 'Stochastic RSI Rec'}
 
-    #print(signalNum)
-    if signalNum == 1:
-        if adx:
-            print("ADX only")
+    print(active_signals)
+
+    signal_num = len(active_signals)
+
+    if signal_num == 1:
+        if 'adx' in active_signals:
             df["Final Rec"] = np.where(df["ADX Rec"] == True, "Trending", "Rangebound")
+        else:
+            for signal in active_signals:
+                df["Final Rec"] = df[recDict[signal]]
 
-        elif ma:
-            print("MA only")
-            df["Final Rec"] = df["MA Rec"]
-
-        elif macd:
-            print("MA only")
-            df["Final Rec"] = df["MACD Rec"]
-
-        elif psar:
-            print("Parabolic SAR only")
-            df["Final Rec"] = df["Parabolic SAR Rec"]
-
-        elif srsi:
-            print("Stochastic RSI only")
-            df["Final Rec"] = df["Stochastic RSI Rec"]
-
-    elif signalNum == 2:
-
-        if adx and ma:
-            print("ADX and MA")
+    elif signal_num == 2:
+        if 'adx' in active_signals:
+            signals_other_than_adx = active_signals.copy()
+            signals_other_than_adx.remove('adx')
             mask = df["ADX Rec"] == True
-            df["Final Rec"] = np.where(mask, df["MA Rec"], "Wait")
+            df["Final Rec"] = np.where(mask, df[recDict[signals_other_than_adx[0]]], "Wait")
 
-        elif adx and macd:
-            print("ADX and MACD")
-            mask = df["ADX Rec"] == True
-            df["Final Rec"] = np.where(mask, df["MACD Rec"], "Wait")
+        else:
+            mask = df[recDict[active_signals[0]]] == df[recDict[active_signals[1]]]
+            df["Final Rec"] = np.where(mask, df[recDict[active_signals[0]]], "Wait")
 
-        elif adx and psar:
+    elif signal_num == 3:
+        if 'adx' in active_signals:
+            mask1 = df["ADX Rec"] == True
+            signals_other_than_adx = active_signals.copy()
+            signals_other_than_adx.remove('adx')
+            mask2 = df[recDict[signals_other_than_adx[0]]] == df[recDict[signals_other_than_adx[1]]]
+            mask = mask1 & mask2
+            df["Final Rec"] = np.where(mask, df[recDict[signals_other_than_adx[0]]], "Wait")
 
-            print("ADX and Parabolic SAR")
-            mask = df["ADX Rec"] == True
-            df["Final Rec"] = np.where(mask, df["Parabolic SAR Rec"], "Wait")
-
-        elif adx and srsi:
-
-            print("ADX and Stochastic RSI")
-            mask = df["ADX Rec"] == True
-            df["Final Rec"] = np.where(mask, df["Stochastic RSI Rec"], "Wait")
-
-        elif ma and macd:
-            print("MA and MACD")
-            mask = df["MA Rec"] == df["MACD Rec"]
-            df["Final Rec"] = np.where(mask, df["MA Rec"], "Wait")
-
-        elif ma and psar:
-
-            print("MA and Parabolic SAR")
-            mask = df["MA Rec"] == df["Parabolic SAR Rec"]
-            df["Final Rec"] = np.where(mask, df["MA Rec"], "Wait")
-
-        elif ma and srsi:
-
-            print("MA and Stochastic RSI")
-            mask = df["MA Rec"] == df["Stochastic RSI Rec"]
-            df["Final Rec"] = np.where(mask, df["MA Rec"], "Wait")
-
-        elif macd and psar:
-
-            print("MACD and Parabolic SAR")
-            mask = df["MACD Rec"] == df["Parabolic SAR Rec"]
-            df["Final Rec"] = np.where(mask, df["MACD Rec"], "Wait")
-
-        elif macd and srsi:
-
-            print("MACD and Stochastic RSI")
-            mask = df["MACD Rec"] == df["Stochastic RSI Rec"]
-            df["Final Rec"] = np.where(mask, df["MACD Rec"], "Wait")
+        else:
+            mask = df[recDict[active_signals[0]]] == df[recDict[active_signals[1]]] == df[recDict[active_signals[2]]]
+            df["Final Rec"] = np.where(mask, df[recDict[active_signals[0]]], "Wait")
 
 
-        elif psar and srsi:
+    elif signal_num == 4:
+        if 'adx' in active_signals:
+            mask1 = df["ADX Rec"] == True
+            signals_other_than_adx = active_signals.copy()
+            signals_other_than_adx.remove('adx')
+            mask2 = (df[recDict[signals_other_than_adx[0]]] == df[recDict[signals_other_than_adx[1]]]) & (
+                    df[recDict[signals_other_than_adx[1]]] == df[recDict[signals_other_than_adx[2]]])
+            mask = mask1 & mask2
+            df["Final Rec"] = np.where(mask, df[recDict[signals_other_than_adx[0]]], "Wait")
 
-            print("Parabolic SAR and Stochastic RSI")
-            mask = df["Parabolic SAR Rec"] == df["Stochastic RSI Rec"]
-            df["Final Rec"] = np.where(mask, df["Parabolic SAR Rec"], "Wait")
+        else:
+            mask = (df[recDict[active_signals[0]]] == df[recDict[active_signals[1]]]) & (
+                    df[recDict[active_signals[1]]] == df[recDict[active_signals[2]]]) & (
+                           df[recDict[active_signals[2]]] == df[recDict[active_signals[3]]])
+            df["Final Rec"] = np.where(mask, df[recDict[active_signals[0]]], "Wait")
 
-    elif signalNum == 3:
+    elif signal_num == 5:
+        if 'adx' in active_signals:
+            mask1 = df["ADX Rec"] == True
+            signals_other_than_adx = active_signals.copy()
+            signals_other_than_adx.remove('adx')
+            mask2 = (df[recDict[signals_other_than_adx[0]]] == df[recDict[signals_other_than_adx[1]]]) & (
+                    df[recDict[signals_other_than_adx[1]]] == df[recDict[signals_other_than_adx[2]]]) & (
+                            df[recDict[signals_other_than_adx[2]]] == df[recDict[signals_other_than_adx[3]]])
+            mask = mask1 & mask2
+            df["Final Rec"] = np.where(mask, df[recDict[signals_other_than_adx[0]]], "Wait")
 
-        if adx and ma and macd:
-
-            print("ADX and MA and MACD")
-            mask = (df["ADX Rec"] == True) & (df["MA Rec"] == df["MACD Rec"])
-            df["Final Rec"] = np.where(mask, df["MA Rec"], "Wait")
-
-        elif adx and ma and psar:
-
-            print("ADX and MA and Parabolic SAR")
-            mask = (df["ADX Rec"] == True) & (df["MA Rec"] == df["Parabolic SAR Rec"])
-            df["Final Rec"] = np.where(mask, df["MA Rec"], "Wait")
-
-        elif adx and ma and srsi:
-            print("ADX and MA and Stochastic RSI")
-            mask = (df["ADX Rec"] == True) & (df["MA Rec"] == df["Stochastic RSI Rec"])
-            df["Final Rec"] = np.where(mask, df["MA Rec"], "Wait")
-
-        elif adx and macd and psar:
-
-            print("ADX and MACD and Parabolic SAR")
-            mask = (df["ADX Rec"] == True) & (df["MACD Rec"] == df["Parabolic SAR Rec"])
-            df["Final Rec"] = np.where(mask, df["MACD Rec"], "Wait")
-
-        elif adx and macd and srsi:
-            print("ADX and MACD and Stochastic RSI")
-            mask = (df["ADX Rec"] == True) & (df["MACD Rec"] == df["Stochastic RSI Rec"])
-            df["Final Rec"] = np.where(mask, df["MACD Rec"], "Wait")
-
-
-        elif adx and psar and srsi:
-
-            print("ADX and Parabolic SAR and Stochastic RSI")
-            mask = (df["ADX Rec"] == True) & (df["Parabolic SAR Rec"] == df["Stochastic RSI Rec"])
-            df["Final Rec"] = np.where(mask, df["Parabolic SAR Rec"], "Wait")
-
-        elif ma and macd and psar:
-
-            print("MA and MACD and Parabolic SAR")
-            mask = (df["MA Rec"] == df["MACD Rec"]) & (df["MACD Rec"] == df["Parabolic SAR Rec"])
-            df["Final Rec"] = np.where(mask, df["MA Rec"], "Wait")
-
-
-        elif ma and macd and srsi:
-
-            print("MA and MACD and Stochastic RSI")
-            mask = (df["MA Rec"] == df["MACD Rec"]) & (df["MACD Rec"] == df["Stochastic RSI Rec"])
-            df["Final Rec"] = np.where(mask, df["MA Rec"], "Wait")
-
-        elif ma and psar and srsi:
-
-            print("MA and Parabolic SAR and Stochastic RSI")
-            mask = (df["MA Rec"] == df["Parabolic SAR Rec"]) & (df["Parabolic SAR Rec"] == df["Stochastic RSI Rec"])
-            df["Final Rec"] = np.where(mask, df["MA Rec"], "Wait")
-
-        elif macd and psar and srsi:
-
-            print("MACD and Parabolic SAR and Stochastic RSI")
-            mask = (df["MACD Rec"] == df["Parabolic SAR Rec"]) & (df["Parabolic SAR Rec"] == df["Stochastic RSI Rec"])
-            df["Final Rec"] = np.where(mask, df["MACD Rec"], "Wait")
-
-    elif signalNum == 4:
-
-        if adx and ma and macd and psar:
-            print("ADX and MA and MACD and Parabolic SAR")
-            mask = (df["ADX Rec"] == True) & (df["MA Rec"] == df["MACD Rec"]) & (
-                        df["MACD Rec"] == df["Parabolic SAR Rec"])
-            df["Final Rec"] = np.where(mask, df["MA Rec"], "Wait")
-
-        elif adx and ma and macd and srsi:
-
-            print("ADX and MA and MACD and Stochastic RSI")
-            mask = (df["ADX Rec"] == True) & (df["MA Rec"] == df["MACD Rec"]) & (
-                        df["MACD Rec"] == df["Stochastic RSI Rec"])
-            df["Final Rec"] = np.where(mask, df["MA Rec"], "Wait")
-
-        elif adx and ma and psar and srsi:
-
-            print("ADX and MA and Parabolic SAR and Stochastic RSI")
-            mask = (df["ADX Rec"] == True) & (df["MA Rec"] == df["Parabolic SAR Rec"]) & (
-                        df["Parabolic SAR Rec"] == df["Stochastic RSI Rec"])
-            df["Final Rec"] = np.where(mask, df["MA Rec"], "Wait")
-
-        elif adx and macd and psar and srsi:
-
-            print("ADX and MACD and Parabolic SAR and Stochastic RSI")
-            mask = (df["ADX Rec"] == True) & (df["MACD Rec"] == df["Parabolic SAR Rec"]) & (
-                        df["Parabolic_SAR_Rec"] == df["Stochastic RSI Rec"])
-            df["Final Rec"] = np.where(mask, df["MACD Rec"], "Wait")
-
-
-        elif ma and macd and psar and srsi:
-
-            print("MA and MACD and Parabolic SAR and Stochastic RSI")
-            mask = (df["MA Rec"] == df["MACD Rec"]) & (df["MACD Rec"] == df["Parabolic SAR Rec"]) & (
-                        df["Parabolic SAR Rec"] == df["Stochastic RSI Rec"])
-            df["Final Rec"] = np.where(mask, df["MA Rec"], "Wait")
-
-    elif signalNum == 5:
-
-        print("All signals")
-        mask = (df["ADX Rec"] == True) & (df["MA Rec"] == df["MACD Rec"]) & (
-                    df["MACD Rec"] == df["Parabolic SAR Rec"]) & (df["Parabolic SAR Rec"] == df["Stochastic RSI Rec"])
-        df["Final Rec"] = np.where(mask, df["MA Rec"], "Wait")
-
-    #print(df.tail())
+        else:
+            mask = (df[recDict[active_signals[0]]] == df[recDict[active_signals[1]]]) & (
+                    df[recDict[active_signals[1]]] == df[recDict[active_signals[2]]]) & (
+                           df[recDict[active_signals[2]]] == df[recDict[active_signals[3]]]) & (
+                           df[recDict[active_signals[3]]] == df[recDict[active_signals[4]]])
+            df["Final Rec"] = np.where(mask, df[recDict[active_signals[0]]], "Wait")
     return df
-

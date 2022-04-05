@@ -4,7 +4,7 @@ from .recommendations import add_final_rec_column
 
 
 def make_calculations(stock_df, signal_dict):
-
+    signals_available = ['adx', 'ma', 'macd', 'psar', 'srsi']
     selectedSignals = []
 
     if signal_dict['ma']:
@@ -30,8 +30,10 @@ def make_calculations(stock_df, signal_dict):
         stock_df = add_macd(stock_df, signal_dict['macdS'], signal_dict['macdF'], signal_dict['macdSm'])
         selectedSignals.append("MACD")
 
-    bool_signal_dict = dict((k, signal_dict[k]) for k in ['adx', 'ma', 'macd', 'psar', 'srsi'] if k in signal_dict)
-    stock_df = add_final_rec_column(stock_df, bool_signal_dict)
+    # Create a list of the signals selected
+    active_signals = [k for k in signals_available if signal_dict[k]]
+
+    stock_df = add_final_rec_column(stock_df, active_signals)
 
     stock_df = add_days_since_change(stock_df, "Final Rec")
 
