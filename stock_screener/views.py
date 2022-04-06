@@ -486,7 +486,7 @@ def watchlist(request):
         signalDict = vars(signal)
 
         # prepare a table to display the saved signal to the user
-        signalTable = prepare_signal_table(signal)
+        signalTable = prepare_signal_table(signalDict)
 
         # can i pass it to html as an object instead?
         for item in watchlistObjects:
@@ -759,14 +759,19 @@ def backtester(request):
                                                          escape=False, index=False)
 
                 overallResult = calc_average_percentage(allResults.values())
-                print(allResults)
+
+
+
+                # prepare a table to display the saved signal to the user
+                signalTable = prepare_signal_table(signalDict)
 
                 context = {
                     "overallResult": overallResult,
                     "htmlJointTable": htmlJointTable,
                     "allDetails": allDetails,
                     "overallAverageTimeBetweenTransactions": overallAverageTimeBetweenTransactions,
-                    "overallAverageTimeHoldingStock": overallAverageTimeHoldingStock
+                    "overallAverageTimeHoldingStock": overallAverageTimeHoldingStock,
+                    "signalTable": signalTable
                 }
 
                 return render(request, "stock_screener/backtester.html", context)

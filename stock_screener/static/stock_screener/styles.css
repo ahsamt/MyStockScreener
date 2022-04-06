@@ -91,6 +91,9 @@ li > .nav-link {
   padding: 30px 20px 20px 20px;
 }
 
+.blue {
+  color: var(--blue-font-color);
+}
 .closing_price {
   color: var(--grey-font-color);
   font-weight: 800;

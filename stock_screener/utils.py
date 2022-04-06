@@ -320,47 +320,47 @@ def add_sma_col(df):
     return df, column
 
 
-def prepare_signal_table(signal):
+def prepare_signal_table(signal_dict):
     signalData = []
     signalHeaders = []
-    if signal.ma:
-        signalData += [signal.ma,
-                       signal.maS,
-                       signal.maL,
-                       signal.maWS,
-                       signal.maWL]
+    if signal_dict['ma']:
+        signalData += [signal_dict['ma'],
+                       signal_dict['maS'],
+                       signal_dict['maL'],
+                       signal_dict['maWS'],
+                       signal_dict['maWL']]
         signalHeaders += ["Moving Average", "Moving Average Type (Short)", "Moving Average Type (Long)",
                           "Moving Average - Short Window Length", "Moving Average - Long Window Length"]
 
-    if signal.psar:
-        signalData += [signal.psar,
-                       signal.psarAF,
-                       signal.psarMA]
+    if signal_dict['psar']:
+        signalData += [signal_dict['psar'],
+                       signal_dict['psarAF'],
+                       signal_dict['psarMA']]
         signalHeaders += ["Parabolic SAR", "Parabolic SAR - Acceleration Factor",
                           "Parabolic SAR - Maximum Acceleration"]
 
-    if signal.adx:
-        signalData += [signal.adx,
-                       signal.adxW,
-                       signal.adxL]
+    if signal_dict['adx']:
+        signalData += [signal_dict['adx'],
+                       signal_dict['adxW'],
+                       signal_dict['adxL']]
         signalHeaders += ["ADX", "ADX Term", "ADX Limit"]
 
-    if signal.srsi:
-        signalData += [signal.srsi,
-                       signal.srsiW,
-                       signal.srsiSm1,
-                       signal.srsiSm2,
-                       signal.srsiOB,
-                       signal.srsiOS]
+    if signal_dict['srsi']:
+        signalData += [signal_dict['srsi'],
+                       signal_dict['srsiW'],
+                       signal_dict['srsiSm1'],
+                       signal_dict['srsiSm2'],
+                       signal_dict['srsiOB'],
+                       signal_dict['srsiOS']]
         signalHeaders += ["Stochastic RSI", "Stochastic RSI - Term", "Stochastic RSI - Smooth 1",
                           "Stochastic RSI - Smooth 2", "Stochastic RSI - Overbought Limit",
                           "Stochastic RSI - Oversold Limit"]
 
-    if signal.macd:
-        signalData += [signal.macd,
-                       signal.macdS,
-                       signal.macdF,
-                       signal.macdSm]
+    if signal_dict['macd']:
+        signalData += [signal_dict['macd'],
+                       signal_dict['macdS'],
+                       signal_dict['macdF'],
+                       signal_dict['macdSm']]
         signalHeaders += ["MACD", "MACD Slow", "MACD Fast", "MACD Smoothing Period"]
 
     signalTable = pd.DataFrame([signalData], columns=signalHeaders).transpose().reset_index()

@@ -131,24 +131,31 @@
    {% else %}
 
       <div id="main_outcome_section">
-        {% if overallResult > 0 %}
-        <h2 class="centre mt-5" id="positive_outcome">
-            Outcome of backtesting the signal: +{{ overallResult }}%
-        </h2>
-        {% else %}
 
-        <h2 class="centre mt-5" id="negative_outcome">
-            Outcome of backtesting the signal: {{ overallResult }}%
-        </h2>
-        {% endif %}
+        <h3 class="centre mt-5 mb-3" >
+            Back testing result:
+            {% if overallResult > 0 %}
+                <span id="positive_outcome">+{{ overallResult }}%</span>
+            {% else %}
+                <span id="negative_outcome">{{ overallResult }}%</span>
+            {% endif %}
+        </h3>
+
+
+
+
 
         {%  if overallAverageTimeBetweenTransactions %}
-            <h4 class="centre mb-2">Average time between transactions: {{ overallAverageTimeBetweenTransactions }} days</h4>
+            <h5 class="centre mb-2">Average time between transactions: <strong class="blue">{{ overallAverageTimeBetweenTransactions }} days</strong>    </h5>
         {% endif %}
 
         {%  if overallAverageTimeHoldingStock %}
-            <h4 class="centre mb-2">Average time holding stock: {{ overallAverageTimeHoldingStock }} days</h4>
+            <h5 class="centre mb-2">Average time holding stock: <strong class="blue">{{ overallAverageTimeHoldingStock }} days</strong></h5>
         {% endif %}
+
+        <p class="show_signal_section centre mt-3 mb-3">(Please click <a href="/" class="view_saved_signal">here</a> to view the signal you have just back tested)</p>
+
+          {% include "stock_screener/child_templates/saved_signal.html" with signalTable=signalTable %}
 
         <div class="stock_info card mb-4" id="outcome_card">
             <div class="card-body">
