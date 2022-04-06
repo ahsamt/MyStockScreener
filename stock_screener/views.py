@@ -8,7 +8,8 @@ from django.db import IntegrityError
 from .forms import StockForm, BacktestForm
 from .utils import read_csv_from_S3, adjust_start, make_graph, get_price_change, get_current_tickers_info, \
     upload_csv_to_S3, stock_tidy_up, prepare_ticker_info_update, get_company_name_from_yf, get_previous_sma, \
-    calculate_price_dif, format_float, backtest_signal, prepare_signal_table, calc_average_percentage, check_and_add_sma
+    calculate_price_dif, format_float, backtest_signal, prepare_signal_table, calc_average_percentage, \
+    check_and_add_sma, constructorFields, compare_signals
 from .calculations import make_calculations
 from datetime import date, datetime
 from dateutil.relativedelta import relativedelta
@@ -21,9 +22,6 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 
 bucket = 'stockscreener-data'
-constructorFields = ['ma', 'maS', 'maL', 'maWS', 'maWL', 'psar', 'psarAF', 'psarMA', 'adx', 'adxW', 'adxL', 'srsi',
-                     'srsiW', 'srsiSm1', 'srsiSm2', 'srsiOB', 'srsiOS', 'macd', 'macdF', 'macdS', 'macdSm']
-
 
 def index(request):
     numMonths = 12
@@ -210,31 +208,9 @@ def index(request):
 
                     if len(constructorObj):
                         savedConstructor = constructorObj[0]
-
                         # checking if the signal user has previously saved
                         # matches the signal being used for the current search
-                        if (savedConstructor.ma == signalDict['ma']
-                                and savedConstructor.maS == signalDict['maS']
-                                and savedConstructor.maL == signalDict['maL']
-                                and savedConstructor.maWS == signalDict['maWS']
-                                and savedConstructor.maWL == signalDict['maWL']
-                                and savedConstructor.psar == signalDict['psar']
-                                and savedConstructor.psarAF == signalDict['psarAF']
-                                and savedConstructor.psarMA == signalDict['psarMA']
-                                and savedConstructor.adx == signalDict['adx']
-                                and savedConstructor.adxW == signalDict['adxW']
-                                and savedConstructor.adxL == signalDict['adxL']
-                                and savedConstructor.srsi == signalDict['srsi']
-                                and savedConstructor.srsiW == signalDict['srsiW']
-                                and savedConstructor.srsiSm1 == signalDict['srsiSm1']
-                                and savedConstructor.srsiSm2 == signalDict['srsiSm2']
-                                and savedConstructor.srsiOB == signalDict['srsiOB']
-                                and savedConstructor.srsiOS == signalDict['srsiOS']
-                                and savedConstructor.macd == signalDict['macd']
-                                and savedConstructor.macdF == signalDict['macdF']
-                                and savedConstructor.macdS == signalDict['macdS']
-                                and savedConstructor.macdSm == signalDict['macdSm']):
-                            constructorAdded = True
+                        constructorAdded = compare_signals(savedConstructor, signalDict)
 
                 context = {
                     "ticker": ticker,

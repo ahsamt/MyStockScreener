@@ -6,6 +6,8 @@ from io import StringIO
 import ta
 import plotly.graph_objects as go
 
+constructorFields = ['ma', 'maS', 'maL', 'maWS', 'maWL', 'psar', 'psarAF', 'psarMA', 'adx', 'adxW', 'adxL', 'srsi',
+                     'srsiW', 'srsiSm1', 'srsiSm2', 'srsiOB', 'srsiOS', 'macd', 'macdF', 'macdS', 'macdSm']
 
 def adjust_start(df, start_date):
     """(pd DataFrame, date as datetime.datetime) => pd DataFrame
@@ -385,3 +387,10 @@ def check_and_add_sma(df):
     if not smaCol:
         df, smaCol = add_sma_col(df)
     return df, smaCol
+
+def compare_signals(signal_class_instance, signal_dict):
+    signal_class_instance_dict = vars(signal_class_instance)
+    for field in constructorFields:
+        if signal_class_instance_dict[field] != signal_dict[field]:
+            return False
+    return True
