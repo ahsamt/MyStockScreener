@@ -141,10 +141,6 @@
             {% endif %}
         </h3>
 
-
-
-
-
         {%  if overallAverageTimeBetweenTransactions %}
             <h5 class="centre mb-2">Average time between transactions: <strong class="blue">{{ overallAverageTimeBetweenTransactions }} days</strong>    </h5>
         {% endif %}
@@ -153,9 +149,15 @@
             <h5 class="centre mb-2">Average time holding stock: <strong class="blue">{{ overallAverageTimeHoldingStock }} days</strong></h5>
         {% endif %}
 
+
+        <div class="centre mt-2 ">
+          {% include "stock_screener/child_templates/save_signal_button.html" with signalSelected=signalSelected constructorAdded=constructorAdded newSignal=newSignal %}
+        </div>
+
         <p class="show_signal_section centre mt-3 mb-3">(Please click <a href="/" class="view_saved_signal">here</a> to view the signal you have just back tested)</p>
 
-          {% include "stock_screener/child_templates/saved_signal.html" with signalTable=signalTable %}
+            {% include "stock_screener/child_templates/saved_signal.html" with signalTable=signalTable %}
+
 
         <div class="stock_info card mb-4" id="outcome_card">
             <div class="card-body">

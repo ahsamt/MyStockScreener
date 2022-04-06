@@ -56,49 +56,7 @@
 
         {% if user.is_authenticated %}
 
-            {% if signalSelected %}
-
-                {% if constructorAdded %}
-
-                    <div id = "existing_signal_message">You have previously saved this signal for your watchlisted items</div>
-
-                {% else %}
-
-                    <a  href="#" class="add-signal"
-                    data-ma="{{ newSignal.ma }}"
-                    data-maS="{{ newSignal.maS }}"
-                    data-maL="{{ newSignal.maL }}"
-                    data-maWS="{{ newSignal.maWS }}"
-                    data-maWL="{{ newSignal.maWL }}"
-                    data-psar="{{ newSignal.psar }}"
-                    data-psarAF="{{ newSignal.psarAF }}"
-                    data-psarMA="{{ newSignal.psarMA }}"
-                    data-adx="{{ newSignal.adx }}"
-                    data-adxW="{{ newSignal.adxW }}"
-                    data-adxL="{{ newSignal.adxL }}"
-                    data-srsi="{{ newSignal.srsi }}"
-                    data-srsiW="{{ newSignal.srsiW }}"
-                    data-srsiSm1="{{ newSignal.srsiSm1 }}"
-                    data-srsiSm2="{{ newSignal.srsiSm2 }}"
-                    data-srsiOB="{{ newSignal.srsiOB }}"
-                    data-srsiOS="{{ newSignal.srsiOS }}"
-                    data-macd="{{ newSignal.macd }}"
-                    data-macdF="{{ newSignal.macdF }}"
-                    data-macdS="{{ newSignal.macdS }}"
-                    data-macdSm="{{ newSignal.macdSm }}"
-                    data-previousSignal = "{{ savedConstructor }}"
-
-                >
-                    {% if not savedConstructor %}
-                        Save this signal
-                    {% else %}
-                        Replace your saved signal with this one
-                    {%  endif %}
-                </a>
-
-                    <div id ="signal_saved_message">This signal has been saved for your watchlisted items</div>
-                {%  endif %}
-            {% endif %}
+            {% include "stock_screener/child_templates/save_signal_button.html" with signalSelected=signalSelected constructorAdded=constructorAdded newSignal=newSignal %}
         {% endif %}
     </div>
 

@@ -23,6 +23,7 @@ from django.contrib.auth.decorators import login_required
 
 bucket = 'stockscreener-data'
 
+
 def index(request):
     numMonths = 12
     if request.method == "GET":
@@ -524,14 +525,14 @@ def watchlist(request):
             # ['''<a href="{% url 'graph' %}" target="blank"> Graph </a>''']
 
             watchlistItem["resultTable"] = pd.DataFrame([tableEntries],
-                                                         columns=['Ticker',
-                                                                  'Analysis Outcome',
-                                                                  'Days Since Trend Change',
-                                                                  'Closing Price',
-                                                                  '1 Week Change',
-                                                                  '1 Month Change',
-                                                                  '3 Months Change'] + selectedSignals + ["Graph"] +
-                                                                 ["Remove From Watchlist?"])
+                                                        columns=['Ticker',
+                                                                 'Analysis Outcome',
+                                                                 'Days Since Trend Change',
+                                                                 'Closing Price',
+                                                                 '1 Week Change',
+                                                                 '1 Month Change',
+                                                                 '3 Months Change'] + selectedSignals + ["Graph"] +
+                                                                ["Remove From Watchlist?"])
 
             watchedTickers.append(watchlistItem)
 
@@ -617,10 +618,13 @@ def backtester(request):
                     }
                     return render(request, "stock_screener/backtester.html", context)
 
+                signalSelected = True
                 allResults = {}
                 allDetails = []
                 averageIndTimesBetweenTransactions = []
                 averageIndTimesHoldingStock = []
+
+
 
                 for ticker in tickers:
                     # Preparing a dataframe for the period of time indicated by the user + 12 months for calculations
@@ -736,10 +740,24 @@ def backtester(request):
 
                 overallResult = calc_average_percentage(allResults.values())
 
-
-
                 # prepare a table to display the saved signal to the user
                 signalTable = prepare_signal_table(signalDict)
+
+
+                # Check if the user has a signal saved in their profile
+                try:
+                    # checking if the user has previously saved any signal for their watchlist
+                    constructorObj = SignalConstructor.objects.filter(user=request.user)
+
+                    if len(constructorObj):
+                        savedConstructor = constructorObj[0]
+                        # checking if the signal user has previously saved
+                        # matches the signal being used for the current search
+                        constructorAdded = compare_signals(savedConstructor, signalDict)
+
+                except SignalConstructor.DoesNotExist:
+                    constructorAdded = False
+
 
                 context = {
                     "overallResult": overallResult,
@@ -747,7 +765,11 @@ def backtester(request):
                     "allDetails": allDetails,
                     "overallAverageTimeBetweenTransactions": overallAverageTimeBetweenTransactions,
                     "overallAverageTimeHoldingStock": overallAverageTimeHoldingStock,
-                    "signalTable": signalTable
+                    "signalTable": signalTable,
+                    "signalSelected": signalSelected,
+                    "constructorAdded": constructorAdded,
+                    "savedConstructor": savedConstructor,
+                    "newSignal": signalDict
                 }
 
                 return render(request, "stock_screener/backtester.html", context)

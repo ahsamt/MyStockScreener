@@ -273,7 +273,7 @@ li > .nav-link {
   display: block;
 }
 
-#existing_signal_message, #signal_saved_message {
+.existing_signal_message, .signal_saved_message {
   color: var(--green-font-color);
   margin: 10px 0;
 }
@@ -313,7 +313,7 @@ li > .nav-link {
   text-align: center;
 }
 
-#signal_saved_message {
+.signal_saved_message {
   display: none;
 }
 

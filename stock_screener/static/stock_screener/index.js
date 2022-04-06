@@ -308,7 +308,7 @@ function add_signal(event) {
         if (result.message === "Signal saved successfully") {
           event.target.dataset.previousSignal = result.id;
           event.target.style.display = "none";
-          document.getElementById("signal_saved_message").style.display = "block";
+          document.querySelector(".signal_saved_message").style.display = "block";
         }
       });
 
