@@ -8,8 +8,7 @@ from django.db import IntegrityError
 from .forms import StockForm, BacktestForm
 from .utils import read_csv_from_S3, adjust_start, make_graph, get_price_change, get_current_tickers_info, \
     upload_csv_to_S3, stock_tidy_up, prepare_ticker_info_update, get_company_name_from_yf, get_previous_sma, \
-    calculate_price_dif, format_float, backtest_signal, check_for_sma_column, add_sma_col, prepare_signal_table, \
-    calc_average_percentage
+    calculate_price_dif, format_float, backtest_signal, prepare_signal_table, calc_average_percentage, check_and_add_sma
 from .calculations import make_calculations
 from datetime import date, datetime
 from dateutil.relativedelta import relativedelta
@@ -98,7 +97,7 @@ def index(request):
                         updatedStocks = pd.concat([existingStocks, updatedStock], axis=1)
                         upload_csv_to_S3(bucket, updatedStocks, "Stocks")
 
-                        tickerList = set(updatedStocks.columns.get_level_values(0).tolist())
+                        # tickerList = set(updatedStocks.columns.get_level_values(0).tolist())
 
                 else:
                     print("reading data and preparing graph")
@@ -118,8 +117,11 @@ def index(request):
                 stock = stock.apply(pd.to_numeric)
 
                 # if no signals are selected:
-                if not (signalDict['ma'] or signalDict['psar'] or signalDict['adx'] or signalDict['srsi'] or signalDict[
-                    'macd']):
+                if not (signalDict['ma']
+                        or signalDict['psar']
+                        or signalDict['adx']
+                        or signalDict['srsi']
+                        or signalDict['macd']):
                     signalSelected = False
                     selectedSignals = []
                     stock = stock.reset_index()
@@ -143,15 +145,13 @@ def index(request):
                 closingPrice, priceChange = get_price_change(stock)
 
                 # Check if an SMA column has already been added, and add one if it has not been
-                smaCol = check_for_sma_column(stock)
-                if not smaCol:
-                    stock, smaCol = add_sma_col(stock)
+                stock, smaCol = check_and_add_sma(stock)
 
-                #latestDate = stock["Date"].max()
                 smaPeriods = [7, 30, 90]
                 smaChanges = []
 
-                # getting the SMA value changes for the ticker going back the number of days indicated in the smaPeriods list
+                # getting the SMA value changes for the ticker
+                # going back the number of days indicated in the smaPeriods list
                 for noDays in smaPeriods:
                     smaValue = get_previous_sma(stock, smaCol, noDays)
                     smaChanges.append(calculate_price_dif(closingPrice, smaValue)[1] + "%")
@@ -410,7 +410,7 @@ def saved_signals(request):
     macdF = data.get("macdF")
     macdS = data.get("macdS")
     macdSm = data.get("macdSm")
-    #previousSignal = data.get("previousSignal")
+    # previousSignal = data.get("previousSignal")
     print("Got all the data, about to delete old and save new")
     # Create a saved search for the logged in user
     try:
@@ -492,10 +492,7 @@ def watchlist(request):
         for item in watchlist:
             ticker = item.ticker
             tickerId = item.id
-            watchlist_item = {}
-            watchlist_item["ticker"] = ticker
-            watchlist_item["notes"] = item.notes
-            watchlist_item["tickerID"] = item.id
+            watchlist_item = {"ticker": ticker, "notes": item.notes, "tickerID": item.id}
 
             # Creating a separate dataframe for each stock, dropping n/a values and converting data to numeric
             data = allStocks[ticker].copy()
@@ -516,9 +513,7 @@ def watchlist(request):
             closingPrice = data["Close"].iloc[-1]
 
             # Check if an SMA column has already been added, and add one if it has not been
-            smaCol = check_for_sma_column(data)
-            if not smaCol:
-                data, smaCol = add_sma_col(data)
+            data, smaCol = check_and_add_sma(data)
 
             smaPeriods = [7, 30, 90]
             smaChanges = []
@@ -537,17 +532,19 @@ def watchlist(request):
             graph = make_graph(data, ticker, selectedSignals, 600, 800)
             watchlist_item["graph"] = graph
 
+            # Create a list of all the latest results for the signals saved
             signalResults = []
-
             for signal in selectedSignals:
                 signalResults.append(format_float(data.loc[data.index.max()][signal]))
 
+            # Create a dataframe with teh watchlist data for each ticker
+
+            tickerHtml = f"<span class='watchlist-ticker'>{ticker}</span>"
+            graphButtonHtml = f"<button class = 'graph-button' data-ticker={ticker}>See graph</button>"
+            removeButtonHtml = f"<button class = 'remove-ticker-button' data-ticker_id={tickerId}>Remove</button>"
             tableEntries = \
-                [f"<span class='watchlist-ticker'>{ticker}</span>",
-                 rec, daysSinceChange, closingPrice] \
-                + smaChanges + signalResults + \
-                [f"<button class = 'graph-button' data-ticker={ticker}>See graph</button>",
-                 f"<button class = 'remove-ticker-button' data-ticker_id={tickerId}>Remove</button>"]
+                [tickerHtml, rec, daysSinceChange, closingPrice] \
+                + smaChanges + signalResults + [graphButtonHtml, removeButtonHtml]
             # ['''<a href="{% url 'graph' %}" target="blank"> Graph </a>''']
 
             watchlist_item["resultTable"] = pd.DataFrame([tableEntries],
@@ -625,8 +622,11 @@ def backtester(request):
                 existingStocks = read_csv_from_S3(bucket, "Stocks")
 
                 # if no signals have been selected, remind the user to select signals
-                if not (signalDict['ma'] or signalDict['psar'] or signalDict['adx'] or signalDict['srsi'] or signalDict[
-                    'macd']):
+                if not (signalDict['ma']
+                        or signalDict['psar']
+                        or signalDict['adx']
+                        or signalDict['srsi']
+                        or signalDict['macd']):
                     context = {
                         "message": "Please select the signals to back test",
                         "stockForm": BacktestForm(request.user)
@@ -685,44 +685,45 @@ def backtester(request):
 
                         # if there is more than 1 transaction in the backtest DataFrame
                         if numTransactions > 1:
-                            days_between_stock_transactions = []
-                            days_holding_stock = []
+                            daysBetweenStockTransactions = []
+                            daysHoldingStock = []
 
-                            # get the number of days between each two transactions, append results to the list for the stock
+                            # get the number of days between each two transactions,
+                            # append results to the list for the stock
                             for i in range(1, numTransactions):
-                                days_between_2_transactions = (backtestData.Date[i] - backtestData.Date[i - 1]).days
-                                days_between_stock_transactions.append(days_between_2_transactions)
+                                daysBetween2Transactions = (backtestData.Date[i] - backtestData.Date[i - 1]).days
+                                daysBetweenStockTransactions.append(daysBetween2Transactions)
 
                                 if backtestData.loc[i - 1, "Recommendation"] == "Buy":
-                                    days_holding_stock.append(days_between_2_transactions)
+                                    daysHoldingStock.append(daysBetween2Transactions)
 
-                            average_time_between_stock_transactions = round(
-                                sum(days_between_stock_transactions) / (numTransactions - 1), 2)
-                            averageIndTimesBetweenTransactions.append(average_time_between_stock_transactions)
+                            averageTimeBetweenStockTransactions = round(
+                                sum(daysBetweenStockTransactions) / (numTransactions - 1), 2)
+                            averageIndTimesBetweenTransactions.append(averageTimeBetweenStockTransactions)
 
-                            average_time_holding_stock = round(sum(days_holding_stock) / len(days_holding_stock), 2)
-                            averageIndTimesHoldingStock.append(average_time_holding_stock)
+                            averageTimeHoldingStock = round(sum(daysHoldingStock) / len(daysHoldingStock), 2)
+                            averageIndTimesHoldingStock.append(averageTimeHoldingStock)
 
                         # if only one ("buy") transaction has taken place
                         else:
-                            average_time_between_stock_transactions = None
-                            average_time_holding_stock = None
+                            averageTimeBetweenStockTransactions = None
+                            averageTimeHoldingStock = None
 
                         # prepare an individual backtesting table per stock
                         indTable = backtestData.to_html(col_space=20, bold_rows=True, classes="table",
                                                         justify="left", index=False)
 
-
                     # If backtest returns no data (sell/buy prompts not generated by teh signal selected)
                     else:
                         numTransactions = None
-                        average_time_between_stock_transactions = None
-                        average_time_holding_stock = None
-                        indTable = "The selected signal has not generated a sufficient number of buy/sell recommendations for this ticker"
+                        averageTimeBetweenStockTransactions = None
+                        averageTimeHoldingStock = None
+                        indTable = "The selected signal has not generated a sufficient number " \
+                                   "of buy/sell recommendations for this ticker"
 
                     # Prepare details and table to be displayed per ticker
-                    allIndTickerDetails = (ticker, numTransactions, average_time_between_stock_transactions,
-                                           average_time_holding_stock, indTable)
+                    allIndTickerDetails = (ticker, numTransactions, averageTimeBetweenStockTransactions,
+                                           averageTimeHoldingStock, indTable)
 
                     # Prepare a list of all ticker info and tables to iterate through
                     allDetails.append(allIndTickerDetails)
@@ -750,8 +751,8 @@ def backtester(request):
                 backtesterTable["Details"] = ""
                 for i in range(backtesterTable.index.max() + 1):
                     nextTicker = backtesterTable.loc[i, "Ticker"]
-                    backtesterTable.loc[
-                        i, "Details"] = f"<button class = 'ind_outcome_button' data-ticker={nextTicker}>See details</button>"
+                    backtesterTable.loc[i, "Details"] = \
+                        f"<button class = 'ind_outcome_button' data-ticker={nextTicker}>See details</button>"
 
                 htmlJointTable = backtesterTable.to_html(col_space=[150, 200, 150], bold_rows=True,
                                                          classes=["table", "backtest_table"],

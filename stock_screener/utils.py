@@ -110,118 +110,6 @@ def get_current_tickers_info(bucket):
     return df
 
 
-def add_ma(df, ma_short, ma_long, window_short, window_long):
-    """(pd DataFrame, string, string, integer, integer) => pd DataFrame, string, string
-    Takes in :
-        - stock data,
-        - types of Moving Average signal (SMA/EMA) for a short and long window
-        - sizes of the window for short and long window
-    Returns a DataFrame with the Moving Average calculations and recommendations added,
-    name of the column representing short MA window, name of the column representing long MA window
-    """
-    if ma_short == "SMA":
-        colShort = f"SMA {window_short}"
-        df[colShort] = ta.trend.sma_indicator(df["Close"], window=window_short)
-    else:
-        colShort = f"EMA {window_short}"
-        df[colShort] = ta.trend.ema_indicator(df["Close"], window=window_short)
-
-    if ma_long == "SMA":
-        colLong = f"SMA {window_long}"
-        df[colLong] = ta.trend.sma_indicator(df["Close"], window=window_long)
-    else:
-        colLong = f"EMA {window_long}"
-        df[colLong] = ta.trend.ema_indicator(df["Close"], window=window_long)
-
-    df["short_more_than_long"] = df[colShort] >= df[colLong]
-    df["No_trend_change"] = df["short_more_than_long"].eq(df["short_more_than_long"].shift())
-    df = df.reset_index()
-    df.loc[0, "No_trend_change"] = True
-    mask = (df["No_trend_change"] == False) & (df["short_more_than_long"] == True)
-    df.loc[mask, "MA Flag"] = "Buy"
-    mask = (df["No_trend_change"] == False) & (df["short_more_than_long"] == False)
-    df.loc[mask, "MA Flag"] = "Sell"
-
-    mask = df["short_more_than_long"] == True
-    df["MA Rec"] = "Sell"
-    df.loc[mask, "MA Rec"] = "Buy"
-
-    return df, colShort, colLong
-
-
-def add_psar(df, psar_af, psar_ma):
-    """(pd DataFrame, float, float) => pd DataFrame
-    Takes in :
-        - stock data,
-        - Acceleration Factor,
-        - Maximum Acceleration
-    Returns a DataFrame with the Parabolic SAR calculations and recommendations added"""
-    if 'Date' not in df.columns:
-        df = df.reset_index()
-    df["Parabolic SAR"] = ta.trend.PSARIndicator(df["High"], df["Low"], df["Close"], psar_af, psar_ma).psar()
-    mask = df["Parabolic SAR"] > df["Close"]
-    df["Parabolic SAR Rec"] = "Buy"
-    df.loc[mask, "Parabolic SAR Rec"] = "Sell"
-    return df
-
-
-def add_adx(df, window_size, limit):
-    """(pd DataFrame, integer, integer) => pd DataFrame
-    Takes in :
-        - stock data,
-        - window size,
-        - limit value above which an instrument is considered to be trending
-    Returns a DataFrame with the Average Directional Index calculations and recommendations added"""
-    if 'Date' not in df.columns:
-        df = df.reset_index()
-    df["ADX"] = ta.trend.ADXIndicator(df["High"], df["Low"], df["Close"], window=window_size).adx()
-    mask = df["ADX"] > limit
-    df["ADX Rec"] = False
-    df.loc[mask, "ADX Rec"] = True
-    return df
-
-
-def add_srsi(df, window_size, smooth1, smooth2, overbought_limit, oversold_limit):
-    """(pd DataFrame, integer, integer, integer, float, float) => pd DataFrame
-    Takes in :
-        - stock data,
-        - window size,
-        - smooth 1 value,
-        - smooth 2 value,
-        - overbought limit,
-        - oversold limit
-    Returns a DataFrame with the Stochastic RSI calculations and recommendations added"""
-    if 'Date' not in df.columns:
-        df = df.reset_index()
-    df["Stochastic RSI"] = ta.momentum.StochRSIIndicator(df["Close"], window=window_size,
-                                                         smooth1=smooth1, smooth2=smooth2).stochrsi()
-    df["Stochastic RSI Rec"] = "Wait"
-    mask = df["Stochastic RSI"] > overbought_limit
-    df.loc[mask, "Stochastic RSI Rec"] = "Sell"
-    mask = df["Stochastic RSI"] < oversold_limit
-    df.loc[mask, "Stochastic RSI Rec"] = "Buy"
-    return df
-
-
-def add_macd(df, window_slow, window_fast, smoothing_period):
-    """(pd DataFrame, integer, integer, integer) => pd DataFrame
-        Takes in :
-            - stock data,
-            - window size - slow,
-            - swindow size - fast,
-            - smoothing period
-        Returns a DataFrame with the Moving Average Convergence Divergence
-         calculations and recommendations added"""
-    if 'Date' not in df.columns:
-        df = df.reset_index()
-    df["MACD"] = ta.trend.MACD(df["Close"], window_slow=window_slow, window_fast=window_fast,
-                               window_sign=smoothing_period).macd()
-    mask = df["MACD"] >= 0
-    df["MACD Rec"] = "Sell"
-    df.loc[mask, "MACD Rec"] = "Buy"
-    return df
-
-
 def add_days_since_change(df, col_name):
     """(pd DataFrame, string) => pd DataFrame
     Takes in a dataframe and the name of the column in the dataframe that needs to be analysed.
@@ -281,13 +169,13 @@ def format_float(number):
     return string
 
 
-def calculate_price_dif(newPrice, oldPrice):
+def calculate_price_dif(new_price, old_price):
     """(float/integer, float/integer => float/integer, string
     Takes an old price and a new price, returns the difference as a number
     as well as percentage of the old price"""
-    priceDif = newPrice - oldPrice
-    percDif = format_float(priceDif / oldPrice * 100)
-    return priceDif, percDif
+    price_dif = new_price - old_price
+    perc_dif = format_float(price_dif / old_price * 100)
+    return price_dif, perc_dif
 
 
 def get_price_change(df):
@@ -491,3 +379,9 @@ def calc_average_percentage(perc_iterable):
         result *= adj_v
 
     return round((result * 100 - 100), 2)
+
+def check_and_add_sma(df):
+    smaCol = check_for_sma_column(df)
+    if not smaCol:
+        df, smaCol = add_sma_col(df)
+    return df, smaCol
