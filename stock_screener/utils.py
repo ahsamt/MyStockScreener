@@ -336,8 +336,8 @@ def prepare_signal_table(signal):
         signalData += [signal.psar,
                        signal.psarAF,
                        signal.psarMA]
-        signalHeaders += ["Parabolic SAR", "Parabolic SAR - Acceleration Factor (AF)",
-                          "Parabolic SAR - Maximum Acceleration (MA)"]
+        signalHeaders += ["Parabolic SAR", "Parabolic SAR - Acceleration Factor",
+                          "Parabolic SAR - Maximum Acceleration"]
 
     if signal.adx:
         signalData += [signal.adx,

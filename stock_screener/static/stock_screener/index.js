@@ -36,7 +36,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
    function hide_signal(event) {
         event.preventDefault();
-        event.target.parentElement.style.display = "none";
+        document.querySelector(".saved-signal").style.display = "none";
         document.querySelector(".show_signal_section").style.display = "block";
     }
 

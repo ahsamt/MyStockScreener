@@ -111,6 +111,10 @@ li > .nav-link {
   margin-top: 5px;
 }
 
+.hide_signal_details {
+  font-size: 13px;
+  padding: 2px 3px;
+}
 .ind_result{
   display: none;
 }
@@ -218,14 +222,18 @@ li > .nav-link {
 }
 .saved-signal {
   display: none;
-}
-.signal_table {
-  max-width: 400px;
-  padding: 5px;
+  max-width: 330px;
+  padding: 5px 13px;
   box-shadow: var(--custom-shadow);
   margin: 0 auto;
-  display: block;
   background: white;
+  border-radius: 4px;
+}
+
+.saved-signal-heading{
+  color: var(--red-hover-color);
+  font-weight: 900;
+  font-size: 15px;
 }
 
 .stock_info, .ind_result {
