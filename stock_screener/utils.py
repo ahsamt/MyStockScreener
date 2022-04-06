@@ -329,8 +329,8 @@ def prepare_signal_table(signal):
                        signal.maL,
                        signal.maWS,
                        signal.maWL]
-        signalHeaders += ["Moving Average", "Moving Average - Short", "Moving Average - Long",
-                          "Moving Average Term - short", "Moving Average Term - Long"]
+        signalHeaders += ["Moving Average", "Moving Average Type (Short)", "Moving Average Type (Long)",
+                          "Moving Average - Short Window Length", "Moving Average - Long Window Length"]
 
     if signal.psar:
         signalData += [signal.psar,

@@ -78,27 +78,19 @@ document.addEventListener("DOMContentLoaded", () => {
   function show_outcome_table(event) {
     event.preventDefault();
     let ticker = event.target.dataset.ticker;
-
     let ind_outcome_table = document.getElementById(`${ticker}_card`);
     let main_outcome_table = document.getElementById("main_outcome_section");
     ind_outcome_table.style.display = "block";
     main_outcome_table.style.display = "none";
-
-
-  }
+   }
 
   function hide_outcome_table(event) {
     event.preventDefault();
     let main_outcome_table = document.getElementById("main_outcome_section");
-
     document.querySelectorAll(".ind_result").forEach((table) => {table.style.display = "none"});
     main_outcome_table.style.display = "block";
 
   }
-
-
-
-
 
   function show_graph(event) {
     event.preventDefault();
@@ -120,6 +112,7 @@ document.addEventListener("DOMContentLoaded", () => {
     headings.style.display = "block";
 
   }
+
   // update watchlist when the relevant button is clicked on the index page
   document.querySelectorAll(".watchlist").forEach((watch_button) => {
     watch_button.addEventListener("click", (event) => async_update_watchlist_index_page(event));
@@ -146,13 +139,9 @@ document.addEventListener("DOMContentLoaded", () => {
     save_button.addEventListener("click", (event) => update_notes(event));
   });
 
-  // display the relevant stocks when a letter button is clicked on the ticker list page
-  document.querySelectorAll(".abc").forEach((letter) => {
-    letter.addEventListener("click", (event) => {
-      display_stock_list(event);
-    });
-  });
+
 });
+
 
 function top_scroll() {
   // insert "back to top" button when user scrolls down the page
