@@ -461,9 +461,9 @@ def watchlist(request):
     startDateDatetime = datetime.combine(startDate, datetime.min.time())
 
     if request.method == "GET":
-        watched_tickers = []
-        watchlist = SavedSearch.objects.filter(user=request.user)
-        if len(watchlist) == 0:
+        watchedTickers = []
+        watchlistObjects = SavedSearch.objects.filter(user=request.user)
+        if len(watchlistObjects) == 0:
             return render(request, "stock_screener/watchlist.html",
                           {"empty_message": "You do not have any tickers added to your watchlist"})
 
@@ -489,10 +489,10 @@ def watchlist(request):
         signalTable = prepare_signal_table(signal)
 
         # can i pass it to html as an object instead?
-        for item in watchlist:
+        for item in watchlistObjects:
             ticker = item.ticker
             tickerId = item.id
-            watchlist_item = {"ticker": ticker, "notes": item.notes, "tickerID": item.id}
+            watchlistItem = {"ticker": ticker, "notes": item.notes, "tickerID": item.id}
 
             # Creating a separate dataframe for each stock, dropping n/a values and converting data to numeric
             data = allStocks[ticker].copy()
@@ -530,7 +530,7 @@ def watchlist(request):
             # Prepare a graph for each ticker
             data = adjust_start(data, startDateDatetime)
             graph = make_graph(data, ticker, selectedSignals, 600, 800)
-            watchlist_item["graph"] = graph
+            watchlistItem["graph"] = graph
 
             # Create a list of all the latest results for the signals saved
             signalResults = []
@@ -547,7 +547,7 @@ def watchlist(request):
                 + smaChanges + signalResults + [graphButtonHtml, removeButtonHtml]
             # ['''<a href="{% url 'graph' %}" target="blank"> Graph </a>''']
 
-            watchlist_item["resultTable"] = pd.DataFrame([tableEntries],
+            watchlistItem["resultTable"] = pd.DataFrame([tableEntries],
                                                          columns=['Ticker',
                                                                   'Analysis Outcome',
                                                                   'Days Since Trend Change',
@@ -557,7 +557,7 @@ def watchlist(request):
                                                                   '3 Months Change'] + selectedSignals + ["Graph"] +
                                                                  ["Remove From Watchlist?"])
 
-            watched_tickers.append(watchlist_item)
+            watchedTickers.append(watchlistItem)
 
         # Create a joint table with recommendations for each ticker to be displayed on the watchlist page
         jointTable = pd.DataFrame(columns=['Ticker',
@@ -568,7 +568,7 @@ def watchlist(request):
                                            '1 Month Change',
                                            '3 Months Change'] + selectedSignals + ["Graph"] +
                                           ["Remove From Watchlist?"])
-        for elt in watched_tickers:
+        for elt in watchedTickers:
             jointTable = pd.concat([jointTable, elt["resultTable"]], axis=0)
 
         jointTable.set_index("Ticker", inplace=True)
@@ -580,7 +580,7 @@ def watchlist(request):
                                              escape=False)
 
     return render(request, "stock_screener/watchlist.html",
-                  {'watched_tickers': watched_tickers, "htmlResultTable": htmlResultTable,
+                  {'watched_tickers': watchedTickers, "htmlResultTable": htmlResultTable,
                    "signalTable": signalTable})
 
 
