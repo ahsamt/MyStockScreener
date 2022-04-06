@@ -169,20 +169,20 @@
 
 
         {% for item in allDetails %}
-        <div class="ind_result card mb-4" id="{{ item.0 }}_card">
-        <h4 class="card-title mt-3 ms-3 red" >{{ item.0 }}</h4>
+        <div class="ind_result card mb-4" id="{{ item.ticker }}_card">
+        <h4 class="card-title mt-3 ms-3 red" >{{ item.ticker }}</h4>
             {% if item.1 %}
-            <h5 class="card-subtitle mt-3 ms-3 " >Number of transactions: {{ item.1 }}</h5>
+            <h5 class="card-subtitle mt-3 ms-3 " >Number of transactions: {{ item.numTransactions }}</h5>
             {%  endif %}
             {% if item.2 %}
-            <h5 class="card-subtitle mt-3 ms-3 " >Average time between transactions: {{ item.2 }} days</h5>
+            <h5 class="card-subtitle mt-3 ms-3 " >Average time between transactions: {{ item.averageTimeBetweenStockTransactions }} days</h5>
             {% endif %}
             {% if item.3 %}
-            <h5 class="card-subtitle mt-3 ms-3 " >Average time holding stock: {{ item.3 }} days</h5>
+            <h5 class="card-subtitle mt-3 ms-3 " >Average time holding stock: {{ item.averageTimeHoldingStock }} days</h5>
             {% endif %}
             <div class="card-body">
 
-                {{ item.4 | safe }}
+                {{ item.indTable | safe }}
             </div>
         <button class="close_ind_outcome_button">
             Back to results summary

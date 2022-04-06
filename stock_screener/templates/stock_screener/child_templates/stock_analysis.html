@@ -61,7 +61,7 @@
     </div>
 
     {% if signalSelected %}
-        {% if backtestResult is not None %}
+        {% if htmlBacktestTable is not None %}
         <div class="stock_info card mb-4">
             <div class="card-body">
                 <h4 class="card-title" id="ticker_name">Backtesting this signal</h4>
@@ -78,7 +78,7 @@
             <div class="card-body">
                 <h4 class="card-title" id="ticker_name">Please review the signal</h4>
                 <h5 class="card-subtitle mb-2">
-                    Could not locate buy or sell triggers for the period indicated
+                    Insufficient number of buy/sell recommendations have been generated for this ticker
                 </h5>
             </div>
         </div>
