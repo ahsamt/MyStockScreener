@@ -483,6 +483,8 @@ def watchlist(request):
 
             # Get an overall buy/sell/wait recommendation based on the signals selected
             rec = data.loc[data.index[-1], "Final Rec"]
+            recColours = {'Wait': 'grey', 'Buy': 'green-circle', 'Sell': 'bright-red-circle'}
+            recHtml = f"<span class={recColours[rec]} rec>{rec}</span>"
 
             # Get the number of days since the current recommendation became active
             daysSinceChange = data.loc[data.index[-1], "Days_Since_Change"]
@@ -520,7 +522,7 @@ def watchlist(request):
             graphButtonHtml = f"<button class = 'graph-button' data-ticker={ticker}>See graph</button>"
             removeButtonHtml = f"<button class = 'remove-ticker-button' data-ticker_id={tickerId}>Remove</button>"
             tableEntries = \
-                [tickerHtml, rec, daysSinceChange, closingPrice] \
+                [tickerHtml, recHtml, daysSinceChange, closingPrice] \
                 + smaChanges + signalResults + [graphButtonHtml, removeButtonHtml]
             # ['''<a href="{% url 'graph' %}" target="blank"> Graph </a>''']
 

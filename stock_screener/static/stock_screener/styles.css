@@ -3,9 +3,9 @@
   --custom-shadow: rgba(164, 164, 167, 0.25) 0px 50px 100px -20px,
     rgba(0, 0, 0, 0.3) 0px 30px 60px -30px,
     rgba(10, 37, 64, 0.35) 0px -2px 6px 0px inset;
-  --red-font-color: #cc0000;
+  --red-font-color: #CC0200;
   --blue-font-color: #325c84;
-  --green-font-color: #40bc1e;
+  --green-font-color: #458B00;
   --red-hover-color: #99103d;
   --grey-font-color: #333333;
   --black-font-color: #231F20;
@@ -113,6 +113,26 @@ li > .nav-link {
   font-size: 13px;
   margin-top: 5px;
 }
+.green-circle {
+  color: var(--green-font-color);
+  padding: 4px 13px;
+  border: 1px solid var(--green-font-color);
+  border-radius: 50%;
+}
+
+.grey {
+  color: var(--black-font-color);
+  opacity: 0.7;
+
+}
+
+.bright-red-circle {
+  color: var(--red-font-color);
+  padding: 4px 13px;
+  border: 1px solid var(--red-font-color);
+  border-radius: 50%;
+
+}
 
 .hide_signal_details {
   font-size: 13px;
@@ -150,6 +170,12 @@ li > .nav-link {
 .question:hover {
   color: var(--red-hover-color);
 }
+
+.rec {
+  font-weight: 900;
+  font-size: 15px;
+}
+
 .red {
   color: var(--red-hover-color);
   font-weight: bolder;
@@ -261,8 +287,8 @@ li > .nav-link {
 }
 .watchlist-ticker {
   color: var(--red-hover-color);
-  font-weight: bold;
-  font-size: 14px;
+  font-weight: 850;
+  font-size: 15px;
 }
 .welcome {
   text-align: center;
@@ -300,7 +326,6 @@ li > .nav-link {
 
 #result-table {
   margin:30px;
-  color: #231F20;
   }
 
 #searchButton {
@@ -326,14 +351,14 @@ li > .nav-link {
   display: none;
   position: fixed;
   z-index: 99;
-  bottom: 5px;
-  right: 5px;
-  padding: 5px 10px;
+  bottom: 330px;
+  right: 0px;
+  padding: 10px 7px;
   text-decoration: none;
   color: var(--blue-font-color);
   background-color: white;
   font-weight: bold;
-  font-size: 25px;
+  font-size: 24px;
   box-shadow: var(--custom-shadow);
   border-radius: 4px;
 }
