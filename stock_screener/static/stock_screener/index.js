@@ -20,6 +20,14 @@ document.addEventListener("DOMContentLoaded", () => {
     graph_button.addEventListener("click", (event) => hide_graphs(event));
   });
 
+  document.querySelectorAll(".notes-button").forEach((graph_button) => {
+    graph_button.addEventListener("click", (event) => show_notes(event));
+  });
+
+  document.querySelectorAll(".close-notes").forEach((graph_button) => {
+    graph_button.addEventListener("click", (event) => hide_notes(event));
+  });
+
   document.querySelectorAll(".ind_outcome_button").forEach((outcome_button) => {
     outcome_button.addEventListener("click", (event) => show_outcome_table(event));
   });
@@ -110,6 +118,30 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("result-table").style.display = "block";
     let headings = document.getElementById("watchlist-headings");
     headings.style.display = "block";
+
+  }
+
+  function show_notes(event) {
+    event.preventDefault();
+    let ticker = event.target.dataset.ticker;
+    let notes = document.getElementById(`${ticker}_notes`);
+    let table = document.getElementById("result-table");
+    let headings = document.getElementById("watchlist-headings");
+    let graphs = document.getElementsByClassName("graphs");
+    notes.style.display = "block";
+    table.style.display = "none";
+    headings.style.display = "none";
+    graphs.forEach((graph) => {graph.display.style="none"});
+  }
+
+  function hide_notes(event) {
+      event.preventDefault();
+      document.querySelectorAll(`.notes-section`).forEach((n) => {
+          n.style.display = "none"
+      });
+      document.getElementById("result-table").style.display = "block";
+      let headings = document.getElementById("watchlist-headings");
+      headings.style.display = "block";
 
   }
 
@@ -222,24 +254,6 @@ function async_update_watchlist_index_page(event) {
     });
   }
 }
-
-function remove_from_watchlist(event) {
-  let stockID = event.target.dataset.ticker_id;
-  let confirm = prompt(
-    `Are you sure you want to remove this ticker from your watchlist? This will permanently delete any notes you have saved. (y/n)`
-  );
-  if (confirm === "y") {
-    update_watchlist(event);
-    document.getElementById(`watchedItem${tickerID}`).style.animationPlayState =
-      "running";
-    document.getElementById(`stock_link${tickerID}`).style.display = "none";
-  } else if (confirm === "n") {
-    alert("No problem, we'll keep it where it is!");
-  } else {
-    alert("Sorry, we didn't get it! Please try again.");
-  }
-}
-
 
 
 function add_signal(event) {

@@ -104,14 +104,16 @@ li > .nav-link {
   margin: 0;
 }
 
-.graphs {
+.graphs, .notes-section {
   display: none;
   margin: 30px;
 }
 
-.graph-button, .remove-ticker-button{
+.graph-button, .remove-ticker-button, .notes-button{
   font-size: 13px;
   margin-top: 5px;
+  opacity: 0.83;
+  width: 90px;
 }
 .green-circle {
   color: var(--green-font-color);

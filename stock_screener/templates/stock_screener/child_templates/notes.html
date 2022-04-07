@@ -1,0 +1,31 @@
+<div class="notes-section" id="{{ ticker }}_notes">
+
+    <h4>Your notes for {{ ticker }}:</h4>
+    <form
+            class="edit_notes"
+            id="editNotes{{ tickerID }}"
+            data-stock_id="{{ tickerID }}"
+    >
+        <div class="form-group">
+                                <textarea
+                                        class="edit_content form-control"
+                                        id="editContent{{ tickerID }}"
+                                        rows="12"
+                                >
+                                        {{ notes }}
+                                </textarea>
+            <button
+                    class="save_notes_button"
+                    type="submit"
+                    data-ticker_id="{{ tickerID }}"
+            >
+                Save notes
+            </button>
+            <br />
+            <button class="close-notes mt-1">Back to watchlist</button>
+
+        </div>
+    </form>
+    <p class="message mt-2 mb-3" id="messageNotes{{ tickerID }}"></p>
+
+</div>

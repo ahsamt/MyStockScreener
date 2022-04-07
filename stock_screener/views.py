@@ -520,10 +520,11 @@ def watchlist(request):
 
             tickerHtml = f"<span class='watchlist-ticker'>{ticker}</span>"
             graphButtonHtml = f"<button class = 'graph-button' data-ticker={ticker}>See graph</button>"
+            notesButtonHtml = f"<button class = 'notes-button' data-ticker={ticker}>Add notes</button>"
             removeButtonHtml = f"<button class = 'remove-ticker-button' data-ticker_id={tickerId}>Remove</button>"
             tableEntries = \
                 [tickerHtml, recHtml, daysSinceChange, closingPrice] \
-                + smaChanges + signalResults + [graphButtonHtml, removeButtonHtml]
+                + smaChanges + signalResults + [graphButtonHtml, notesButtonHtml, removeButtonHtml]
             # ['''<a href="{% url 'graph' %}" target="blank"> Graph </a>''']
 
             watchlistItem["resultTable"] = pd.DataFrame([tableEntries],
@@ -533,8 +534,8 @@ def watchlist(request):
                                                                  'Closing Price',
                                                                  '1 Week Change',
                                                                  '1 Month Change',
-                                                                 '3 Months Change'] + selectedSignals + ["Graph"] +
-                                                                ["Remove From Watchlist?"])
+                                                                 '3 Months Change'] + selectedSignals +
+                                                                ["Graph", "Notes", "Remove"])
 
             watchedTickers.append(watchlistItem)
 
@@ -545,8 +546,8 @@ def watchlist(request):
                                            'Closing Price',
                                            '1 Week Change',
                                            '1 Month Change',
-                                           '3 Months Change'] + selectedSignals + ["Graph"] +
-                                          ["Remove From Watchlist?"])
+                                           '3 Months Change'] + selectedSignals +
+                                          ["Graph", "Notes", "Remove"])
         for elt in watchedTickers:
             jointTable = pd.concat([jointTable, elt["resultTable"]], axis=0)
 
