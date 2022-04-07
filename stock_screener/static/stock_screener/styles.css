@@ -87,7 +87,7 @@ li > .nav-link {
 
 .table svg {
   fill: white;
-  width: 15px;
+  height: 15px; ;
 
 }
 .about
@@ -118,6 +118,7 @@ li > .nav-link {
   font-size: 13px;
   margin-top: 5px;
   opacity: 0.83;
+  width: 40px;
 }
 .green-circle {
   color: var(--green-font-color);
