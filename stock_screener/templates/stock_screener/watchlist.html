@@ -2,83 +2,81 @@
 {% load static %}
 
 {% block body %}
-<nav class="navbar navbar-expand-lg navbar-dark">
-  <div class="container-fluid">
-    <a class="navbar-brand" id="top" href="{% url 'index' %}">StockScreener</a>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" id="top" href="{% url 'index' %}">StockScreener</a>
 
-    <button
-      class="navbar-toggler"
-      type="button"
-      data-bs-toggle="collapse"
-      data-bs-target="#navbarNav"
-      aria-controls="navbarNav"
-      aria-expanded="false"
-      aria-label="Toggle navigation"
-    >
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav justify-content-end w-100">
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'index' %}">Search</a>
-        </li>
+            <button
+                    class="navbar-toggler"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#navbarNav"
+                    aria-controls="navbarNav"
+                    aria-expanded="false"
+                    aria-label="Toggle navigation"
+            >
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav justify-content-end w-100">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'index' %}">Search</a>
+                    </li>
 
-        {%  if user.is_authenticated %}
+                    {%  if user.is_authenticated %}
 
-        <li class="nav-item">
-          <a class="nav-link active" href="{% url 'watchlist' %}">Watchlist</a>
-        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active" href="{% url 'watchlist' %}">Watchlist</a>
+                        </li>
 
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'backtester' %}">Back Tester</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'logout' %}">Log Out</a>
-        </li>
-        {% else %}
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'login' %}">Log In</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'register' %}">Register</a>
-        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'backtester' %}">Back Tester</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'logout' %}">Log Out</a>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'login' %}">Log In</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'register' %}">Register</a>
+                        </li>
 
-        {% endif %}
-      </ul>
-    </div>
-  </div>
-</nav>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
 
-{% if empty_message %}
+    {% if empty_message %}
 
-    <h4 class="mt-5 ms-5">{{ empty_message }}</h4>
+        <h4 class="mt-5 ms-5">{{ empty_message }}</h4>
 
-{% else %}
-    <div id="watchlist-headings">
-        <h3 class="rec-watchlist mt-5">Recommendations for {{ user }}'s watchlisted tickers</h3>
-        <h5 class="show_signal_section centre">(Please click <a href="/" class="view_saved_signal">here</a> to view the signal these recommendations are based on)</h5>
-    </div>
+    {% else %}
+        <div id="watchlist-main-section">
 
-    {% include "stock_screener/child_templates/saved_signal.html" with signalTable=signalTable %}
+            <h3 class="rec-watchlist mt-5">Recommendations for {{ user }}'s watchlisted tickers</h3>
+            <h5 class="show_signal_section centre">(Please click <a href="/" class="view_saved_signal">here</a> to view the signal these recommendations are based on)</h5>
 
+            {% include "stock_screener/child_templates/saved_signal.html" with signalTable=signalTable %}
 
-
-    <div id="result-table">{{ htmlResultTable | safe }}</div>
-
+            <div id="result-table">{{ htmlResultTable | safe }}</div>
+        </div>
 
 
-    {% for item in watched_tickers  %}
+        {% for item in watched_tickers  %}
             <div class = "graphs" id="{{ item.ticker }}_graph">
 
-                    <div class="col" > {{ item.graph | safe }}</div>
-            <br />
-            <button class="close-graph mt-1">Back to watchlist</button>
+                <div class="col" > {{ item.graph | safe }}</div>
+                <br />
+                <button class="close-graph mt-1">Back to watchlist</button>
 
 
             </div>
-        {% include "stock_screener/child_templates/notes.html" with ticker=item.ticker tickerID=item.tickerID notes=item.notes  %}
+            {% include "stock_screener/child_templates/notes.html" with ticker=item.ticker tickerID=item.tickerID notes=item.notes  %}
 
-    {% endfor %}
+        {% endfor %}
     {% endif %}
 
 
