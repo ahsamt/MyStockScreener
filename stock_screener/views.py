@@ -509,7 +509,7 @@ def watchlist(request):
 
             # Prepare a graph for each ticker
             data = adjust_start(data, startDateDatetime)
-            graph = make_graph(data, ticker, selectedSignals, 600, 800)
+            graph = make_graph(data, ticker, selectedSignals, 650, 900)
             watchlistItem["graph"] = graph
 
             # Create a list of all the latest results for the signals saved

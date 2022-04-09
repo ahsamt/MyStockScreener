@@ -66,14 +66,8 @@
 
 
         {% for item in watched_tickers  %}
-            <div class = "graphs" id="{{ item.ticker }}_graph">
 
-                <div class="col" > {{ item.graph | safe }}</div>
-                <br />
-                <button class="close-graph mt-1">Back to watchlist</button>
-
-
-            </div>
+            {% include "stock_screener/child_templates/graph.html" with ticker=item.ticker graph=item.graph %}
             {% include "stock_screener/child_templates/notes.html" with ticker=item.ticker tickerID=item.tickerID notes=item.notes  %}
 
         {% endfor %}
