@@ -155,7 +155,10 @@ li > .nav-link {
 .ind_result{
   display: none;
 }
-
+.ind-backtest-info {
+  color: var(--blue-font-color);
+  margin-top: 5px;
+}
 .navbar {
   background-color: var(--blue-font-color);
 }
