@@ -10,7 +10,7 @@ from .utils import read_csv_from_S3, adjust_start, make_graph, get_price_change,
     upload_csv_to_S3, stock_tidy_up, prepare_ticker_info_update, get_company_name_from_yf, get_previous_sma, \
     calculate_price_dif, format_float, backtest_signal, prepare_signal_table, calc_average_percentage, \
     check_and_add_sma, constructorFields, compare_signals
-from .inline_svg import notesImage, graphImage, removeImage
+
 from .calculations import make_calculations
 from datetime import date, datetime
 from dateutil.relativedelta import relativedelta
@@ -522,7 +522,7 @@ def watchlist(request):
             tickerHtml = f"<span class='watchlist-ticker'>{ticker}</span>"
             graphButtonHtml = f"<button class = 'graph-button' data-ticker={ticker}>Graph</button>"
             notesButtonHtml = f"<button class = 'notes-button' data-ticker={ticker}>Notes</button>"
-            removeButtonHtml = f"<button class = 'remove-ticker-button' data-ticker_id={tickerId}>{removeImage}</button>"
+            removeButtonHtml = f"<button class = 'remove-ticker-button' data-ticker_id={tickerId}>&#10005</button>"
             tableEntries = \
                 [tickerHtml, recHtml, daysSinceChange, closingPrice] \
                 + smaChanges + signalResults + [graphButtonHtml, notesButtonHtml, removeButtonHtml]

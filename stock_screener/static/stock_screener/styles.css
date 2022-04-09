@@ -114,11 +114,18 @@ li > .nav-link {
   margin: 30px;
 }
 
-.graph-button, .remove-ticker-button, .notes-button{
+ .remove-ticker-button {
   font-size: 12px;
-  margin-top: 5px;
+  margin-top: 3px;
   opacity: 0.83;
-  width: 70px;
+  width: 40px;
+}
+
+.graph-button, .notes-button{
+  font-size: 12px;
+  margin-top: 1px;
+  opacity: 0.83;
+  width: 60px;
 }
 .green-circle {
   color: var(--green-font-color);
