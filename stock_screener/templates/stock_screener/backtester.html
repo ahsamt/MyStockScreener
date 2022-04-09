@@ -1,198 +1,180 @@
 {% extends "stock_screener/layout.html" %}
 {% load static %}
 <div id="all_backtester">
-{% block body %}
+    {% block body %}
 
 
-<nav class="navbar navbar-expand-lg navbar-dark">
-  <div class="container-fluid">
-    <a class="navbar-brand" id="top" href="{% url 'index' %}">StockScreener</a>
+        <nav class="navbar navbar-expand-lg navbar-dark">
+            <div class="container-fluid">
+                <a class="navbar-brand" id="top" href="{% url 'index' %}">StockScreener</a>
 
-    <button
-      class="navbar-toggler"
-      type="button"
-      data-bs-toggle="collapse"
-      data-bs-target="#navbarNav"
-      aria-controls="navbarNav"
-      aria-expanded="false"
-      aria-label="Toggle navigation"
-    >
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav justify-content-end w-100">
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'index' %}">Search</a>
-        </li>
+                <button
+                        class="navbar-toggler"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#navbarNav"
+                        aria-controls="navbarNav"
+                        aria-expanded="false"
+                        aria-label="Toggle navigation"
+                >
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav justify-content-end w-100">
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'index' %}">Search</a>
+                        </li>
 
-        {%  if user.is_authenticated %}
+                        {%  if user.is_authenticated %}
 
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'watchlist' %}">Watchlist</a>
-        </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'watchlist' %}">Watchlist</a>
+                            </li>
 
-        <li class="nav-item">
-          <a class="nav-link active" href="{% url 'backtester' %}">Back Tester</a>
-        </li>
-
-
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'logout' %}">Log Out</a>
-        </li>
-        {% else %}
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'login' %}">Log In</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'register' %}">Register</a>
-        </li>
-
-        {% endif %}
-      </ul>
-    </div>
-  </div>
-</nav>
-
-<div class="container">
-  {% if not overallResult %}
-
-  <div class="welcome">
-    <h1>Back Tester</h1>
-    <h4>Please select the relevant signals and parameters below</h4>
-    {% if message %}
-        <p id="search_error_message">{{ message }}</p>
-    {% endif %}
+                            <li class="nav-item">
+                                <a class="nav-link active" href="{% url 'backtester' %}">Back Tester</a>
+                            </li>
 
 
-  </div>
-    <div class="stock_search mt-2 mb-1">
-        <form action="" method="post">
-        {% csrf_token %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'logout' %}">Log Out</a>
+                            </li>
+                        {% else %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'login' %}">Log In</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'register' %}">Register</a>
+                            </li>
+
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <div class="container">
+            {% if not overallResult %}
+
+                <div class="welcome">
+                    <h1>Back Tester</h1>
+                    <h4>Please select the relevant signals and parameters below</h4>
+                    {% if message %}
+                        <p id="search_error_message">{{ message }}</p>
+                    {% endif %}
 
 
-            {% include "stock_screener/child_templates/signal_builder.html" %}
+                </div>
+                <div class="stock_search mt-2 mb-1">
+                    <form action="" method="post">
+                        {% csrf_token %}
 
-            <h3 class="centre mb-3 mt-3">Additional parameters</h3>
-            <div class="backtest">
 
-                    <div class="backtest-params row mt-3">
+                        {% include "stock_screener/child_templates/signal_builder.html" %}
 
-                            <div class="col-6">
-                                {{ stockForm.days_to_buy.label }}  {{ stockForm.days_to_buy }}
+                        <h3 class="centre mb-3 mt-3">Additional parameters</h3>
+                        <div class="backtest">
+
+                            <div class="backtest-params row mt-3">
+
+                                <div class="col-6">
+                                    {{ stockForm.days_to_buy.label }}  {{ stockForm.days_to_buy }}
+                                </div>
+
+                                <div class="col-6">
+                                    {{  stockForm.days_to_sell.label }}  {{ stockForm.days_to_sell }}
+                                </div>
+
                             </div>
 
-                            <div class="col-6">
-                                {{  stockForm.days_to_sell.label }}  {{ stockForm.days_to_sell }}
+                            <div class="backtest-params row mt-3">
+
+                                <div class="col-6">
+                                    {{  stockForm.buy_price_adjustment.label }}  {{ stockForm.buy_price_adjustment }}
+                                </div>
+
+                                <div class="col-6">
+                                    {{  stockForm.sell_price_adjustment.label }}  {{ stockForm.sell_price_adjustment }}
+                                </div>
                             </div>
 
-                    </div>
+                            <div class="backtest-params row mt-3">
 
-                    <div class="backtest-params row mt-3">
-
-                            <div class="col-6">
-                                {{  stockForm.buy_price_adjustment.label }}  {{ stockForm.buy_price_adjustment }}
+                                <div class="col-6">
+                                    {{  stockForm.num_years.label }} {{ stockForm.num_years }}
+                                </div>
                             </div>
 
-                            <div class="col-6">
-                                {{  stockForm.sell_price_adjustment.label }}  {{ stockForm.sell_price_adjustment }}
+                            <h3 class="centre mt-3">Tickers to include in back test</h3>
+
+                            <div class="backtest-params row mt-3">
+
+                                {%  for t in stockForm.tickers %}
+                                    <div class="col-lg-3 col-sm-6 col-md-4">{{ t }}</div>
+                                {% endfor %}
+
                             </div>
-                    </div>
 
-                    <div class="backtest-params row mt-3">
+                        </div>
 
-                            <div class="col-6">
-                                {{  stockForm.num_years.label }} {{ stockForm.num_years }}
-                            </div>
-                    </div>
+                        <div class = "mt-3">
+                            <button type="submit" id="searchButton" >Get Results</button>
+                        </div>
 
-                    <h3 class="centre mt-3">Tickers to include in back test</h3>
-
-                    <div class="backtest-params row mt-3">
-
-                        {%  for t in stockForm.tickers %}
-                            <div class="col-lg-3 col-sm-6 col-md-4">{{ t }}</div>
-                        {% endfor %}
-
-                    </div>
+                    </form>
 
                 </div>
 
-            <div class = "mt-3">
-                <button type="submit" id="searchButton" >Get Results</button>
-            </div>
-
-        </form>
-
-    </div>
 
 
 
-
-   {% else %}
-
-      <div id="main_outcome_section">
-
-        <h3 class="centre mt-5 mb-3" >
-            Back testing result:
-            {% if overallResult > 0 %}
-                <span id="positive_outcome">+{{ overallResult }}%</span>
             {% else %}
-                <span id="negative_outcome">{{ overallResult }}%</span>
+
+                <div id="main_outcome_section">
+
+                    <h3 class="centre mt-5 mb-3" >
+                        Back testing result:
+                        {% if overallResult > 0 %}
+                            <span id="positive_outcome">+{{ overallResult }}%</span>
+                        {% else %}
+                            <span id="negative_outcome">{{ overallResult }}%</span>
+                        {% endif %}
+                    </h3>
+
+                    {%  if overallAverageTimeBetweenTransactions %}
+                        <h5 class="centre mb-2">Average time between transactions: <strong class="blue">{{ overallAverageTimeBetweenTransactions }} days</strong>    </h5>
+                    {% endif %}
+
+                    {%  if overallAverageTimeHoldingStock %}
+                        <h5 class="centre mb-2">Average time holding stock: <strong class="blue">{{ overallAverageTimeHoldingStock }} days</strong></h5>
+                    {% endif %}
+
+
+                    <div class="centre mt-2 ">
+                        {% include "stock_screener/child_templates/save_signal_button.html" with signalSelected=signalSelected constructorAdded=constructorAdded newSignal=newSignal %}
+                    </div>
+
+                    <p class="show_signal_section centre mt-3 mb-3">(Please click <a href="/" class="view_saved_signal">here</a> to view the signal you have just back tested)</p>
+
+                    {% include "stock_screener/child_templates/saved_signal.html" with signalTable=signalTable %}
+
+
+                    <div class="stock_info card mb-4" id="outcome_card">
+                        <div class="card-body">
+
+                            {{ htmlJointTable | safe }}
+                        </div>
+                    </div>
+                </div>
+
+
+                {% for item in allDetails %}
+
+                    {% include "stock_screener/child_templates/ind_backtest.html" with item=item %}
+
+                {% endfor %}
+
             {% endif %}
-        </h3>
-
-        {%  if overallAverageTimeBetweenTransactions %}
-            <h5 class="centre mb-2">Average time between transactions: <strong class="blue">{{ overallAverageTimeBetweenTransactions }} days</strong>    </h5>
-        {% endif %}
-
-        {%  if overallAverageTimeHoldingStock %}
-            <h5 class="centre mb-2">Average time holding stock: <strong class="blue">{{ overallAverageTimeHoldingStock }} days</strong></h5>
-        {% endif %}
-
-
-        <div class="centre mt-2 ">
-          {% include "stock_screener/child_templates/save_signal_button.html" with signalSelected=signalSelected constructorAdded=constructorAdded newSignal=newSignal %}
-        </div>
-
-        <p class="show_signal_section centre mt-3 mb-3">(Please click <a href="/" class="view_saved_signal">here</a> to view the signal you have just back tested)</p>
-
-            {% include "stock_screener/child_templates/saved_signal.html" with signalTable=signalTable %}
-
-
-        <div class="stock_info card mb-4" id="outcome_card">
-            <div class="card-body">
-
-                {{ htmlJointTable | safe }}
-            </div>
-        </div>
-      </div>
-
-
-        {% for item in allDetails %}
-        <div class="ind_result card mb-4" id="{{ item.ticker }}_card">
-        <h4 class="card-title mt-3 ms-3 red" >{{ item.ticker }}</h4>
-            {% if item.1 %}
-            <h5 class="card-subtitle mt-3 ms-3 " >Number of transactions: {{ item.numTransactions }}</h5>
-            {%  endif %}
-            {% if item.2 %}
-            <h5 class="card-subtitle mt-3 ms-3 " >Average time between transactions: {{ item.averageTimeBetweenStockTransactions }} days</h5>
-            {% endif %}
-            {% if item.3 %}
-            <h5 class="card-subtitle mt-3 ms-3 " >Average time holding stock: {{ item.averageTimeHoldingStock }} days</h5>
-            {% endif %}
-            <div class="card-body">
-
-                {{ item.indTable | safe }}
-            </div>
-        <button class="close_ind_outcome_button">
-            Back to results summary
-        </button>
-        </div>
-
-
-      {% endfor %}
-
-   {% endif %}
-</div >
-{% endblock %}
+        </div >
+    {% endblock %}
 </div>
