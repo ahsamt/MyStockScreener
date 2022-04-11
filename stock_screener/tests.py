@@ -38,8 +38,6 @@ class SignalTestCase(TestCase):
         response = c.get("/")
         self.assertEqual(response.status_code, 200)
 
-    #   self.assertEqual(len(response.context["posts"]), 3)
-
     def test_login(self):
         c = Client()
         c.login(username='AAA', password='abcdefg')
