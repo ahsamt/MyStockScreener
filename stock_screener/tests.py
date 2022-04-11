@@ -8,17 +8,17 @@ from .models import User, SavedSearch, SignalConstructor
 
 # Testing using TestCase
 
-class PostTestCase(TestCase):
+class SignalTestCase(TestCase):
     def setUp(self):
         # Create new users
         userA = User.objects.create(username="AAA", email="usera@user.user", password="abcdefg")
         userB = User.objects.create(username="BBB", email="userb@user.user", password="hijklmn")
-        userC = User.objects.create(username="CCC", email="userc@user.user", password="opqrstu")
-        # Create posts
+
+        # Create signals for each user
         SignalConstructor.objects.create(user=userA, psar=True, psarAF=0.02, psarMA=0.2, adx=True, adxW=18, adxL=20)
         SignalConstructor.objects.create(user=userB, ma=True)
 
-        # Create following
+        # Save instruments for each user
         SavedSearch.objects.create(user=userA, ticker='AAPL', ticker_full='Apple Inc.')
         SavedSearch.objects.create(user=userA, ticker='MRNA', ticker_full='Moderna, Inc.')
         SavedSearch.objects.create(user=userB, ticker='SBUX', ticker_full='Starbucks Corporation')
