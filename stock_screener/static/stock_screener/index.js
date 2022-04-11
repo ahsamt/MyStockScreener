@@ -157,11 +157,6 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("watchlist-main-section").style.display = "block";
     }
 
-
-
-
-
-
     function top_scroll() {
         // insert "back to top" button when user scrolls down the page
         if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
@@ -312,9 +307,4 @@ document.addEventListener("DOMContentLoaded", () => {
                     document.querySelector(".signal_saved_message").style.display = "block";
                 }
             });
-
-
-    }
-
-
-});
+    }});
