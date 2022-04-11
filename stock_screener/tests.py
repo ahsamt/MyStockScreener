@@ -1,5 +1,3 @@
-from django.test import TestCase
-
 from django.test import Client, TestCase
 from django.urls import reverse
 
@@ -52,6 +50,8 @@ class SignalTestCase(TestCase):
         a = User.objects.get(username="AAA")
         self.client.force_login(user=a)
         response = self.client.get(reverse('watchlist'))
+        self.assertEqual(len(response.context["watched_tickers"]), 2)
+        self.assertNotEqual(response.context['htmlResultTable'], None)
         self.assertEqual(response.status_code, 200)
 
     def test_backtest(self):
