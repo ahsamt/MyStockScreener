@@ -1,12 +1,14 @@
-from django.test import Client, TestCase
+from django.test import Client, TestCase, LiveServerTestCase
 from django.urls import reverse
+from selenium import webdriver
+from webdriver_manager.chrome import ChromeDriverManager
 
 from .models import User, SavedSearch, SignalConstructor
 
 
 # Testing using TestCase
 
-class SignalTestCase(TestCase):
+class GeneralTest(TestCase):
     def setUp(self):
         # Create new users
         userA = User.objects.create(username="AAA", email="usera@user.user", password="abcdefg")
@@ -59,3 +61,21 @@ class SignalTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
 
 
+
+
+
+class SearchTest(LiveServerTestCase):
+
+    def setUp(self):
+        self.driver = webdriver.Chrome(ChromeDriverManager().install())
+
+    def test_search(self):
+        self.driver.get(self.live_server_url)
+        # self.driver.get("http://127.0.0.1:8000")
+        self.driver.find_element_by_id('id_ticker').send_keys("AAPL")
+        element = self.driver.find_element_by_id('searchButton')
+        self.driver.execute_script("arguments[0].click();", element)
+        self.assertIn(self.live_server_url, self.driver.current_url)
+
+    def tearDown(self):
+        self.driver.quit
