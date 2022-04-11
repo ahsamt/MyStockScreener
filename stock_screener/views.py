@@ -1,26 +1,24 @@
-from django.shortcuts import render
-from django.contrib.auth import authenticate, login, logout
-from django.http import HttpResponse, HttpResponseRedirect
-from django.urls import reverse
+import json
+from datetime import date, datetime
 
-from .models import User, SavedSearch, SignalConstructor
+import pandas as pd
+import yfinance as yf
+from dateutil.relativedelta import relativedelta
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
+from django.shortcuts import render
+from django.urls import reverse
+from django.views.decorators.csrf import csrf_exempt
+
+from .calculations import make_calculations
 from .forms import StockForm, BacktestForm
+from .models import User, SavedSearch, SignalConstructor
 from .utils import read_csv_from_S3, adjust_start, make_graph, get_price_change, get_current_tickers_info, \
     upload_csv_to_S3, stock_tidy_up, prepare_ticker_info_update, get_company_name_from_yf, get_previous_sma, \
     calculate_price_dif, format_float, backtest_signal, prepare_signal_table, calc_average_percentage, \
     check_and_add_sma, constructorFields, compare_signals
-
-from .calculations import make_calculations
-from datetime import date, datetime
-from dateutil.relativedelta import relativedelta
-import pandas as pd
-import yfinance as yf
-import json
-
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth.decorators import login_required
 
 bucket = 'stockscreener-data'
 

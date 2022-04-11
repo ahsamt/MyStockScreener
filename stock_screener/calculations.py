@@ -1,6 +1,7 @@
-import ta
-from .utils import add_days_since_change
 import numpy as np
+import ta
+
+from .utils import add_days_since_change
 
 
 def add_ma(df, ma_short, ma_long, window_short, window_long):

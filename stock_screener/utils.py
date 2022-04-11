@@ -1,10 +1,11 @@
-import yfinance as yf
-import pandas as pd
+from io import StringIO
+
 import boto3
 import numpy as np
-from io import StringIO
-import ta
+import pandas as pd
 import plotly.graph_objects as go
+import ta
+import yfinance as yf
 
 constructorFields = ['ma', 'maS', 'maL', 'maWS', 'maWL', 'psar', 'psarAF', 'psarMA', 'adx', 'adxW', 'adxL', 'srsi',
                      'srsiW', 'srsiSm1', 'srsiSm2', 'srsiOB', 'srsiOS', 'macd', 'macdF', 'macdS', 'macdSm']
