@@ -160,7 +160,7 @@ def index(request):
 
                 if signalSelected:
                     # preparing backtesting information to be shown on search page
-                    backtestResult, backtestDataFull = backtest_signal(stock)
+                    backtestResult, backtestDataFull = backtest_signal(stock, format_outcome=False)
                     signalSelected = True
 
                     if backtestDataFull is not None:
@@ -168,7 +168,7 @@ def index(request):
                         backtestData.reset_index(inplace=True)
                         backtestData.columns = ["Date", "Price", "Action", "Profit/Loss"]
 
-                        htmlBacktestTable = backtestData.to_html(col_space=30, bold_rows=True, classes="table",
+                        htmlBacktestTable = backtestData.to_html(col_space=30, bold_rows=True, classes=["table", "backtesting_table"],
                                                                  justify="left", index=False)
                     else:
                         htmlBacktestTable = None

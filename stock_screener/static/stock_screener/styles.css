@@ -100,6 +100,10 @@ li > .nav-link {
 .blue {
   color: var(--blue-font-color);
 }
+
+.bold {
+  font-weight: bold;
+}
 .closing_price {
   color: var(--grey-font-color);
   font-weight: 800;
@@ -297,9 +301,10 @@ li > .nav-link {
   box-shadow: var(--custom-shadow);
   color: var(--blue-font-color);
   margin: 0px 0 10px 0;
-  padding: 4px 8px;
+  padding: 4px 27px;
   text-decoration: none;
 }
+
 
 .stock_table  thead th {
   font-weight: bold;
@@ -307,6 +312,8 @@ li > .nav-link {
   font-size: 15px;
 
 }
+
+
 .watchlist, .add-signal{
   background-color: white;
   border-radius: 4px;
@@ -335,6 +342,11 @@ li > .nav-link {
   margin: 10px 0;
 }
 
+#backtest_search_title {
+  font-size: 17px;
+  font-weight: bold;
+  margin-bottom: 3px;
+}
 #positive_outcome, #negative_outcome {
   font-weight: bold;
   padding-bottom: 30px;

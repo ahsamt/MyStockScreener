@@ -4,7 +4,7 @@
             <h4 class="card-title" id="ticker_name">{{ ticker }} ({{ tickerName }})</h4>
 
             <h5 class="card-subtitle mt-1 mb-2">
-                <span class="price_change_{{ priceChange.1 }}">{{ priceChange.0 }}</span>
+                <span class="price_change_{{ priceChange.1 }} bold">{{ priceChange.0 }}</span>
             </h5>
 
 
@@ -14,40 +14,40 @@
 
         {% if user.is_authenticated %}
 
-        {% if watchlisted %}
+            {% if watchlisted %}
 
-        <div class="card-link">
-            <a
-            href="#"
-            class="watchlist"
-            data-ticker_name="{{ ticker }}"
-            data-ticker_id="{{ tickerID }}"
-            data-ticker_full="{{ tickerName }}"
-            >
-                Remove {{ ticker }} from watchlist
-            </a>
-        </div>
+                <div class="card-link">
+                    <a
+                            href="/"
+                            class="watchlist"
+                            data-ticker_name="{{ ticker }}"
+                            data-ticker_id="{{ tickerID }}"
+                            data-ticker_full="{{ tickerName }}"
+                    >
+                        Remove {{ ticker }} from watchlist
+                    </a>
+                </div>
 
-        {% else %}
+            {% else %}
 
-        <a
-            href="#"
-            class="watchlist"
-            data-ticker_name="{{ ticker }}"
-            data-ticker_id="{{ tickerID }}"
-            data-ticker_full="{{ tickerName }}"
-        >
-            Add {{ ticker }} to watchlist
-        </a>
+                <a
+                        href="/"
+                        class="watchlist"
+                        data-ticker_name="{{ ticker }}"
+                        data-ticker_id="{{ tickerID }}"
+                        data-ticker_full="{{ tickerName }}"
+                >
+                    Add {{ ticker }} to watchlist
+                </a>
 
-        {% endif %} {% else %}
+            {% endif %} {% else %}
 
-        <p>
-            Please
-            <a href="{% url 'login' %}">log In</a>
-            or <a href="{% url 'register' %}">register</a> to add this stock to your
-            watchlist
-        </p>
+            <p>
+                Please
+                <a href="{% url 'login' %}">log In</a>
+                or <a href="{% url 'register' %}">register</a> to add this stock to your
+                watchlist
+            </p>
 
         {% endif %}
 
@@ -59,28 +59,31 @@
 
     {% if signalSelected %}
         {% if htmlBacktestTable is not None %}
-        <div class="stock_info card mb-4">
-            <div class="card-body">
-                <h4 class="card-title" id="ticker_name">Backtesting this signal</h4>
-                <h5 class="card-subtitle mb-2">
-                    <span class="text-muted">Outcome for {{ ticker }}</span>
-                    <span class="closing_price">{{ backtestResult }}</span>
-                </h5>
+            <div class="stock_info card mb-4">
+                <div class="card-body">
+                    <h4 class="card-title bold" id="backtest_search_title">Backtesting Results ({{ ticker }}, 12 Months):</h4>
+
+                    {%  if backtestResult < 0 %}
+                        <span class="bright-red bold">{{ backtestResult }}%</span>
+                    {% else %}
+                        <span class="green bold">+{{ backtestResult }}%</span>
+                    {% endif %}
+
+                </div>
 
                 <div id="backtesting-table">{{ htmlBacktestTable | safe }}</div>
+
             </div>
-        </div>
         {% else %}
             <div class="stock_info card mb-4">
-            <div class="card-body">
-                <h4 class="card-title" id="ticker_name">Please review the signal</h4>
-                <h5 class="card-subtitle mb-2">
-                    Insufficient number of buy/sell recommendations have been generated for this ticker
-                </h5>
+                <div class="card-body">
+                    <h4 class="card-title" id="ticker_name">Please review the signal</h4>
+                    <h5 class="card-subtitle mb-2">
+                        Insufficient number of buy/sell recommendations have been generated for this ticker
+                    </h5>
+                </div>
             </div>
-        </div>
         {% endif %}
-
 
     {% endif %}
 
