@@ -199,6 +199,12 @@ textarea {
   background-color: white;
 }
 
+.table .stock_table  th {
+  color: var(--red-hover-color);
+  background-color: red;
+
+}
+
 .welcome {
   text-align: center;
   margin-bottom: 15px;

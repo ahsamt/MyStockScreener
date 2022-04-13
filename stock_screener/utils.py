@@ -10,12 +10,13 @@ import yfinance as yf
 constructorFields = ['ma', 'maS', 'maL', 'maWS', 'maWL', 'psar', 'psarAF', 'psarMA', 'adx', 'adxW', 'adxL', 'srsi',
                      'srsiW', 'srsiSm1', 'srsiSm2', 'srsiOB', 'srsiOS', 'macd', 'macdF', 'macdS', 'macdSm']
 
+
 def adjust_start(df, start_date):
     """(pd DataFrame, date as datetime.datetime) => pd DataFrame
     Creates a copy of current dataframe with starting date matching the requirements"""
 
     mask = (df["Date"] >= start_date)
-    dfNew = df.loc[mask] #.copy()
+    dfNew = df.loc[mask]  # .copy()
     dfNew.reset_index(drop=True, inplace=True)
     return dfNew
 
@@ -219,13 +220,11 @@ def get_date_within_df(df, dt):
 
 def get_previous_sma(df, sma_col, no_of_days):
     """(pd DataFrame, string, timestamp, integer) => (float)
-        Takes in Pandas DataFrame, name of teh Simple Moving Average column in the dataframe (such as "SMA 15"),
-        t
-
-             with a "Date" column and a timestamp for the date that needs to be located.
-            Returns the original timestamp if it is found in the "Date" column,
-            otherwise returns the closest earlier date
-            """
+        Takes in Pandas DataFrame, name of teh Simple Moving Average column in the dataframe (such as "SMA 15")
+        with a "Date" column and a timestamp for the date that needs to be located.
+        Returns the original timestamp if it is found in the "Date" column,
+        otherwise returns the closest earlier date
+    """
     latest_date = df["Date"].max()
     reqDate = get_date_within_df(df, latest_date - pd.DateOffset(no_of_days))
     mask = df["Date"] == reqDate
@@ -235,6 +234,7 @@ def get_previous_sma(df, sma_col, no_of_days):
 
 def backtest_signal(df, format_outcome=True, days_to_buy=0, days_to_sell=0, buy_price_adjustment=0,
                     sell_price_adjustment=0):
+    """(pd DataFrame, boolean, integer, integer, integer, integer, """
     flags = ['Buy', 'Sell']
     columnsBacktest = ["Old_Index", "Date", "Close", "Final Rec", "Change_Flag", "Days_Since_Change"]
     backTest = df.loc[(df['Days_Since_Change'] == 0) & df['Final Rec'].isin(flags)].copy(deep=True)
@@ -318,6 +318,7 @@ def check_for_sma_column(df):
 
 
 def add_sma_col(df):
+    """Adds SMA """
     df["Table SMA"] = ta.trend.sma_indicator(df["Close"], window=15)
     column = "Table SMA"
     return df, column
@@ -383,13 +384,16 @@ def calc_average_percentage(perc_iterable):
 
     return round((result * 100 - 100), 2)
 
+
 def check_and_add_sma(df):
     smaCol = check_for_sma_column(df)
     if not smaCol:
         df, smaCol = add_sma_col(df)
     return df, smaCol
 
+
 def compare_signals(signal_class_instance, signal_dict):
+
     signal_class_instance_dict = vars(signal_class_instance)
     for field in constructorFields:
         if signal_class_instance_dict[field] != signal_dict[field]:

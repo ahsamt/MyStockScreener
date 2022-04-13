@@ -166,7 +166,7 @@ def index(request):
                     if backtestDataFull is not None:
                         backtestData = backtestDataFull.loc[:, ["Close", "Final Rec", "Profit/Loss"]]
                         backtestData.reset_index(inplace=True)
-                        backtestData.columns = ["Date", "Closing Price", "Recommendation", "Profit/Loss"]
+                        backtestData.columns = ["Date", "Price", "Action", "Profit/Loss"]
 
                         htmlBacktestTable = backtestData.to_html(col_space=30, bold_rows=True, classes="table",
                                                                  justify="left", index=False)
@@ -178,18 +178,22 @@ def index(request):
                     signalSelected = False
 
                 # Preparing the results table to be shown on search page
+
+                recColours = {'Wait': 'grey', 'Buy': 'green', 'Sell': 'bright-red'}
+                recHtml = f"<span class={recColours[rec]} rec>{rec}</span>"
                 for signal in selectedSignals:
                     signalResults.append(format_float(stock.loc[stock.index.max()][signal]))
-                data = [rec, daysSinceChange] + smaChanges + signalResults
+                data = [recHtml, daysSinceChange, format_float(closingPrice)] + smaChanges + signalResults
                 resultTable = pd.DataFrame([data],
                                            columns=['Analysis Outcome',
                                                     'Days Since Trend Change',
+                                                    'Last Closing Price, USD',
                                                     '1 Week Change',
                                                     '1 Month Change',
                                                     '3 Months Change'] + selectedSignals)
                 resultTable.set_index('Analysis Outcome', inplace=True)
                 resultTable = resultTable.transpose()
-                htmlResultTable = resultTable.to_html(col_space=30, bold_rows=True, classes="table", justify="left")
+                htmlResultTable = resultTable.to_html(col_space=30, bold_rows=True, classes=["table", "stock_table"], justify="left", escape=False)
 
                 watchlisted = False
                 tickerID = None

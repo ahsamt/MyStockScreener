@@ -1,14 +1,15 @@
 :root {
   --background-color: #fff2e5;
+  --black-font-color: #231F20;
+  --blue-font-color: #325c84;
+  --graph-background-color: rgb(234, 234, 241);
+  --green-font-color: #458B00;
+  --grey-font-color: #333333;
+  --red-font-color: #CC0200;
+  --red-hover-color: #99103d;
   --custom-shadow: rgba(164, 164, 167, 0.25) 0px 50px 100px -20px,
     rgba(0, 0, 0, 0.3) 0px 30px 60px -30px,
     rgba(10, 37, 64, 0.35) 0px -2px 6px 0px inset;
-  --red-font-color: #CC0200;
-  --blue-font-color: #325c84;
-  --green-font-color: #458B00;
-  --red-hover-color: #99103d;
-  --grey-font-color: #333333;
-  --black-font-color: #231F20;
 }
 
 a {
@@ -20,20 +21,20 @@ a:hover{
 }
 body {
   background: var(--background-color);
+  color: var(--black-font-color);
   font-family: "Open Sans", sans-serif;
   font-size: 16px;
   padding-left: 0;
-  color: var(--black-font-color);
 }
 
 button {
-  transition: ease-in-out 200ms;
+  background-color: var(--blue-font-color);
   border-radius: 4px;
   box-shadow: var(--custom-shadow);
-  background-color: var(--blue-font-color);
+  color: white;
   margin: 10px 0 5px 0;
   padding: 3px 11px;
-  color: white;
+  transition: ease-in-out 200ms;
 }
 
 button:hover {
@@ -42,17 +43,17 @@ button:hover {
 }
 
 h1 {
+  color: var(--blue-font-color);
   font-size: 27px;
   font-weight: 530;
   padding: 60px 0px 20px 0px;
-  color: var(--blue-font-color);
 }
 
 h2 {
-  font-size: 23px;
-  padding: 15px 0 5px 0;
-  font-weight: 600;
   color: var(--grey-font-color);
+  font-size: 23px;
+  font-weight: 600;
+  padding: 15px 0 5px 0;
 }
 
 h3 {
@@ -81,8 +82,8 @@ textarea {
 }
 
 li > .nav-link {
-  margin: 0px 20px 0px 0px;
   font-weight: bolder;
+  margin: 0px 20px 0px 0px;
 }
 
 .table svg {
@@ -105,8 +106,8 @@ li > .nav-link {
 }
 
 .edit_content {
-  text-align: left;
   margin: 0;
+  text-align: left;
 }
 
 .graphs, .notes-section {
@@ -114,7 +115,7 @@ li > .nav-link {
   margin: 30px;
 }
 
- .remove-ticker-button {
+.remove-ticker-button {
   font-size: 12px;
   margin-top: 3px;
   opacity: 0.83;
@@ -127,11 +128,15 @@ li > .nav-link {
   opacity: 0.83;
   width: 60px;
 }
-.green-circle {
+
+.green, .green-circle {
   color: var(--green-font-color);
-  padding: 4px 13px;
+}
+
+.green-circle {
   border: 1px solid var(--green-font-color);
   border-radius: 50%;
+  padding: 4px 13px;
 }
 
 .grey {
@@ -140,11 +145,15 @@ li > .nav-link {
 
 }
 
-.bright-red-circle {
+
+.bright-red, .bright-red-circle {
   color: var(--red-font-color);
-  padding: 4px 13px;
+}
+
+.bright-red-circle {
   border: 1px solid var(--red-font-color);
   border-radius: 50%;
+  padding: 4px 13px;
 
 }
 
@@ -178,9 +187,9 @@ li > .nav-link {
 }
 
 .question {
+  color: var(--grey-font-color);
   font-size: 13px;
   padding-bottom: 5px;
-  color: var(--grey-font-color);
   transition: ease-in-out 200ms;
 }
 
@@ -189,8 +198,8 @@ li > .nav-link {
 }
 
 .rec {
-  font-weight: 900;
   font-size: 15px;
+  font-weight: 900;
 }
 
 .red {
@@ -199,8 +208,8 @@ li > .nav-link {
 }
 
 .result_table td, .result_table th, .backtest_table td, .backtest_table th{
-  text-align: center;
   font-size: 14px;
+  text-align: center;
   vertical-align: middle;
 
 }
@@ -210,106 +219,111 @@ li > .nav-link {
 }
 
 .rec-watchlist {
-  display: block;
-  text-align: center;
-  font-weight: 900;
   color: var(--blue-font-color);
+  display: block;
+  font-weight: 900;
+  text-align: center;
 }
 
 
 .centre {
+  align-items: center;
   display: block;
   margin: auto;
   text-align: center;
-  align-items: center;
 }
 
 .signal, .backtest-params {
-  font-weight: bolder;
-  box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;
-  padding: 8px 30px;
   background: #e0e3e5;
   border-radius: 4px;
+  box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;
+  font-weight: bolder;
+  padding: 8px 30px;
 
 }
 
 .signal-checkbox {
-  font-weight: bolder;
   color: var(--red-hover-color);
+  font-weight: bolder;
 }
 
 .signals, .backtest  {
   display: block;
+  font-size: 15px;
   margin: auto;
   text-align: start;
-  font-size: 15px;
 }
 
 .stock_link {
+  background-color: white;
   border-radius: 4px;
   box-shadow: var(--custom-shadow);
-  margin: 0px 20px 0px 0px;
-  text-decoration: none;
-  padding: 6px 10px;
   color: var(--blue-font-color);
-  background-color: white;
+  margin: 0px 20px 0px 0px;
+  padding: 6px 10px;
+  text-decoration: none;
   z-index: 99;
 }
 
 .table {
-  font-size: 12px;
   color: var(--blue-font-color);
+  font-size: 13px;
 }
 
 
 .tickers {
-  font-weight: 800;
   color: var(--red-hover-color);
+  font-weight: 800;
 }
 .saved-signal {
-  display: none;
-  max-width: 330px;
-  padding: 5px 13px;
-  box-shadow: var(--custom-shadow);
-  margin: 0 auto;
   background: white;
   border-radius: 4px;
+  box-shadow: var(--custom-shadow);
+  display: none;
+  margin: 0 auto;
+  max-width: 330px;
+  padding: 5px 13px;
 }
 
 .saved-signal-heading{
   color: var(--red-hover-color);
-  font-weight: 900;
   font-size: 15px;
+  font-weight: 900;
 }
 
 .stock_info, .ind_result {
+  background-color: white;
   border-radius: 4px;
   box-shadow: var(--custom-shadow);
-  margin: 0px 0 10px 0;
   color: var(--blue-font-color);
-  text-decoration: none;
+  margin: 0px 0 10px 0;
   padding: 4px 8px;
-  background-color: white;
+  text-decoration: none;
 }
 
+.stock_table  thead th {
+  font-weight: bold;
+  background-color: rgb(234, 234, 241);
+  font-size: 15px;
 
+}
 .watchlist, .add-signal{
+  background-color: white;
   border-radius: 4px;
   box-shadow: var(--custom-shadow);
-  margin: 10px 0 10px 0;
   color: var(--blue-font-color);
-  text-decoration: none;
+  margin: 10px 0 10px 0;
   padding: 4px 8px;
-  background-color: white;
+  text-decoration: none;
 }
 .watchlist-ticker {
   color: var(--red-hover-color);
-  font-weight: 850;
   font-size: 15px;
+  font-weight: 850;
 }
 .welcome {
-  text-align: center;
   margin-bottom: 15px;
+  text-align: center;
 }
 
 #A {
@@ -334,11 +348,11 @@ li > .nav-link {
     color: var(--green-font-color);
 }
 
-.
+
 #outcome_card {
-  width: 700px;
   display: block;
   margin: 0 auto;
+  width: 700px;
 }
 
 #result-table {
@@ -364,20 +378,24 @@ li > .nav-link {
   font-weight: 900;
 }
 
+#ticker_name {
+  font-size: 20px;
+  font-weight: bolder;
+}
 #topButton {
-  display: none;
-  position: fixed;
-  z-index: 99;
-  bottom: 330px;
-  right: 0px;
-  padding: 10px 7px;
-  text-decoration: none;
-  color: var(--blue-font-color);
   background-color: white;
-  font-weight: bold;
-  font-size: 24px;
-  box-shadow: var(--custom-shadow);
   border-radius: 4px;
+  bottom: 330px;
+  box-shadow: var(--custom-shadow);
+  color: var(--blue-font-color);
+  display: none;
+  font-size: 24px;
+  font-weight: bold;
+  padding: 10px 7px;
+  position: fixed;
+  right: 0px;
+  text-decoration: none;
+  z-index: 99;
 }
 
 #username {
@@ -391,10 +409,10 @@ li > .nav-link {
   }
 
   .index-card {
-    width: 300px;
     display: block;
     margin: 0 auto;
     text-align: center;
+    width: 300px;
   }
 }
 
