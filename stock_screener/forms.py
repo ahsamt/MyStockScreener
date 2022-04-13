@@ -8,10 +8,10 @@ ma2_choices = [('SMA', 'Simple Moving Average'), ('EMA', 'Exponential Moving Ave
 
 class SignalForm(forms.Form):
     ma = forms.BooleanField(label='Moving Average', required=False)
-    maS = forms.ChoiceField(label='Moving Average type (short)', required=False, choices=ma1_choices)
+    maS = forms.ChoiceField(label='Type (short)', required=False, choices=ma1_choices)
     maWS = forms.IntegerField(label='Short window length, days', min_value=1, max_value=220, initial="15",
                               widget=forms.NumberInput(attrs={'style': 'width:7ch'}))
-    maL = forms.ChoiceField(label='Moving Average type (long)', required=False, choices=ma2_choices)
+    maL = forms.ChoiceField(label='Type (long)', required=False, choices=ma2_choices)
 
     maWL = forms.IntegerField(label='Long window length, days', min_value=1, max_value=220, initial="25",
                               widget=forms.NumberInput(attrs={'style': 'width:7ch'}))

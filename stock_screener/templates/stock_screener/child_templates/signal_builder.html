@@ -1,122 +1,195 @@
+<h3 class="centre mb-3">Signal Constructor</h3>
+<div class="signals">
 
 
-      <h3 class="centre mb-3">Signal Constructor</h3>
-      <div class="signals">
-
-
-          <div class="signal row mt-3">
-              <div class="signal-checkbox col-2 mt-1 red">
-                  {{ stockForm.ma }} {{ stockForm.ma.label }}
-              </div>
-              <div class="col-10">
-                  <div class="row mb-1">
-                    <div class="col-4">
-                        {{ stockForm.maWS.label }}
-                        {{ stockForm.maWS }}
+    <div class="signal row mt-3">
+        <div class="signal-checkbox col-2 mt-1 red">
+            {{ stockForm.ma }} {{ stockForm.ma.label }}
+        </div>
+        <div class="col-10">
+            <div class="row mb-1">
+                <div class="col-4">
+                    <div class="row">
+                        <div class="col-7">{{ stockForm.maWS.label }}</div>
+                        <div class="col-5">{{ stockForm.maWS }}</div>
                     </div>
 
-                    <div class="col-6">
-                        {{ stockForm.maS.label }}
-                        {{ stockForm.maS }}
+                </div>
+
+                <div class="col-4">
+                    <div class="row">
+                        <div class="col-7">
+                            {{ stockForm.maS.label }}
+                        </div>
+                        <div class="col-5">
+                            {{ stockForm.maS }}
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="row">
+                <div class="col-4">
+                    <div class="row">
+                        <div class="col-7">
+                            {{ stockForm.maWL.label }}
+                        </div>
+                        <div class="col-5">
+                            {{ stockForm.maWL }}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="row">
+                        <div class="col-7">
+                            {{ stockForm.maL.label }}
+                        </div>
+                        <div class="col-5">
+                            {{ stockForm.maL }}
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+    <div class="signal row mt-3">
+
+        <div class="signal-checkbox col-2 mt-1 red">
+            {{ stockForm.psar }} {{ stockForm.psar.label }}
+        </div>
+
+        <div class="col-10">
+
+            <div class="row mb-1">
+
+                <div class="col-4">
+                    <div class="row">
+                        <div class="col-7">{{ stockForm.psarAF.label}}</div>
+                        <div class="col-5">{{ stockForm.psarAF }}</div>
+                    </div>
+                </div>
+
+
+
+                <div class="col-4">
+                    <div class="row">
+                        <div class="col-7">{{ stockForm.psarMA.label }}</div>
+                        <div class="col-5">{{ stockForm.psarMA }}</div>
                     </div>
 
-                  </div>
-                  <div class="row">
-                    <div class="col-4">
-                        {{ stockForm.maWL.label }}
-                        {{ stockForm.maWL }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="signal row mt-3">
+        <div class="signal-checkbox col-2 mt-1 red">
+            {{ stockForm.adx }} {{ stockForm.adx.label }}
+        </div>
+        <div class="col-10">
+            <div class="row">
+                <div class="col-4">
+                    <div class="row">
+                        <div class="col-7">{{ stockForm.adxW.label }}</div>
+                        <div class="col-5">{{ stockForm.adxW }}</div>
                     </div>
-                      <div class="col-6">
-                        {{ stockForm.maL.label }}
-                        {{ stockForm.maL }}
+
+                </div>
+                <div class="col-4">
+                    <div class="row">
+                        <div class="col-7">{{ stockForm.adxL.label }}</div>
+                        <div class="col-5">{{ stockForm.adxL }}</div>
                     </div>
-                  </div>
-              </div>
-          </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="signal row mt-3">
+
+        <div class="signal-checkbox col-2 mt-1 red">
+            {{ stockForm.srsi }} {{ stockForm.srsi.label }}
+        </div>
+
+        <div class="col-10">
+
+            <div class="row">
+
+
+                <div class="col-4">
+                    <div class="row mb-1">
+                        <div class="col-7">{{ stockForm.srsiW.label }}</div>
+                        <div class="col-5">{{ stockForm.srsiW }}</div>
+                    </div>
+                </div>
 
 
 
-
-          <div class="signal row mt-3">
-              <div class="signal-checkbox col-2 mt-1 red">
-                  {{ stockForm.psar }} {{ stockForm.psar.label }}
-              </div>
-              <div class="col-10">
-                  <div class="row">
-                      <div class="col-4">
-                          {{ stockForm.psarAF.label}} {{ stockForm.psarAF }}
-                      </div>
-                      <div class="col-4">
-                          {{ stockForm.psarMA.label }} {{ stockForm.psarMA }}
-                      </div>
-                  </div>
-              </div>
-          </div>
-
-          <div class="signal row mt-3">
-              <div class="signal-checkbox col-2 mt-1 red">
-                  {{ stockForm.adx }} {{ stockForm.adx.label }}
-              </div>
-              <div class="col-10">
-                  <div class="row">
-                      <div class="col-4">
-                          {{ stockForm.adxW.label }} {{ stockForm.adxW }}
-                      </div>
-                      <div class="col-4">
-                          {{ stockForm.adxL.label }} {{ stockForm.adxL }}
-                      </div>
-                  </div>
-              </div>
-          </div>
+                <div class="col-4">
+                    <div class="row">
+                        <div class="col-7">{{ stockForm.srsiSm1.label }}</div>
+                        <div class="col-5">{{ stockForm.srsiSm1 }}</div>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="row">
+                        <div class="col-7">{{ stockForm.srsiSm2.label }}</div>
+                        <div class="col-5">{{ stockForm.srsiSm2 }}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-4">
+                    <div class="row">
+                        <div class="col-7">{{ stockForm.srsiOB.label }}</div>
+                        <div class="col-5">{{ stockForm.srsiOB }}</div>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="row">
+                        <div class="col-7">{{ stockForm.srsiOS.label }}</div>
+                        <div class="col-5">{{ stockForm.srsiOS }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
 
-          <div class="signal row mt-3">
-              <div class="signal-checkbox col-2 mt-1 red">
-                  {{ stockForm.srsi }} {{ stockForm.srsi.label }}
-              </div>
-              <div class="col-10">
-                  <div class="row">
-                      <div class="row mb-1">
-                          <div class="col">
-                              {{ stockForm.srsiW.label }}  {{ stockForm.srsiW }}
-                          </div>
-                          <div class="col">
-                              {{ stockForm.srsiSm1.label }} {{ stockForm.srsiSm1 }}
-                          </div>
-                          <div class="col">
-                              {{ stockForm.srsiSm2.label }} {{ stockForm.srsiSm2 }}
-                          </div>
-                      </div>
-                      <div class="row">
-                          <div class="col">
-                              {{ stockForm.srsiOB.label }} {{ stockForm.srsiOB }}
-                          </div>
-                          <div class="col">
-                              {{ stockForm.srsiOS.label }} {{ stockForm.srsiOS }}
-                          </div>
-                      </div>
-                  </div>
-              </div>
-          </div>
-
-          <div class="signal row mt-3">
-              <div class="signal-checkbox col-2 mt-1 red">
-                  {{ stockForm.macd }} {{ stockForm.macd.label }}
-              </div>
-              <div class="col-10">
-                  <div class="row">
-                      <div class="col">
-                          {{ stockForm.macdF.label }}  {{ stockForm.macdF}}
-                      </div>
-                      <div class="col">
-                          {{ stockForm.macdS.label }} {{ stockForm.macdS }}
-                      </div>
-                      <div class="col">
-                          {{ stockForm.macdSm.label }} {{ stockForm.macdSm }}
-                      </div>
-                  </div>
-              </div>
-          </div>
-      </div>
+    <div class="signal row mt-3">
+        <div class="signal-checkbox col-2 mt-1 red">
+            {{ stockForm.macd }} {{ stockForm.macd.label }}
+        </div>
+        <div class="col-10">
+            <div class="row">
+                <div class="col-4">
+                    <div class="row">
+                        <div class="col-7">{{ stockForm.macdF.label }}</div>
+                        <div class="col-5">{{ stockForm.macdF}}</div>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="row">
+                        <div class="col-7">{{ stockForm.macdS.label }}</div>
+                        <div class="col-5">{{ stockForm.macdS }}</div>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="row">
+                        <div class="col-7">{{ stockForm.macdSm.label }}</div>
+                        <div class="col-5">{{ stockForm.macdSm }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 

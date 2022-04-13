@@ -61,7 +61,7 @@
         {% if htmlBacktestTable is not None %}
             <div class="stock_info card mb-4">
                 <div class="card-body">
-                    <h4 class="card-title bold" id="backtest_search_title">Backtesting Results ({{ ticker }}, 12 Months):</h4>
+                    <h4 class="card-title bold" id="backtest_search_title">Backtesting Results<span class="grey"> ({{ ticker }}, 12 Months)</span>:</h4>
 
                     {%  if backtestResult < 0 %}
                         <span class="bright-red bold">{{ backtestResult }}%</span>

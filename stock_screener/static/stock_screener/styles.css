@@ -238,7 +238,7 @@ li > .nav-link {
 }
 
 .signal, .backtest-params {
-  background: #e0e3e5;
+  background: rgb(234, 234, 241, 0.6);
   border-radius: 4px;
   box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;
   font-weight: bolder;
@@ -248,12 +248,13 @@ li > .nav-link {
 
 .signal-checkbox {
   color: var(--red-hover-color);
-  font-weight: bolder;
+  font-weight: 900;
+
 }
 
 .signals, .backtest  {
   display: block;
-  font-size: 15px;
+  font-size: 14px;
   margin: auto;
   text-align: start;
 }
@@ -343,9 +344,9 @@ li > .nav-link {
 }
 
 #backtest_search_title {
-  font-size: 17px;
+  font-size: 16px;
   font-weight: bold;
-  margin-bottom: 3px;
+  margin-bottom: 1px;
 }
 #positive_outcome, #negative_outcome {
   font-weight: bold;
