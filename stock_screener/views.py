@@ -103,6 +103,8 @@ def index(request):
 
                 # getting full company name for the selected ticker
                 tickerName = tickerInfo.loc[ticker]["Name"]
+                sector = tickerInfo.loc[ticker]["Sector"]
+                country = tickerInfo.loc[ticker]["Country"]
 
                 # Getting the slice of the data starting from 18 months back
                 # (12 required for display + 12 extra for analysis)
@@ -126,6 +128,7 @@ def index(request):
 
                     # getting info for the result table
                     rec = "No signals selected"
+                    recHtml = rec
                     daysSinceChange = "n/a"
 
                 # if any of the signals are selected:
@@ -137,6 +140,8 @@ def index(request):
 
                     # getting info for the result table
                     rec = stock.loc[stock.index[-1], "Final Rec"]
+                    recColours = {'Wait': 'grey', 'Buy': 'green', 'Sell': 'bright-red'}
+                    recHtml = f"<span class={recColours[rec]} rec>{rec}</span>"
                     daysSinceChange = stock.loc[stock.index[-1], "Days_Since_Change"]
 
                 # getting last closing price for the ticker + price change information to display in the results window
@@ -179,15 +184,15 @@ def index(request):
 
                 # Preparing the results table to be shown on search page
 
-                recColours = {'Wait': 'grey', 'Buy': 'green', 'Sell': 'bright-red'}
-                recHtml = f"<span class={recColours[rec]} rec>{rec}</span>"
+
                 for signal in selectedSignals:
                     signalResults.append(format_float(stock.loc[stock.index.max()][signal]))
-                data = [recHtml, daysSinceChange, format_float(closingPrice)] + smaChanges + signalResults
+                data = [recHtml, daysSinceChange, format_float(closingPrice), priceChange[0]] + smaChanges + signalResults
                 resultTable = pd.DataFrame([data],
                                            columns=['Analysis Outcome',
                                                     'Days Since Trend Change',
                                                     'Last Closing Price, USD',
+                                                    'Change Since Previous Day',
                                                     '1 Week Change',
                                                     '1 Month Change',
                                                     '3 Months Change'] + selectedSignals)
@@ -219,6 +224,8 @@ def index(request):
                 context = {
                     "ticker": ticker,
                     "tickerName": tickerName,
+                    "sector": sector,
+                    "country": country,
                     "graph": graph,
                     "rec": rec,
                     "closingPrice": format_float(closingPrice),

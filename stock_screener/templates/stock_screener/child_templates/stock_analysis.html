@@ -1,14 +1,23 @@
 <div>
     <div class="stock_info card mb-4">
         <div class="card-body">
-            <h4 class="card-title" id="ticker_name">{{ ticker }} ({{ tickerName }})</h4>
+            <h4 class="card-title mb-2" id="ticker_name">{{ ticker }} ({{ tickerName }})</h4>
+            <div class="additional_info mb-3">
 
-            <h5 class="card-subtitle mt-1 mb-2">
-                <span class="price_change_{{ priceChange.1 }} bold">{{ priceChange.0 }}</span>
-            </h5>
+                {%  if sector %}
+                    {{ sector }}
+                {% endif %}
+
+                {% if sector and country %}
+                    -
+                {% endif %}
+
+                {%  if country %}
+                    {{ country }}
+                {% endif %}
+            </div>
 
 
-        </div>
 
         {{ htmlResultTable | safe }}
 
@@ -16,7 +25,7 @@
 
             {% if watchlisted %}
 
-                <div class="card-link">
+                <div class="card-link mb-3">
                     <a
                             href="/"
                             class="watchlist"
@@ -29,7 +38,7 @@
                 </div>
 
             {% else %}
-
+                <div class="card-link mb-3">
                 <a
                         href="/"
                         class="watchlist"
@@ -39,6 +48,7 @@
                 >
                     Add {{ ticker }} to watchlist
                 </a>
+                </div>
 
             {% endif %} {% else %}
 
@@ -56,29 +66,31 @@
             {% include "stock_screener/child_templates/save_signal_button.html" with signalSelected=signalSelected constructorAdded=constructorAdded newSignal=newSignal %}
         {% endif %}
     </div>
+    </div>
 
     {% if signalSelected %}
         {% if htmlBacktestTable is not None %}
-            <div class="stock_info card mb-4">
+            <div class="stock_info card mb-3">
                 <div class="card-body">
-                    <h4 class="card-title bold" id="backtest_search_title">Backtesting Results<span class="grey"> ({{ ticker }}, 12 Months)</span>:</h4>
+                    <h4 class="card-title bold"><span class="backtest_search_title">Signal Back Test ({{ ticker }}, 12 Months)</span>
+                        <div class="mt-2">
+                            {%  if backtestResult < 0 %}
+                                <span class="bright-red rec">{{ backtestResult }}%</span>
+                            {% else %}
+                                <span class="green rec">+{{ backtestResult }}%</span>
+                            {% endif %}
+                        </div>
+                    </h4>
 
-                    {%  if backtestResult < 0 %}
-                        <span class="bright-red bold">{{ backtestResult }}%</span>
-                    {% else %}
-                        <span class="green bold">+{{ backtestResult }}%</span>
-                    {% endif %}
-
-                </div>
 
                 <div id="backtesting-table">{{ htmlBacktestTable | safe }}</div>
-
+</div>
             </div>
         {% else %}
             <div class="stock_info card mb-4">
                 <div class="card-body">
                     <h4 class="card-title" id="ticker_name">Please review the signal</h4>
-                    <h5 class="card-subtitle mb-2">
+                    <h5 class="card-subtitle mb-2 grey">
                         Insufficient number of buy/sell recommendations have been generated for this ticker
                     </h5>
                 </div>
