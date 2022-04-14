@@ -2,7 +2,7 @@
 
     {% if constructorAdded %}
 
-        <div class="existing_signal_message">You have previously saved this signal for your watchlisted items</div>
+        <div class="existing_signal_message">Signal already applied to watchlist</div>
 
     {% else %}
 
@@ -32,13 +32,13 @@
 
         >
             {% if not savedConstructor %}
-                Save this signal
+                Save signal settings for your watchlist
             {% else %}
-                Replace your saved signal with this one
+                Replace existing watchlist signal
             {%  endif %}
         </a>
 
-        <div class="signal_saved_message">This signal has been saved for your watchlisted items</div>
+        <div class="signal_saved_message">Signal applied to watchlist</div>
 
     {%  endif %}
 

@@ -211,12 +211,7 @@ li > .nav-link {
   font-weight: bolder;
 }
 
-.result_table td, .result_table th, .backtest_table td, .backtest_table th{
-  font-size: 14px;
-  text-align: center;
-  vertical-align: middle;
 
-}
 .result_table th {
   font-size: 14px;
 
@@ -318,6 +313,7 @@ li > .nav-link {
 .watchlist, .add-signal{
   background-color: rgb(234, 234, 241, 0.2);
   border-radius: 4px;
+  font-size: 14px;
   box-shadow: var(--custom-shadow);
   color: var(--blue-font-color);
   margin: 10px 0 10px 0;
@@ -420,6 +416,13 @@ li > .nav-link {
 .backtest_search_title {
   font-size: 17px;
   font-weight: bold;
+}
+
+.result_table td, .result_table th, .backtest_table td, .backtest_table th{
+  font-weight: bold;
+  text-align: center;
+  vertical-align: middle;
+
 }
 
 @media (max-width: 991px) {

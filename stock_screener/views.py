@@ -16,7 +16,7 @@ from .calculations import make_calculations
 from .forms import StockForm, BacktestForm
 from .models import User, SavedSearch, SignalConstructor
 from .utils import read_csv_from_S3, adjust_start, make_graph, get_price_change, get_current_tickers_info, \
-    upload_csv_to_S3, stock_tidy_up, prepare_ticker_info_update, get_company_name_from_yf, get_previous_sma, \
+    upload_csv_to_S3, stock_tidy_up, prepare_ticker_info_update, get_company_details_from_yf, get_previous_sma, \
     calculate_price_dif, format_float, backtest_signal, prepare_signal_table, calc_average_percentage, \
     check_and_add_sma, constructorFields, compare_signals
 
@@ -84,8 +84,8 @@ def index(request):
                         print("Data downloaded in full")
 
                         # get full company name for the ticker and save info on S3
-                        tickerName = get_company_name_from_yf(ticker)
-                        tickerInfo = prepare_ticker_info_update(tickerInfo, ticker, tickerName)
+                        tickerName, sector, country = get_company_details_from_yf(ticker)
+                        tickerInfo = prepare_ticker_info_update(tickerInfo, ticker, tickerName, sector, country)
                         upload_csv_to_S3(bucket, tickerInfo, "TickersInfo")
 
                         # prepare stock data for concatenation with the table on S3
@@ -193,9 +193,9 @@ def index(request):
                                                     'Days Since Trend Change',
                                                     'Last Closing Price, USD',
                                                     'Change Since Previous Day',
-                                                    '1 Week Change',
-                                                    '1 Month Change',
-                                                    '3 Months Change'] + selectedSignals)
+                                                    '1 Week SMA Change',
+                                                    '1 Month SMA Change',
+                                                    '3 Months SMA Change'] + selectedSignals)
                 resultTable.set_index('Analysis Outcome', inplace=True)
                 resultTable = resultTable.transpose()
                 htmlResultTable = resultTable.to_html(col_space=30, bold_rows=True, classes=["table", "stock_table"], justify="left", escape=False)
@@ -542,9 +542,9 @@ def watchlist(request):
                                                                  'Analysis Outcome',
                                                                  'Days Since Trend Change',
                                                                  'Closing Price',
-                                                                 '1 Week Change',
-                                                                 '1 Month Change',
-                                                                 '3 Months Change'] + selectedSignals +
+                                                                 '1 Week SMA Change',
+                                                                 '1 Month SMA Change',
+                                                                 '3 Months SMA Change'] + selectedSignals +
                                                                 ["Graph", "Notes", "Remove"])
 
             watchedTickers.append(watchlistItem)
@@ -554,9 +554,9 @@ def watchlist(request):
                                            'Analysis Outcome',
                                            'Days Since Trend Change',
                                            'Closing Price',
-                                           '1 Week Change',
-                                           '1 Month Change',
-                                           '3 Months Change'] + selectedSignals +
+                                           '1 Week SMA Change',
+                                           '1 Month SMA Change',
+                                           '3 Months SMA Change'] + selectedSignals +
                                           ["Graph", "Notes", "Remove"])
         for elt in watchedTickers:
             jointTable = pd.concat([jointTable, elt["resultTable"]], axis=0)
@@ -565,7 +565,7 @@ def watchlist(request):
         jointTable.sort_values(by=['Days Since Trend Change', 'Ticker'], inplace=True)
         jointTable.rename_axis(None, inplace=True)
 
-        htmlResultTable = jointTable.to_html(col_space=30, bold_rows=True, classes=["table", "result_table"],
+        htmlResultTable = jointTable.to_html(col_space='80px', bold_rows=True, classes=["table", "result_table"],
                                              justify="left",
                                              escape=False)
 

@@ -21,8 +21,8 @@ def adjust_start(df, start_date):
     return dfNew
 
 
-def get_company_name_from_yf(ticker):
-    """(string) => string
+def get_company_details_from_yf(ticker):
+    """(string) => (string, string, string)
     Takes in a ticker as a string.
     Returns the matching company name found on yfinance.
     """
@@ -32,8 +32,20 @@ def get_company_name_from_yf(ticker):
     try:
         name = tickerDetails['longName']
     except KeyError:
-        name = tickerDetails['shortName']
-    return name
+        try:
+            name = tickerDetails['shortName']
+        except KeyError:
+            name = "Full company name not available"
+    try:
+        sector = tickerDetails['sector']
+    except KeyError:
+        sector = None
+    try:
+        country = tickerDetails['country']
+    except KeyError:
+        country = None
+
+    return name, sector, country
 
 
 def upload_csv_to_S3(bucket, df, file_name):
@@ -52,13 +64,13 @@ def upload_csv_to_S3(bucket, df, file_name):
     return None
 
 
-def prepare_ticker_info_update(current_tickers_info, ticker, ticker_name):
+def prepare_ticker_info_update(current_tickers_info, ticker, ticker_name, sector, country):
     """(df, string, string) => df
    Takes in a string representing the name of the S3 bucket where current tickers are being stored
    and a list of new tickers that need to be added to the ticker information file on S3.
    Uploads an updated ticker information file to S3 as a csv file and returns the updated dataframe.
    """
-    dt = {'Ticker': [ticker], 'Name': [ticker_name]}
+    dt = {'Ticker': [ticker], 'Name': [ticker_name], 'Sector': [sector], 'Country': [country]}
     dfUpdate = pd.DataFrame(data=dt).set_index('Ticker')
     df = current_tickers_info.append(dfUpdate, ignore_index=False)
     df.drop_duplicates(subset=None, keep='first', inplace=True, ignore_index=False)
@@ -202,7 +214,7 @@ def get_price_change(df):
         sign = ""
         color = "red"
     priceDif = format_float(priceDif)
-    change = (f"{sign}{priceDif} USD  ({sign}{percDif}%)", color)
+    change = (f"{sign}{percDif}%", color)
     return closingPrice, change
 
 
@@ -272,8 +284,6 @@ def backtest_signal(df, format_outcome=True, days_to_buy=0, days_to_sell=0, buy_
                     backTestClean.loc[i, 'Profit/Loss'] = (backTestClean.loc[i, 'Adjusted Price After Delay'] -
                                                            backTestClean.loc[i - 1, "Adjusted Price After Delay"]) / \
                                                           backTestClean.loc[i - 1, "Adjusted Price After Delay"] * 100
-
-
 
             elif rec == "Buy":
                 dfIndexAdjusted = backTestClean.loc[i, "Old_Index"] + days_to_buy
@@ -393,7 +403,6 @@ def check_and_add_sma(df):
 
 
 def compare_signals(signal_class_instance, signal_dict):
-
     signal_class_instance_dict = vars(signal_class_instance)
     for field in constructorFields:
         if signal_class_instance_dict[field] != signal_dict[field]:

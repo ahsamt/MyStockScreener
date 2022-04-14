@@ -66,15 +66,15 @@ class BacktestForm(SignalForm):
     days_to_sell = forms.IntegerField(label='Days to Complete a Sell Order', min_value=0, max_value=10, initial="0",
                                       widget=forms.NumberInput(attrs={'style': 'width:9ch'}))
 
-    buy_price_adjustment = forms.IntegerField(label='Days to Complete a Sell Order', min_value=0, max_value=10,
+    buy_price_adjustment = forms.IntegerField(label='Buy Price Adjustment, bps', min_value=0, max_value=10,
                                               initial="0",
                                               widget=forms.NumberInput(attrs={'style': 'width:9ch'}))
-    sell_price_adjustment = forms.IntegerField(label='Days to Complete a Sell Order', min_value=0, max_value=10,
+    sell_price_adjustment = forms.IntegerField(label='Sell Price Adjustment, bps', min_value=0, max_value=10,
                                                initial="0",
                                                widget=forms.NumberInput(attrs={'style': 'width:9ch'}))
 
-    num_years = forms.ChoiceField(label='Number of years this back test should cover', initial=1,
-                                  choices=[(1, 1), (2, 2), (3, 3), (4, 4), (5, 5)])
+    num_years = forms.ChoiceField(label='Testing Period, years', initial=1,
+                                  choices=[(1, 1), (2, 2), (3, 3), (4, 4), (5, 5)], widget=forms.Select(attrs={'style': 'width:9ch'}))
 
     def __init__(self, user, *args, **kwargs):
         super(BacktestForm, self).__init__(*args, *kwargs)

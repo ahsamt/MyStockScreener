@@ -77,12 +77,19 @@
 
                             <div class="backtest-params row mt-3">
 
-                                <div class="col-6">
-                                    {{ stockForm.days_to_buy.label }}  {{ stockForm.days_to_buy }}
-                                </div>
 
                                 <div class="col-6">
-                                    {{  stockForm.days_to_sell.label }}  {{ stockForm.days_to_sell }}
+                                    <div class="row">
+                                        <div class="col-8">{{ stockForm.days_to_buy.label }}</div>
+                                        <div class="col-4">{{ stockForm.days_to_buy }}</div>
+
+                                    </div></div>
+
+                                <div class="col-6">
+                                    <div class="row">
+                                        <div class="col-8">{{  stockForm.days_to_sell.label }}</div>
+                                        <div class="col-4">{{ stockForm.days_to_sell }}</div>
+                                    </div>
                                 </div>
 
                             </div>
@@ -90,18 +97,32 @@
                             <div class="backtest-params row mt-3">
 
                                 <div class="col-6">
-                                    {{  stockForm.buy_price_adjustment.label }}  {{ stockForm.buy_price_adjustment }}
-                                </div>
+                                    <div class="row">
+                                        <div class="col-8">{{  stockForm.buy_price_adjustment.label }}</div>
+                                        <div class="col-4">{{ stockForm.buy_price_adjustment }}</div>
+
+                                </div></div>
 
                                 <div class="col-6">
-                                    {{  stockForm.sell_price_adjustment.label }}  {{ stockForm.sell_price_adjustment }}
+                                    <div class="row">
+                                        <div class="col-8">{{  stockForm.sell_price_adjustment.label }}</div>
+                                        <div class="col-4">{{ stockForm.sell_price_adjustment }}</div>
+                                    </div>
                                 </div>
                             </div>
 
                             <div class="backtest-params row mt-3">
 
                                 <div class="col-6">
-                                    {{  stockForm.num_years.label }} {{ stockForm.num_years }}
+                                    <div class="row">
+                                        <div class="col-8">
+                                            {{  stockForm.num_years.label }}
+                                        </div>
+                                        <div class="col-4">
+                                            {{ stockForm.num_years }}
+                                        </div>
+                                    </div>
+
                                 </div>
                             </div>
 
