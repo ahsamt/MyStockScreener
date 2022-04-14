@@ -71,11 +71,13 @@ class SearchTest(LiveServerTestCase):
 
     def test_search(self):
         self.driver.get(self.live_server_url)
-        # self.driver.get("http://127.0.0.1:8000")
         self.driver.find_element_by_id('id_ticker').send_keys("AAPL")
         element = self.driver.find_element_by_id('searchButton')
         self.driver.execute_script("arguments[0].click();", element)
-        self.assertIn(self.live_server_url, self.driver.current_url)
+        resultTable = self.driver.find_element_by_class_name('stock_table')
+        graph = self.driver.find_element_by_class_name('plotly-graph-div')
+        assert resultTable is not None
+        assert graph is not None
 
     def tearDown(self):
         self.driver.quit
