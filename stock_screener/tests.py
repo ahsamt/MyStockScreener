@@ -1,3 +1,5 @@
+import random
+
 from django.test import Client, TestCase, LiveServerTestCase
 from django.urls import reverse
 from selenium import webdriver
@@ -61,16 +63,15 @@ class GeneralTest(TestCase):
         self.assertEqual(response.status_code, 200)
 
 
-
-
-
 class SearchTest(LiveServerTestCase):
 
     def setUp(self):
         self.driver = webdriver.Chrome(ChromeDriverManager().install())
-
-    def test_search(self):
         self.driver.get(self.live_server_url)
+
+    def test_search_no_signal(self):
+        element = self.driver.find_element_by_id('searchButton')
+        self.driver.execute_script("arguments[0].click();", element)
         self.driver.find_element_by_id('id_ticker').send_keys("AAPL")
         element = self.driver.find_element_by_id('searchButton')
         self.driver.execute_script("arguments[0].click();", element)
@@ -78,6 +79,31 @@ class SearchTest(LiveServerTestCase):
         graph = self.driver.find_element_by_class_name('plotly-graph-div')
         assert resultTable is not None
         assert graph is not None
+
+
+    def test_search_with_signals(self):
+        signals = ['ma', 'psar', 'adx', 'srsi', 'macd']
+        num_of_signals = range(1, (len(signals) + 1))
+        element = self.driver.find_element_by_id('searchButton')
+        self.driver.execute_script("arguments[0].click();", element)
+        for n in num_of_signals:
+            search_link = self.driver.find_element_by_link_text("Search")
+            self.driver.execute_script("arguments[0].click();", search_link)
+
+            self.driver.find_element_by_id('id_ticker').send_keys("AAPL")
+            selected_signals = random.sample(signals, k=n)
+            print(n, selected_signals)
+            for s in selected_signals:
+                s_element = self.driver.find_element_by_id(f"id_{s}")
+                if not s_element.is_selected():
+                    self.driver.execute_script("arguments[0].click();", s_element)
+
+            element = self.driver.find_element_by_id('searchButton')
+            self.driver.execute_script("arguments[0].click();", element)
+            resultTable = self.driver.find_element_by_class_name('stock_table')
+            graph = self.driver.find_element_by_class_name('plotly-graph-div')
+            assert resultTable is not None
+            assert graph is not None
 
     def tearDown(self):
         self.driver.quit
