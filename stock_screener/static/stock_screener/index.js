@@ -1,3 +1,14 @@
+
+document.onreadystatechange = function() {
+    if (document.readyState !== "complete") {
+        document.querySelector(".graph_page").style.visibility = "hidden";
+        document.querySelector("#loader").style.visibility = "visible";
+    } else {
+        document.querySelector("#loader").style.display = "none";
+        document.querySelector(".graph_page").style.visibility = "visible";
+    }
+};
+
 document.addEventListener("DOMContentLoaded", () => {
     // check on scroll if "back to top" button should be displayed
     window.addEventListener("scroll", () => top_scroll());
@@ -12,13 +23,13 @@ document.addEventListener("DOMContentLoaded", () => {
         hide_signal_button.addEventListener("click", (event) => hide_signal(event));
     });
 
-    document.querySelectorAll(".graph-button").forEach((graph_button) => {
-        graph_button.addEventListener("click", (event) => show_graph(event));
-    });
-
-    document.querySelectorAll(".close-graph").forEach((close_graph_button) => {
-        close_graph_button.addEventListener("click", (event) => hide_graphs(event));
-    });
+    // document.querySelectorAll(".graph-button").forEach((graph_button) => {
+    //     graph_button.addEventListener("click", (event) => show_graph(event));
+    // });
+    //
+    // document.querySelectorAll(".close-graph").forEach((close_graph_button) => {
+    //     close_graph_button.addEventListener("click", (event) => hide_graphs(event));
+    // });
 
     document.querySelectorAll(".notes-button").forEach((notes_button) => {
         notes_button.addEventListener("click", (event) => show_notes(event));
@@ -126,23 +137,23 @@ document.addEventListener("DOMContentLoaded", () => {
         main_outcome_table.style.display = "block";
 
     }
-
-    function show_graph(event) {
-        event.preventDefault();
-        console.log(event.target.parentElement.dataset)
-        let ticker = event.target.dataset.ticker;
-        console.log(`ticker is ${ticker}`);
-        document.getElementById(`${ticker}_graph`).style.display = "block";
-        console.log("graph displayed");
-        document.getElementById("watchlist-main-section").style.display = "none";
-    }
-
-    function hide_graphs(event) {
-        event.preventDefault();
-        event.target.parentElement.style.display = "none";
-        document.getElementById("watchlist-main-section").style.display = "block";
-
-    }
+    //
+    // function show_graph(event) {
+    //     event.preventDefault();
+    //     console.log(event.target.parentElement.dataset)
+    //     let ticker = event.target.dataset.ticker;
+    //     console.log(`ticker is ${ticker}`);
+    //     document.getElementById(`${ticker}_graph`).style.display = "block";
+    //     console.log("graph displayed");
+    //     document.getElementById("watchlist-main-section").style.display = "none";
+    // }
+    //
+    // function hide_graphs(event) {
+    //     event.preventDefault();
+    //     event.target.parentElement.style.display = "none";
+    //     document.getElementById("watchlist-main-section").style.display = "block";
+    //
+    // }
 
     function show_notes(event) {
         event.preventDefault();

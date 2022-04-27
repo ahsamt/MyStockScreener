@@ -67,7 +67,7 @@
 
         {% for item in watched_tickers  %}
 
-            {% include "stock_screener/child_templates/graph.html" with ticker=item.ticker graph=item.graph %}
+{#            {% include "stock_screener/child_templates/graph.html" with ticker=item.ticker graph=item.graph %}#}
             {% include "stock_screener/child_templates/notes.html" with ticker=item.ticker tickerID=item.tickerID notes=item.notes  %}
 
         {% endfor %}

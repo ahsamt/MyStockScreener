@@ -2,7 +2,14 @@
 {% load static %}
 
 {% block body %}
-
-{{ graph | safe }}
-
+    <div id="loader">Graph loading...</div>
+    <div class="graph_page">
+    {% if error_message %}
+        <h4 class="mt-5 ms-5">{{ error_message }}</h4>
+    {% else %}
+    <div class="col-md-8 mx-auto mt-5"  id="{{ ticker }}_graph">
+        {{ graph | safe }}
+    </div>
+    {% endif %}
+</div>
 {% endblock %}

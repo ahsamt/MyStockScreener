@@ -63,6 +63,7 @@ def index(request):
 
                 # getting stocks data from S3
                 existingStocks = read_csv_from_S3(bucket, "Stocks")
+
                 tickerList = set(existingStocks.columns.get_level_values(0).tolist())
                 tickerInfo = get_current_tickers_info(bucket)
 
@@ -517,9 +518,9 @@ def watchlist(request):
             closingPrice = format_float(closingPrice)
 
             # Prepare a graph for each ticker
-            data = adjust_start(data, startDateDatetime)
-            graph = make_graph(data, ticker, selectedSignals, 650, 900)
-            watchlistItem["graph"] = graph
+            #data = adjust_start(data, startDateDatetime)
+            #graph = make_graph(data, ticker, selectedSignals, 650, 900)
+            #watchlistItem["graph"] = graph
 
             # Create a list of all the latest results for the signals saved
             signalResults = []
@@ -529,7 +530,8 @@ def watchlist(request):
             # Create a dataframe with teh watchlist data for each ticker
 
             tickerHtml = f"<span class='watchlist-ticker'>{ticker}</span>"
-            graphButtonHtml = f"<button class = 'graph-button' data-ticker={ticker}>Graph</button>"
+            #graphButtonHtml = f"<button class = 'graph-button' data-ticker={ticker}>Graph</button>"
+            graphButtonHtml = f'<a href = "{reverse("display_graph", kwargs={"ticker_id":tickerId})}" target="_blank class = "graph-button"">Plot</a>'
             notesButtonHtml = f"<button class = 'notes-button' data-ticker={ticker}>Notes</button>"
             removeButtonHtml = f"<button class = 'remove-ticker-button' data-ticker_id={tickerId}>&#10005</button>"
             tableEntries = \
@@ -786,5 +788,56 @@ def backtester(request):
 
                 return render(request, "stock_screener/backtester.html", context)
 
-# def graph(request):
-# return render(request, "stock_screener/graph.html")
+@login_required
+def display_graph(request, ticker_id):
+    numMonths = 12
+    endDate = date.today()
+    startDate = endDate + relativedelta(months=-numMonths)
+    startDateInternal = startDate + relativedelta(months=-12)
+    startDateDatetime = datetime.combine(startDate, datetime.min.time())
+
+    if request.method == "GET":
+        try:
+            search_data = SavedSearch.objects.get(
+                user=request.user, id=ticker_id)
+        except SavedSearch.DoesNotExist:
+            return render(request, "stock_screener/child_templates/graph.html",
+                          {"error_message": "You do not have any saved ticker associated with this ID"})
+
+        allStocksFull = read_csv_from_S3(bucket, "Stocks")
+
+        # Getting the slice of the data starting from 18 months back (12 required for display + 12 extra for analysis)
+        allStocks = allStocksFull.loc[startDateInternal:, :]
+
+        # Check if the user has a signal saved in their profile
+        try:
+            signal = SignalConstructor.objects.get(user=request.user)
+
+        except SignalConstructor.DoesNotExist:
+            return render(request, "stock_screener/watchlist.html",
+                          {"empty_message": "Please create and save a signal on the 'Search' page to view "
+                                            "recommendations for your watchlist"})
+
+        # Converting the saved signal object to dictionary
+        signalDict = vars(signal)
+
+        # prepare a table to display the saved signal to the user
+        ticker = search_data.ticker
+
+        # Creating a separate dataframe for each stock, dropping n/a values and converting data to numeric
+        data = allStocks[ticker].copy()
+        data.dropna(how="all", inplace=True)
+        data = data.apply(pd.to_numeric)
+
+        # make relevant calculations for each ticker to get current recommendations on selling/buying
+
+        # Get an updated dataframe + names of the signal columns added
+        data, selectedSignals = make_calculations(data, signalDict)
+
+        # Prepare a graph for each ticker
+        data = adjust_start(data, startDateDatetime)
+        graph = make_graph(data, ticker, selectedSignals, 650, 900)
+
+    return render(request, "stock_screener/graph.html",
+                  {"ticker": ticker, 'graph': graph})
+
