@@ -464,6 +464,7 @@ def watchlist(request):
         # Check if the user has a signal saved in their profile
         try:
             signal = SignalConstructor.objects.get(user=request.user)
+            signalId = signal.id
 
         except SignalConstructor.DoesNotExist:
             return render(request, "stock_screener/watchlist.html",
@@ -531,7 +532,7 @@ def watchlist(request):
 
             tickerHtml = f"<span class='watchlist-ticker'>{ticker}</span>"
             #graphButtonHtml = f"<button class = 'graph-button' data-ticker={ticker}>Graph</button>"
-            graphButtonHtml = f'<a href = "{reverse("display_graph", kwargs={"ticker_id":tickerId})}" target="_blank class = "graph-button"">Plot</a>'
+            graphButtonHtml = f'<a href = "{reverse("display_graph", kwargs={"ticker_id":tickerId, "constructor_id":signalId})}" target="_blank class = "graph-button"">Plot</a>'
             notesButtonHtml = f"<button class = 'notes-button' data-ticker={ticker}>Notes</button>"
             removeButtonHtml = f"<button class = 'remove-ticker-button' data-ticker_id={tickerId}>&#10005</button>"
             tableEntries = \
@@ -789,7 +790,7 @@ def backtester(request):
                 return render(request, "stock_screener/backtester.html", context)
 
 @login_required
-def display_graph(request, ticker_id):
+def display_graph(request, ticker_id, constructor_id):
     numMonths = 12
     endDate = date.today()
     startDate = endDate + relativedelta(months=-numMonths)
@@ -809,14 +810,16 @@ def display_graph(request, ticker_id):
         # Getting the slice of the data starting from 18 months back (12 required for display + 12 extra for analysis)
         allStocks = allStocksFull.loc[startDateInternal:, :]
 
-        # Check if the user has a signal saved in their profile
-        try:
-            signal = SignalConstructor.objects.get(user=request.user)
+        signal = SignalConstructor.objects.get(user=request.user, id=constructor_id)
 
-        except SignalConstructor.DoesNotExist:
-            return render(request, "stock_screener/watchlist.html",
-                          {"empty_message": "Please create and save a signal on the 'Search' page to view "
-                                            "recommendations for your watchlist"})
+        # # Check if the user has a signal saved in their profile
+        # try:
+        #     signal = SignalConstructor.objects.get(user=request.user)
+        #
+        # except SignalConstructor.DoesNotExist:
+        #     return render(request, "stock_screener/watchlist.html",
+        #                   {"empty_message": "Please create and save a signal on the 'Search' page to view "
+        #                                     "recommendations for your watchlist"})
 
         # Converting the saved signal object to dictionary
         signalDict = vars(signal)
