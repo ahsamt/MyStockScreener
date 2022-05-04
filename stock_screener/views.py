@@ -158,7 +158,10 @@ def index(request):
                 # going back the number of days indicated in the smaPeriods list
                 for noDays in smaPeriods:
                     smaValue = get_previous_sma(stock, smaCol, noDays)
-                    smaChanges.append(calculate_price_dif(closingPrice, smaValue)[1] + "%")
+                    if smaValue is None:
+                        smaChanges.append("No stock data")
+                    else:
+                        smaChanges.append(calculate_price_dif(closingPrice, smaValue)[1] + "%")
 
                 # adjusting the start date according to client requirements and preparing the graph
                 stock = adjust_start(stock, startDateDatetime)
@@ -513,7 +516,10 @@ def watchlist(request):
             # over the number of days indicated in the smaPeriods list above
             for noDays in smaPeriods:
                 smaValue = get_previous_sma(data, smaCol, noDays)
-                smaChanges.append(calculate_price_dif(closingPrice, smaValue)[1] + "%")
+                if smaValue is None:
+                    smaChanges.append("No stock data")
+                else:
+                    smaChanges.append(calculate_price_dif(closingPrice, smaValue)[1] + "%")
 
             # Format the closing price for each ticker for table display
             closingPrice = format_float(closingPrice)
@@ -736,7 +742,7 @@ def backtester(request):
                     overallAverageTimeHoldingStock = round(
                         sum(averageIndTimesHoldingStock) / len(averageIndTimesHoldingStock), 2)
                 else:
-                    overallAverageTimeBetweenTransactions = None
+                    overallAverageTimeHoldingStock = None
 
                 # Preparing a main joint table with the results of backtesting
                 backtesterTable = pd.DataFrame.from_dict(allResults, orient="index")
@@ -770,9 +776,13 @@ def backtester(request):
                         # checking if the signal user has previously saved
                         # matches the signal being used for the current search
                         constructorAdded = compare_signals(savedConstructor, signalDict)
+                    else:
+                        constructorAdded = False
+                        savedConstructor = None
 
                 except SignalConstructor.DoesNotExist:
                     constructorAdded = False
+                    savedConstructor = None
 
                 context = {
                     "overallResult": overallResult,

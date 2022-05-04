@@ -88,7 +88,9 @@ class SeleniumTest(LiveServerTestCase):
 
         self.driver.find_element_by_css_selector("form").submit()
 
-    def test_search_no_signal(self):
+    def test_all(self):
+
+        # search page
         search_link = self.driver.find_element_by_link_text("Search")
         self.driver.execute_script("arguments[0].click();", search_link)
         self.driver.find_element_by_id('id_ticker').send_keys("AAPL")
@@ -98,11 +100,11 @@ class SeleniumTest(LiveServerTestCase):
         graph = self.driver.find_element_by_class_name('plotly-graph-div')
         assert resultTable is not None
         assert graph is not None
-        #add_link = self.driver.find_element_by_class_name('watchlist')
-        #self.driver.execute_script("arguments[0].click();", add_link)
+        add_link = self.driver.find_element_by_class_name('watchlist')
+        self.driver.execute_script("arguments[0].click();", add_link)
 
 
-    def test_search_with_signals(self):
+        #search_with_signals:
 
         for n in self.num_of_signals:
             search_link = self.driver.find_element_by_link_text("Search")
@@ -110,7 +112,6 @@ class SeleniumTest(LiveServerTestCase):
 
             self.driver.find_element_by_id('id_ticker').send_keys("GS")
             selected_signals = random.sample(self.signals, k=n)
-            print(n, selected_signals)
             for s in selected_signals:
                 s_element = self.driver.find_element_by_id(f"id_{s}")
                 if not s_element.is_selected():
@@ -123,15 +124,14 @@ class SeleniumTest(LiveServerTestCase):
             assert resultTable is not None
             assert graph is not None
 
-    def test_backtest_with_signals(self):
-
+       # backtest_with_signals:
 
         for n in self.num_of_signals:
             backtest_link = self.driver.find_element_by_link_text("Back Tester")
             self.driver.execute_script("arguments[0].click();", backtest_link)
 
             selected_signals = random.sample(self.signals, k=n)
-            print(n, selected_signals)
+
             for s in selected_signals:
                 s_element = self.driver.find_element_by_id(f"id_{s}")
                 if not s_element.is_selected():
@@ -139,7 +139,7 @@ class SeleniumTest(LiveServerTestCase):
 
             element = self.driver.find_element_by_id('searchButton')
             self.driver.execute_script("arguments[0].click();", element)
-            resultTable = self.driver.find_element_by_class_name('outcome_card')
+            resultTable = self.driver.find_element_by_id('outcome_card')
 
             assert resultTable is not None
 

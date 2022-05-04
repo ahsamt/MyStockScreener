@@ -226,7 +226,10 @@ def get_date_within_df(df, dt):
         """
     allDates = list(df["Date"])
     while dt not in allDates:
-        dt = dt - pd.DateOffset(1)
+        if dt > df["Date"].min():
+            dt = dt - pd.DateOffset(1)
+        else:
+            return None
     return dt
 
 
@@ -239,9 +242,12 @@ def get_previous_sma(df, sma_col, no_of_days):
     """
     latest_date = df["Date"].max()
     reqDate = get_date_within_df(df, latest_date - pd.DateOffset(no_of_days))
-    mask = df["Date"] == reqDate
-    prevSma = list(df.loc[mask, sma_col])[0]
-    return prevSma
+    if reqDate is None:
+        return None
+    else:
+        mask = df["Date"] == reqDate
+        prevSma = list(df.loc[mask, sma_col])[0]
+        return prevSma
 
 
 def backtest_signal(df, format_outcome=True, days_to_buy=0, days_to_sell=0, buy_price_adjustment=0,
