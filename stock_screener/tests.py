@@ -65,7 +65,8 @@ class GeneralTest(TestCase):
 
 class SeleniumTest(LiveServerTestCase):
     signals = ['ma', 'psar', 'adx', 'srsi', 'macd']
-    num_of_signals = range(1, (len(signals) + 1))
+    # test with min 2 signals to avoid testing with ADX alone
+    num_of_signals = range(2, (len(signals) + 1))
     username = "tester"
     email = "tester@tester.tester"
     password = "tester"
