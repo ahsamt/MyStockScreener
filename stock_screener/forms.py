@@ -76,7 +76,7 @@ class BacktestForm(SignalForm):
     num_years = forms.ChoiceField(label='Testing Period, years', initial=1,
                                   choices=[(1, 1), (2, 2), (3, 3), (4, 4), (5, 5)],
                                   widget=forms.Select(attrs={'style': 'width:9ch'}))
-    fee_per_trade = forms.ChoiceField(label='Fee Per Trade, USD', initial=0,
+    fee_per_trade = forms.IntegerField(label='Fee Per Trade, USD', initial=0,
                                       widget=forms.NumberInput(attrs={'style': 'width:9ch'}))
 
     def __init__(self, user, *args, **kwargs):
