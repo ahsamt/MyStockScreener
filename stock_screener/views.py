@@ -600,6 +600,7 @@ def backtester(request):
                 buy_price_adjustment = backtestForm.cleaned_data["buy_price_adjustment"]
                 sell_price_adjustment = backtestForm.cleaned_data["sell_price_adjustment"]
                 num_years = backtestForm.cleaned_data["num_years"]
+                fee_per_trade = backtestForm.cleaned_data["fee_per_trade"]
 
                 tickers = backtestForm.cleaned_data['tickers']
 
