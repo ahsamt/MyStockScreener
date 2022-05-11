@@ -121,9 +121,9 @@ li > .nav-link {
 
 .remove-ticker-button {
   font-size: 12px;
-  margin-top: 3px;
+  margin-top: 1px;
   opacity: 0.83;
-  width: 40px;
+  width: 35px;
 }
 
 .graph-button, .notes-button{
@@ -131,6 +131,7 @@ li > .nav-link {
   margin-top: 1px;
   opacity: 0.83;
   width: 60px;
+  text-decoration: none;
 }
 
 .green, .green-circle {

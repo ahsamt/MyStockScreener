@@ -524,11 +524,6 @@ def watchlist(request):
             # Format the closing price for each ticker for table display
             closingPrice = format_float(closingPrice)
 
-            # Prepare a graph for each ticker
-            #data = adjust_start(data, startDateDatetime)
-            #graph = make_graph(data, ticker, selectedSignals, 650, 900)
-            #watchlistItem["graph"] = graph
-
             # Create a list of all the latest results for the signals saved
             signalResults = []
             for signal in selectedSignals:
@@ -537,14 +532,14 @@ def watchlist(request):
             # Create a dataframe with teh watchlist data for each ticker
 
             tickerHtml = f"<span class='watchlist-ticker'>{ticker}</span>"
-            #graphButtonHtml = f"<button class = 'graph-button' data-ticker={ticker}>Graph</button>"
-            graphButtonHtml = f'<a href = "{reverse("display_graph", kwargs={"ticker_id":tickerId, "constructor_id":signalId})}" target="_blank class = "graph-button"">Plot</a>'
+
+            graphButtonHtml = f'<a href = "{reverse("display_graph", kwargs={"ticker_id":tickerId, "constructor_id":signalId})}" target = "_blank"><button class = "graph-button">Plot</button></a>'
             notesButtonHtml = f"<button class = 'notes-button' data-ticker={ticker}>Notes</button>"
             removeButtonHtml = f"<button class = 'remove-ticker-button' data-ticker_id={tickerId}>&#10005</button>"
             tableEntries = \
                 [tickerHtml, recHtml, daysSinceChange, closingPrice] \
                 + smaChanges + signalResults + [graphButtonHtml, notesButtonHtml, removeButtonHtml]
-            # ['''<a href="{% url 'graph' %}" target="blank"> Graph </a>''']
+
 
             watchlistItem["resultTable"] = pd.DataFrame([tableEntries],
                                                         columns=['Ticker',

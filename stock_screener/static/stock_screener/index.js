@@ -23,14 +23,6 @@ document.addEventListener("DOMContentLoaded", () => {
         hide_signal_button.addEventListener("click", (event) => hide_signal(event));
     });
 
-    // document.querySelectorAll(".graph-button").forEach((graph_button) => {
-    //     graph_button.addEventListener("click", (event) => show_graph(event));
-    // });
-    //
-    // document.querySelectorAll(".close-graph").forEach((close_graph_button) => {
-    //     close_graph_button.addEventListener("click", (event) => hide_graphs(event));
-    // });
-
     document.querySelectorAll(".notes-button").forEach((notes_button) => {
         notes_button.addEventListener("click", (event) => show_notes(event));
     });
