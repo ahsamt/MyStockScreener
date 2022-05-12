@@ -159,22 +159,52 @@ def make_graph(df, ticker, signal_names, height, width):
                {"count": 6, "label": "6M", "step": "month", "stepmode": "backward"},
                {"count": 1, "label": "1Y", "step": "year", "stepmode": "backward"}, ]
 
-    fig = go.Figure()
+    graphList1 = []
+    graphList2 = []
+    for elt in signal_names:
+        if elt not in ["Stochastic RSI", "MACD", "ADX"]:
+            graphList1.append(elt)
+        else:
+            graphList2.append(elt)
 
-    fig.add_trace(go.Scatter(name=ticker, x=df["Date"], y=df["Close"]))
+    print(f"graph list 1 : {graphList1}")
+    print(f"graph list 2 : {graphList2}")
+    fig1 = go.Figure()
 
-    for signalName in signal_names:
-        fig.add_trace(go.Scatter(name=signalName, x=df["Date"], y=df[signalName]))
+    fig1.add_trace(go.Scatter(name=ticker, x=df["Date"], y=df["Close"]))
 
-    fig.update_layout(title=f"{ticker} prices over the past year", template="seaborn",
-                      legend={"orientation": "h", "xanchor": "left"},
-                      xaxis={
-                          "rangeselector": {
-                              "buttons": buttons
-                          }}, width=width, height=height,
-                      )
-    graph = fig.to_html(full_html=False)
-    return graph
+    for signalName in graphList1:
+        fig1.add_trace(go.Scatter(name=signalName, x=df["Date"], y=df[signalName]))
+
+    fig1.update_layout(title=f"{ticker} prices over the past year", template="seaborn",
+                       legend={"orientation": "h", "xanchor": "left"},
+                       xaxis={
+                           "rangeselector": {
+                               "buttons": buttons
+                           }}, width=width, height=height,
+                       )
+    graph1 = fig1.to_html(full_html=False)
+
+    if len(graphList2) == 0:
+        graph2 = None
+
+    else:
+
+        fig2 = go.Figure()
+
+        for signalName in graphList2:
+            fig2.add_trace(go.Scatter(name=signalName, x=df["Date"], y=df[signalName]))
+
+        fig2.update_layout(title=f"{ticker} - {', '.join(graphList2)} over the past year", template="seaborn",
+                           legend={"orientation": "h", "xanchor": "left"},
+                           xaxis={
+                               "rangeselector": {
+                                   "buttons": buttons
+                               }}, width=width, height=height,
+                           )
+        graph2 = fig2.to_html(full_html=False)
+
+    return graph1, graph2
 
 
 def format_float(number):

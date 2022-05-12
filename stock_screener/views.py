@@ -165,7 +165,7 @@ def index(request):
 
                 # adjusting the start date according to client requirements and preparing the graph
                 stock = adjust_start(stock, startDateDatetime)
-                graph = make_graph(stock, ticker, selectedSignals, height, width)
+                graph1, graph2 = make_graph(stock, ticker, selectedSignals, height, width)
 
                 if signalSelected:
                     # preparing backtesting information to be shown on search page
@@ -230,7 +230,8 @@ def index(request):
                     "tickerName": tickerName,
                     "sector": sector,
                     "country": country,
-                    "graph": graph,
+                    "graph1": graph1,
+                    "graph2": graph2,
                     "rec": rec,
                     "closingPrice": format_float(closingPrice),
                     "priceChange": priceChange,
@@ -845,8 +846,8 @@ def display_graph(request, ticker_id, constructor_id):
 
         # Prepare a graph for each ticker
         data = adjust_start(data, startDateDatetime)
-        graph = make_graph(data, ticker, selectedSignals, 650, 900)
+        graph1, graph2 = make_graph(data, ticker, selectedSignals, 650, 900)
 
     return render(request, "stock_screener/graph.html",
-                  {"ticker": ticker, 'graph': graph})
+                  {"ticker": ticker, 'graph1': graph1, "graph2": graph2})
 
