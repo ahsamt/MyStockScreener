@@ -18,7 +18,7 @@ from .models import User, SavedSearch, SignalConstructor
 from .utils import read_csv_from_S3, adjust_start, make_graph, get_price_change, get_current_tickers_info, \
     upload_csv_to_S3, stock_tidy_up, prepare_ticker_info_update, get_company_details_from_yf, get_previous_sma, \
     calculate_price_dif, format_float, backtest_signal, prepare_signal_table, calc_average_percentage, \
-    check_and_add_sma, constructorFields, compare_signals
+    check_and_add_sma, constructorFields, compare_signals, get_date_within_df
 
 bucket = 'stockscreener-data'
 
@@ -109,6 +109,7 @@ def index(request):
 
                 # Getting the slice of the data starting from 18 months back
                 # (12 required for display + 12 extra for analysis)
+                startDateInternal = get_date_within_df(stock, startDateInternal)
                 stock = stock.loc[startDateInternal:, :]
 
                 # removing NaN values from the stock data
@@ -461,6 +462,8 @@ def watchlist(request):
 
         # watchlist = sorted(watchlist, key=lambda p: p.date, reverse=True)
         allStocksFull = read_csv_from_S3(bucket, "Stocks")
+        print(allStocksFull.head())
+        startDateInternal = get_date_within_df(allStocksFull, startDateInternal)
 
         # Getting the slice of the data starting from 18 months back (12 required for display + 12 extra for analysis)
         allStocks = allStocksFull.loc[startDateInternal:, :]

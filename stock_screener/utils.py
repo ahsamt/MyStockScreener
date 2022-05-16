@@ -254,9 +254,13 @@ def get_date_within_df(df, dt):
         Returns the original timestamp if it is found in the "Date" column,
         otherwise returns the closest earlier date
         """
-    allDates = list(df["Date"])
+    if "Date" in df.columns:
+        col = df["Date"]
+    else:
+        col = df.index
+    allDates = list(col)
     while dt not in allDates:
-        if dt > df["Date"].min():
+        if dt > col.min():
             dt = dt - pd.DateOffset(1)
         else:
             return None
