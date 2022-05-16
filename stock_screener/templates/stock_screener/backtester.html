@@ -116,10 +116,10 @@
                                 <div class="col-6">
                                     <div class="row">
                                         <div class="col-8">
-                                            {{  stockForm.num_years.label }}
+                                            {{  stockForm.amount_to_invest.label }}
                                         </div>
                                         <div class="col-4">
-                                            {{ stockForm.num_years }}
+                                            {{ stockForm.amount_to_invest }}
                                         </div>
                                     </div>
 
@@ -136,6 +136,20 @@
 
                                 </div>
                             </div>
+
+                        <div class="backtest-params row mt-3">
+
+                                <div class="col-6">
+                                    <div class="row">
+                                        <div class="col-8">
+                                            {{  stockForm.num_years.label }}
+                                        </div>
+                                        <div class="col-4">
+                                            {{ stockForm.num_years }}
+                                        </div>
+                                    </div>
+                                </div>
+                        </div>
 
                             <h3 class="centre mt-3">Tickers to include in back test</h3>
 

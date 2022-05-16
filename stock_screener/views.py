@@ -605,6 +605,7 @@ def backtester(request):
                 sell_price_adjustment = backtestForm.cleaned_data["sell_price_adjustment"]
                 num_years = backtestForm.cleaned_data["num_years"]
                 fee_per_trade = backtestForm.cleaned_data["fee_per_trade"]
+                amount_to_invest = backtestForm.cleaned_data["amount_to_invest"]
 
                 tickers = backtestForm.cleaned_data['tickers']
 
@@ -648,7 +649,7 @@ def backtester(request):
 
                 for ticker in tickers:
                     # Preparing a dataframe for the period of time indicated by the user + 12 months for calculations
-                    startDateInternal = get_date_within_df(existingStocks, startDateInternal)
+                    #startDateInternal = get_date_within_df(existingStocks[ticker], startDateInternal)
                     stock = existingStocks[ticker].copy().loc[startDateInternal:, :]
 
                     # removing NaN values from the stock data
