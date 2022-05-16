@@ -851,7 +851,7 @@ def display_graph(request, ticker_id, constructor_id):
 
         # Prepare a graph for each ticker
         data = adjust_start(data, startDateDatetime)
-        graph1, graph2 = make_graph(data, ticker, selectedSignals, 480, 680)
+        graph1, graph2 = make_graph(data, ticker, selectedSignals, 480, 630)
 
     return render(request, "stock_screener/graph.html",
                   {"ticker": ticker, 'graph1': graph1, "graph2": graph2})
