@@ -706,10 +706,18 @@ def backtester(request):
                             averageTimeHoldingStock = round(sum(daysHoldingStock) / len(daysHoldingStock), 2)
                             averageIndTimesHoldingStock.append(averageTimeHoldingStock)
 
+                            amountSpentOnFees = fee_per_trade * numTransactions
+                            totalAmountRemaining = amount_to_invest * (1 + backtestResult/100)
+                            finalAmount = format_float(totalAmountRemaining - amountSpentOnFees)
+
+                            result = format_float(backtestResult)
+
                         # if only one ("buy") transaction has taken place
                         else:
                             averageTimeBetweenStockTransactions = None
                             averageTimeHoldingStock = None
+                            finalAmount = None
+                            result = None
 
                         # prepare an individual backtesting table per stock
                         indTable = backtestData.to_html(col_space=20, bold_rows=True, classes="table",
@@ -720,6 +728,9 @@ def backtester(request):
                         numTransactions = None
                         averageTimeBetweenStockTransactions = None
                         averageTimeHoldingStock = None
+                        finalAmount = None
+                        result = None
+
                         indTable = "The selected signal has not generated a sufficient number " \
                                    "of buy/sell recommendations for this ticker"
 
@@ -728,6 +739,8 @@ def backtester(request):
                                            'numTransactions': numTransactions,
                                            'averageTimeBetweenStockTransactions': averageTimeBetweenStockTransactions,
                                            'averageTimeHoldingStock': averageTimeHoldingStock,
+                                           'finalAmount': finalAmount,
+                                           'result': result,
                                            'indTable': indTable}
 
                     # Prepare a list of all ticker info and tables to iterate through
