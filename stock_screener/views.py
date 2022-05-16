@@ -648,6 +648,7 @@ def backtester(request):
 
                 for ticker in tickers:
                     # Preparing a dataframe for the period of time indicated by the user + 12 months for calculations
+                    startDateInternal = get_date_within_df(existingStocks, startDateInternal)
                     stock = existingStocks[ticker].copy().loc[startDateInternal:, :]
 
                     # removing NaN values from the stock data
@@ -818,6 +819,7 @@ def display_graph(request, ticker_id, constructor_id):
         allStocksFull = read_csv_from_S3(bucket, "Stocks")
 
         # Getting the slice of the data starting from 18 months back (12 required for display + 12 extra for analysis)
+        startDateInternal = get_date_within_df(allStocksFull, startDateInternal)
         allStocks = allStocksFull.loc[startDateInternal:, :]
 
         signal = SignalConstructor.objects.get(user=request.user, id=constructor_id)
@@ -849,7 +851,7 @@ def display_graph(request, ticker_id, constructor_id):
 
         # Prepare a graph for each ticker
         data = adjust_start(data, startDateDatetime)
-        graph1, graph2 = make_graph(data, ticker, selectedSignals, 650, 900)
+        graph1, graph2 = make_graph(data, ticker, selectedSignals, 480, 680)
 
     return render(request, "stock_screener/graph.html",
                   {"ticker": ticker, 'graph1': graph1, "graph2": graph2})

@@ -4,12 +4,24 @@
 {% block body %}
     <div id="loader">Graph loading...</div>
     <div class="graph_page">
-    {% if error_message %}
-        <h4 class="mt-5 ms-5">{{ error_message }}</h4>
-    {% else %}
-    <div class="col-md-8 mx-auto mt-5"  id="{{ ticker }}_graph">
-        {{ graph1 | safe }}
+        {% if error_message %}
+            <h4 class="mt-5 ms-5">{{ error_message }}</h4>
+        {% else %}
+            {% if graph2 %}
+                <h1 class="centre">Signal Graphs ({{ ticker }})</h1>
+            {% else %}
+                <h1 class="centre">Signal Graphs ({{ ticker }})</h1>
+            {% endif %}
+            <div class="row mt-5 ms-2 me-2">
+                <div class="col d-flex align-items-center justify-content-center">
+                    {{ graph1 | safe }}
+                </div>
+                <div class="col d-flex align-items-center justify-content-center">
+                    {{ graph2 | safe }}
+                </div>
+            </div>
+        {% endif %}
+
     </div>
-    {% endif %}
-</div>
 {% endblock %}
+

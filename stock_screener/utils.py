@@ -176,7 +176,7 @@ def make_graph(df, ticker, signal_names, height, width):
     for signalName in graphList1:
         fig1.add_trace(go.Scatter(name=signalName, x=df["Date"], y=df[signalName]))
 
-    fig1.update_layout(title=f"{ticker} - {', '.join(['Stock Price'] + graphList1)} over the past year", template="seaborn",
+    fig1.update_layout(title=f"{', '.join(['Stock Price'] + graphList1)} over the past year", template="seaborn",
                        legend={"orientation": "h", "xanchor": "left"},
                        xaxis={
                            "rangeselector": {
@@ -195,7 +195,7 @@ def make_graph(df, ticker, signal_names, height, width):
         for signalName in graphList2:
             fig2.add_trace(go.Scatter(name=signalName, x=df["Date"], y=df[signalName]))
 
-        fig2.update_layout(title=f"{ticker} - {', '.join(graphList2)} over the past year", template="seaborn",
+        fig2.update_layout(title=f"{', '.join(graphList2)} over the past year", template="seaborn",
                            legend={"orientation": "h", "xanchor": "left"},
                            xaxis={
                                "rangeselector": {
