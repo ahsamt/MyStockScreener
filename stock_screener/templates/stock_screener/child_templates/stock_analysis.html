@@ -4,68 +4,72 @@
             <h4 class="card-title mb-2" id="ticker_name">{{ ticker }} ({{ tickerName }})</h4>
             <div class="additional_info mb-3">
 
-                {%  if sector %}
-                    {{ sector }}
+                {%  if industry %}
+                    {{ industry }}
                 {% endif %}
 
-                {% if sector and country %}
-                    -
-                {% endif %}
-
-                {%  if country %}
-                    {{ country }}
-                {% endif %}
+                {#                {%  if sector %}#}
+                {#                    {{ sector }}#}
+                {#                {% endif %}#}
+                {##}
+                {#                {% if sector and country %}#}
+                {#                    -#}
+                {#                {% endif %}#}
+                {##}
+                {#                {%  if country %}#}
+                {#                    {{ country }}#}
+                {#                {% endif %}#}
             </div>
 
 
 
-        {{ htmlResultTable | safe }}
+            {{ htmlResultTable | safe }}
 
-        {% if user.is_authenticated %}
+            {% if user.is_authenticated %}
 
-            {% if watchlisted %}
+                {% if watchlisted %}
 
-                <div class="card-link mb-3">
-                    <a
-                            href="/"
-                            class="watchlist"
-                            data-ticker_name="{{ ticker }}"
-                            data-ticker_id="{{ tickerID }}"
-                            data-ticker_full="{{ tickerName }}"
-                    >
-                        Remove {{ ticker }} from watchlist
-                    </a>
-                </div>
+                    <div class="card-link mb-3">
+                        <a
+                                href="/"
+                                class="watchlist"
+                                data-ticker_name="{{ ticker }}"
+                                data-ticker_id="{{ tickerID }}"
+                                data-ticker_full="{{ tickerName }}"
+                        >
+                            Remove {{ ticker }} from watchlist
+                        </a>
+                    </div>
 
-            {% else %}
-                <div class="card-link mb-3">
-                <a
-                        href="/"
-                        class="watchlist"
-                        data-ticker_name="{{ ticker }}"
-                        data-ticker_id="{{ tickerID }}"
-                        data-ticker_full="{{ tickerName }}"
-                >
-                    Add {{ ticker }} to watchlist
-                </a>
-                </div>
+                {% else %}
+                    <div class="card-link mb-3">
+                        <a
+                                href="/"
+                                class="watchlist"
+                                data-ticker_name="{{ ticker }}"
+                                data-ticker_id="{{ tickerID }}"
+                                data-ticker_full="{{ tickerName }}"
+                        >
+                            Add {{ ticker }} to watchlist
+                        </a>
+                    </div>
 
-            {% endif %} {% else %}
+                {% endif %} {% else %}
 
-            <p>
-                Please
-                <a href="{% url 'login' %}">log In</a>
-                or <a href="{% url 'register' %}">register</a> to add this stock to your
-                watchlist
-            </p>
+                <p>
+                    Please
+                    <a href="{% url 'login' %}">log In</a>
+                    or <a href="{% url 'register' %}">register</a> to add this stock to your
+                    watchlist
+                </p>
 
-        {% endif %}
+            {% endif %}
 
-        {% if user.is_authenticated %}
+            {% if user.is_authenticated %}
 
-            {% include "stock_screener/child_templates/save_signal_button.html" with signalSelected=signalSelected constructorAdded=constructorAdded newSignal=newSignal %}
-        {% endif %}
-    </div>
+                {% include "stock_screener/child_templates/save_signal_button.html" with signalSelected=signalSelected constructorAdded=constructorAdded newSignal=newSignal %}
+            {% endif %}
+        </div>
     </div>
 
     {% if signalSelected %}
@@ -83,8 +87,8 @@
                     </h4>
 
 
-                <div id="backtesting-table">{{ htmlBacktestTable | safe }}</div>
-</div>
+                    <div id="backtesting-table">{{ htmlBacktestTable | safe }}</div>
+                </div>
             </div>
         {% else %}
             <div class="stock_info card mb-4">

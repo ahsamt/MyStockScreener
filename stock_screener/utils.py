@@ -112,6 +112,10 @@ def stock_tidy_up(df, ticker):
     newDF = newDF.sort_index(axis=1)
     return newDF
 
+def get_saved_stocks_details():
+    df = pd.read_csv("stock_screener/stocks_details.csv")
+    df.set_index("Symbol", inplace=True)
+    return df
 
 def get_current_tickers_info(bucket):
     """(string) => pd DataFrame

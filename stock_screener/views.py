@@ -18,7 +18,7 @@ from .models import User, SavedSearch, SignalConstructor
 from .utils import read_csv_from_S3, adjust_start, make_graph, get_price_change, get_current_tickers_info, \
     upload_csv_to_S3, stock_tidy_up, prepare_ticker_info_update, get_company_details_from_yf, get_previous_sma, \
     calculate_price_dif, format_float, backtest_signal, prepare_signal_table, calc_average_percentage, \
-    check_and_add_sma, constructorFields, compare_signals, get_date_within_df
+    check_and_add_sma, constructorFields, compare_signals, get_date_within_df, get_saved_stocks_details
 
 bucket = 'stockscreener-data'
 
@@ -65,7 +65,7 @@ def index(request):
                 existingStocks = read_csv_from_S3(bucket, "Stocks")
 
                 tickerList = set(existingStocks.columns.get_level_values(0).tolist())
-                tickerInfo = get_current_tickers_info(bucket)
+                tickerInfo = get_saved_stocks_details()
 
                 if ticker not in tickerList:
                     # download data from Yahoo Finance if not available from S3
@@ -104,8 +104,9 @@ def index(request):
 
                 # getting full company name for the selected ticker
                 tickerName = tickerInfo.loc[ticker]["Name"]
-                sector = tickerInfo.loc[ticker]["Sector"]
-                country = tickerInfo.loc[ticker]["Country"]
+                industry = tickerInfo.loc[ticker]["Industry"]
+                #sector = tickerInfo.loc[ticker]["Sector"]
+                #country = tickerInfo.loc[ticker]["Country"]
 
                 # Getting the slice of the data starting from 18 months back
                 # (12 required for display + 12 extra for analysis)
@@ -229,8 +230,9 @@ def index(request):
                 context = {
                     "ticker": ticker,
                     "tickerName": tickerName,
-                    "sector": sector,
-                    "country": country,
+                    "industry": industry,
+                    #"sector": sector,
+                    #"country": country,
                     "graph1": graph1,
                     "graph2": graph2,
                     "rec": rec,
