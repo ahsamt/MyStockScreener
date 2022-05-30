@@ -101,7 +101,7 @@
                                         <div class="col-8">{{  stockForm.buy_price_adjustment.label }}</div>
                                         <div class="col-4">{{ stockForm.buy_price_adjustment }}</div>
 
-                                </div></div>
+                                    </div></div>
 
                                 <div class="col-6">
                                     <div class="row">
@@ -137,7 +137,7 @@
                                 </div>
                             </div>
 
-                        <div class="backtest-params row mt-3">
+                            <div class="backtest-params row mt-3">
 
                                 <div class="col-6">
                                     <div class="row">
@@ -149,7 +149,7 @@
                                         </div>
                                     </div>
                                 </div>
-                        </div>
+                            </div>
 
                             <h3 class="centre mt-3">Tickers to include in back test</h3>
 
@@ -187,6 +187,9 @@
                         {% endif %}
                     </h3>
 
+                    <p class="show_signal_section centre mt-3 mb-3 grey">(Please click <a href="/" class="view_saved_signal">here</a> to view the signal you have just back tested)</p>
+
+                    {% include "stock_screener/child_templates/saved_signal.html" with signalTable=signalTable %}
                     {%  if overallAverageTimeBetweenTransactions %}
                         <h5 class="ind-backtest-info centre"><span class = "grey">Average time between transactions: </span><strong>{{ overallAverageTimeBetweenTransactions }} days</strong>    </h5>
                     {% endif %}
@@ -195,14 +198,17 @@
                         <h5 class="ind-backtest-info centre"><span class = "grey">Average time holding stock: </span><strong class="blue">{{ overallAverageTimeHoldingStock }} days</strong></h5>
                     {% endif %}
 
+                    {%  if averageNumberOfTransactions %}
+                        <h5 class="ind-backtest-info centre"><span class = "grey">Average number of transactions: </span><strong class="blue">{{ averageNumberOfTransactions }}</strong></h5>
+                    {% endif %}
 
-                    <div class="centre mt-2 ">
+
+
+                    <div class="centre mt-4 mb-4 ">
                         {% include "stock_screener/child_templates/save_signal_button.html" with signalSelected=signalSelected constructorAdded=constructorAdded newSignal=newSignal %}
                     </div>
 
-                    <p class="show_signal_section centre mt-3 mb-3 grey">(Please click <a href="/" class="view_saved_signal">here</a> to view the signal you have just back tested)</p>
 
-                    {% include "stock_screener/child_templates/saved_signal.html" with signalTable=signalTable %}
 
 
                     <div class="stock_info card mb-4" id="outcome_card">

@@ -84,10 +84,7 @@ def index(request):
                     else:
                         print("Data downloaded in full")
 
-                        # get full company name for the ticker and save info on S3
-                        tickerName, sector, country = get_company_details_from_yf(ticker)
-                        tickerInfo = prepare_ticker_info_update(tickerInfo, ticker, tickerName, sector, country)
-                        upload_csv_to_S3(bucket, tickerInfo, "TickersInfo")
+
 
                         # prepare stock data for concatenation with the table on S3
                         updatedStock = stock_tidy_up(stock, ticker)
@@ -95,6 +92,17 @@ def index(request):
                         # update stock data table and upload back on S3
                         updatedStocks = pd.concat([existingStocks, updatedStock], axis=1)
                         upload_csv_to_S3(bucket, updatedStocks, "Stocks")
+
+
+                        # check if we have company details in local csv file:
+                        tickerInfo = get_saved_stocks_details()
+                        if ticker not in tickerInfo.index:
+
+                            # get company info for the ticker and save info on S3
+                            # This needs to be updated to save changes to local csv!!!!
+                            tickerName, industry, sector, country = get_company_details_from_yf(ticker)
+                            tickerInfo = prepare_ticker_info_update(tickerInfo, ticker, tickerName, industry, sector, country)
+                            upload_csv_to_S3(bucket, tickerInfo, "AllTickersInfo")
 
                         # tickerList = set(updatedStocks.columns.get_level_values(0).tolist())
 
@@ -648,6 +656,7 @@ def backtester(request):
                 allDetails = []
                 averageIndTimesBetweenTransactions = []
                 averageIndTimesHoldingStock = []
+                averageNumbersOfTransactions = []
 
                 for ticker in tickers:
                     # Preparing a dataframe for the period of time indicated by the user + 12 months for calculations
@@ -686,6 +695,7 @@ def backtester(request):
                                                 "Adjusted Price After Delay", "Profit/Loss"]
 
                         numTransactions = len(backtestData.index)
+                        averageNumbersOfTransactions.append(numTransactions)
 
                         # if there is more than 1 transaction in the backtest DataFrame
                         if numTransactions > 1:
@@ -707,6 +717,8 @@ def backtester(request):
 
                             averageTimeHoldingStock = round(sum(daysHoldingStock) / len(daysHoldingStock), 2)
                             averageIndTimesHoldingStock.append(averageTimeHoldingStock)
+
+
 
                             amountSpentOnFees = fee_per_trade * numTransactions
                             totalAmountRemaining = amount_to_invest * (1 + backtestResult/100)
@@ -807,6 +819,7 @@ def backtester(request):
                     "allDetails": allDetails,
                     "overallAverageTimeBetweenTransactions": overallAverageTimeBetweenTransactions,
                     "overallAverageTimeHoldingStock": overallAverageTimeHoldingStock,
+                    "averageNumberOfTransactions": sum(averageNumbersOfTransactions)//len(averageNumbersOfTransactions),
                     "signalTable": signalTable,
                     "signalSelected": signalSelected,
                     "constructorAdded": constructorAdded,

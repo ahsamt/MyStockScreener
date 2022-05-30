@@ -1,13 +1,12 @@
-
-document.onreadystatechange = function() {
+/*document.onreadystatechange = function() {
     if (document.readyState !== "complete") {
         document.querySelector(".graph_page").style.visibility = "hidden";
-        document.querySelector("#loader").style.visibility = "visible";
+        // document.querySelector("#loader").style.visibility = "visible";
     } else {
-        document.querySelector("#loader").style.display = "none";
+        // document.querySelector("#loader").style.display = "none";
         document.querySelector(".graph_page").style.visibility = "visible";
     }
-};
+};*/
 
 document.addEventListener("DOMContentLoaded", () => {
     // check on scroll if "back to top" button should be displayed

@@ -114,7 +114,7 @@ li > .nav-link {
   text-align: left;
 }
 
-.graphs, .notes-section {
+notes-section {
   display: none;
   margin: 30px;
 }
@@ -321,6 +321,7 @@ li > .nav-link {
   padding: 4px 8px;
   text-decoration: none;
 }
+
 .watchlist-ticker {
   color: var(--red-hover-color);
   font-size: 15px;

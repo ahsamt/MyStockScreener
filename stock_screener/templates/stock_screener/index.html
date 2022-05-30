@@ -97,9 +97,11 @@
                         <div class="col d-flex align-items-center justify-content-center">
                             {{ graph1 | safe }}
                         </div>
-                        <div class="col d-flex align-items-center justify-content-center mt-4">
-                            {{ graph2 | safe }}
-                        </div>
+                        {% if graph2 %}
+                            <div class="col d-flex align-items-center justify-content-center mt-4">
+                                {{ graph2 | safe }}
+                            </div>
+                        {% endif %}
                     </div>
                 </div>
 
