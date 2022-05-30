@@ -15,8 +15,8 @@ from django.views.decorators.csrf import csrf_exempt
 from .calculations import make_calculations
 from .forms import StockForm, BacktestForm
 from .models import User, SavedSearch, SignalConstructor
-from .utils import read_csv_from_S3, adjust_start, make_graph, get_price_change, get_current_tickers_info, \
-    upload_csv_to_S3, stock_tidy_up, prepare_ticker_info_update, get_company_details_from_yf, get_previous_sma, \
+from .utils import read_csv_from_S3, adjust_start, make_graph, get_price_change, upload_csv_to_S3, stock_tidy_up, \
+    prepare_ticker_info_update, get_company_details_from_yf, get_previous_sma, \
     calculate_price_dif, format_float, backtest_signal, prepare_signal_table, calc_average_percentage, \
     check_and_add_sma, constructorFields, compare_signals, get_date_within_df, get_saved_stocks_details
 
@@ -84,8 +84,6 @@ def index(request):
                     else:
                         print("Data downloaded in full")
 
-
-
                         # prepare stock data for concatenation with the table on S3
                         updatedStock = stock_tidy_up(stock, ticker)
 
@@ -93,15 +91,13 @@ def index(request):
                         updatedStocks = pd.concat([existingStocks, updatedStock], axis=1)
                         upload_csv_to_S3(bucket, updatedStocks, "Stocks")
 
-
                         # check if we have company details in local csv file:
                         tickerInfo = get_saved_stocks_details()
                         if ticker not in tickerInfo.index:
-
                             # get company info for the ticker and save info on S3
                             # This needs to be updated to save changes to local csv!!!!
-                            tickerName, industry, sector, country = get_company_details_from_yf(ticker)
-                            tickerInfo = prepare_ticker_info_update(tickerInfo, ticker, tickerName, industry, sector, country)
+                            tickerName, sector, country = get_company_details_from_yf(ticker)
+                            tickerInfo = prepare_ticker_info_update(tickerInfo, ticker, tickerName, sector, country)
                             upload_csv_to_S3(bucket, tickerInfo, "AllTickersInfo")
 
                         # tickerList = set(updatedStocks.columns.get_level_values(0).tolist())
@@ -113,8 +109,8 @@ def index(request):
                 # getting full company name for the selected ticker
                 tickerName = tickerInfo.loc[ticker]["Name"]
                 industry = tickerInfo.loc[ticker]["Industry"]
-                #sector = tickerInfo.loc[ticker]["Sector"]
-                #country = tickerInfo.loc[ticker]["Country"]
+                # sector = tickerInfo.loc[ticker]["Sector"]
+                # country = tickerInfo.loc[ticker]["Country"]
 
                 # Getting the slice of the data starting from 18 months back
                 # (12 required for display + 12 extra for analysis)
@@ -187,7 +183,8 @@ def index(request):
                         backtestData.reset_index(inplace=True)
                         backtestData.columns = ["Date", "Price", "Action", "Profit/Loss"]
 
-                        htmlBacktestTable = backtestData.to_html(col_space=30, bold_rows=True, classes=["table", "backtesting_table"],
+                        htmlBacktestTable = backtestData.to_html(col_space=30, bold_rows=True,
+                                                                 classes=["table", "backtesting_table"],
                                                                  justify="left", index=False)
                     else:
                         htmlBacktestTable = None
@@ -198,10 +195,10 @@ def index(request):
 
                 # Preparing the results table to be shown on search page
 
-
                 for signal in selectedSignals:
                     signalResults.append(format_float(stock.loc[stock.index.max()][signal]))
-                data = [recHtml, daysSinceChange, format_float(closingPrice), priceChange[0]] + smaChanges + signalResults
+                data = [recHtml, daysSinceChange, format_float(closingPrice), priceChange[0]] \
+                       + smaChanges + signalResults
                 resultTable = pd.DataFrame([data],
                                            columns=['Analysis Outcome',
                                                     'Days Since Trend Change',
@@ -212,7 +209,8 @@ def index(request):
                                                     '3 Months SMA Change'] + selectedSignals)
                 resultTable.set_index('Analysis Outcome', inplace=True)
                 resultTable = resultTable.transpose()
-                htmlResultTable = resultTable.to_html(col_space=30, bold_rows=True, classes=["table", "stock_table"], justify="left", escape=False)
+                htmlResultTable = resultTable.to_html(col_space=30, bold_rows=True, classes=["table", "stock_table"],
+                                                      justify="left", escape=False)
 
                 watchlisted = False
                 tickerID = None
@@ -239,8 +237,8 @@ def index(request):
                     "ticker": ticker,
                     "tickerName": tickerName,
                     "industry": industry,
-                    #"sector": sector,
-                    #"country": country,
+                    # "sector": sector,
+                    # "country": country,
                     "graph1": graph1,
                     "graph2": graph2,
                     "rec": rec,
@@ -547,13 +545,13 @@ def watchlist(request):
 
             tickerHtml = f"<span class='watchlist-ticker'>{ticker}</span>"
 
-            graphButtonHtml = f'<a href = "{reverse("display_graph", kwargs={"ticker_id":tickerId, "constructor_id":signalId})}" target = "_blank"><button class = "graph-button">Plot</button></a>'
+            graphButtonHtml = f'<a href = "{reverse("display_graph", kwargs={"ticker_id": tickerId, "constructor_id": signalId})}" ' \
+                              f'target = "_blank"><button class = "graph-button">Plot</button></a>'
             notesButtonHtml = f"<button class = 'notes-button' data-ticker={ticker}>Notes</button>"
             removeButtonHtml = f"<button class = 'remove-ticker-button' data-ticker_id={tickerId}>&#10005</button>"
             tableEntries = \
                 [tickerHtml, recHtml, daysSinceChange, closingPrice] \
                 + smaChanges + signalResults + [graphButtonHtml, notesButtonHtml, removeButtonHtml]
-
 
             watchlistItem["resultTable"] = pd.DataFrame([tableEntries],
                                                         columns=['Ticker',
@@ -660,7 +658,7 @@ def backtester(request):
 
                 for ticker in tickers:
                     # Preparing a dataframe for the period of time indicated by the user + 12 months for calculations
-                    #startDateInternal = get_date_within_df(existingStocks[ticker], startDateInternal)
+                    # startDateInternal = get_date_within_df(existingStocks[ticker], startDateInternal)
                     stock = existingStocks[ticker].copy().loc[startDateInternal:, :]
 
                     # removing NaN values from the stock data
@@ -718,10 +716,8 @@ def backtester(request):
                             averageTimeHoldingStock = round(sum(daysHoldingStock) / len(daysHoldingStock), 2)
                             averageIndTimesHoldingStock.append(averageTimeHoldingStock)
 
-
-
                             amountSpentOnFees = fee_per_trade * numTransactions
-                            totalAmountRemaining = amount_to_invest * (1 + backtestResult/100)
+                            totalAmountRemaining = amount_to_invest * (1 + backtestResult / 100)
                             finalAmount = format_float(totalAmountRemaining - amountSpentOnFees)
 
                             result = format_float(backtestResult)
@@ -819,7 +815,8 @@ def backtester(request):
                     "allDetails": allDetails,
                     "overallAverageTimeBetweenTransactions": overallAverageTimeBetweenTransactions,
                     "overallAverageTimeHoldingStock": overallAverageTimeHoldingStock,
-                    "averageNumberOfTransactions": sum(averageNumbersOfTransactions)//len(averageNumbersOfTransactions),
+                    "averageNumberOfTransactions": sum(averageNumbersOfTransactions) // len(
+                        averageNumbersOfTransactions),
                     "signalTable": signalTable,
                     "signalSelected": signalSelected,
                     "constructorAdded": constructorAdded,
@@ -828,6 +825,7 @@ def backtester(request):
                 }
 
                 return render(request, "stock_screener/backtester.html", context)
+
 
 @login_required
 def display_graph(request, ticker_id, constructor_id):
@@ -884,4 +882,3 @@ def display_graph(request, ticker_id, constructor_id):
 
     return render(request, "stock_screener/graph.html",
                   {"ticker": ticker, 'graph1': graph1, "graph2": graph2})
-

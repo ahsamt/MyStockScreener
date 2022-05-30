@@ -365,7 +365,9 @@ li > .nav-link {
 #outcome_card {
   display: block;
   margin: 0 auto;
-  width: 700px;
+
+
+
 }
 
 #result-table {
@@ -427,6 +429,8 @@ li > .nav-link {
 
 }
 
+
+
 @media (max-width: 991px) {
   body {
     font-size: 14px;
@@ -438,6 +442,7 @@ li > .nav-link {
     text-align: center;
     width: 300px;
   }
+
 }
 
 

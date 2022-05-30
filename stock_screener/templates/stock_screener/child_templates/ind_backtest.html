@@ -4,7 +4,7 @@
                 <h5 class="ind-backtest-info ms-3"><span class = "grey">Backtesting outcome: </span><strong>{{ item.result }}%</strong></h5>
             {%  endif %}
             {% if item.finalAmount %}
-                <h5 class="ind-backtest-info ms-3"><span class = "grey">Final amount (fees deducted): </span><strong>{{ item.finalAmount }}</strong></h5>
+                <h5 class="ind-backtest-info ms-3"><span class = "grey">Final amount (transaction fees deducted): </span><strong>{{ item.finalAmount }} USD</strong></h5>
             {%  endif %}
             {% if item.numTransactions %}
                 <h5 class="ind-backtest-info ms-3"><span class = "grey">Number of transactions: </span><strong>{{ item.numTransactions }}</strong></h5>

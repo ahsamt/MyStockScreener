@@ -195,11 +195,11 @@
                     {% endif %}
 
                     {%  if overallAverageTimeHoldingStock %}
-                        <h5 class="ind-backtest-info centre"><span class = "grey">Average time holding stock: </span><strong class="blue">{{ overallAverageTimeHoldingStock }} days</strong></h5>
+                        <h5 class="ind-backtest-info centre mt-1"><span class = "grey">Average time holding stock: </span><strong class="blue">{{ overallAverageTimeHoldingStock }} days</strong></h5>
                     {% endif %}
 
                     {%  if averageNumberOfTransactions %}
-                        <h5 class="ind-backtest-info centre"><span class = "grey">Average number of transactions: </span><strong class="blue">{{ averageNumberOfTransactions }}</strong></h5>
+                        <h5 class="ind-backtest-info centre mt-1"><span class = "grey">Average number of transactions: </span><strong class="blue">{{ averageNumberOfTransactions }}</strong></h5>
                     {% endif %}
 
 
@@ -211,10 +211,12 @@
 
 
 
-                    <div class="stock_info card mb-4" id="outcome_card">
+                    <div class="stock_info card mb-4 col-lg-6" id="outcome_card">
                         <div class="card-body">
+                            <div class="col d-flex justify-content-center">
 
-                            {{ htmlJointTable | safe }}
+                                {{ htmlJointTable | safe }}
+                            </div>
                         </div>
                     </div>
                 </div>
