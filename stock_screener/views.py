@@ -13,7 +13,7 @@ from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 
 from .calculations import make_calculations
-from .forms import StockForm, BacktestForm
+from .forms import StockForm, BacktestForm, suggestedTickers
 from .models import User, SavedSearch, SignalConstructor
 from .utils import read_csv_from_S3, adjust_start, make_graph, get_price_change, upload_csv_to_S3, stock_tidy_up, \
     prepare_ticker_info_update, get_company_details_from_yf, get_previous_sma, \
@@ -590,13 +590,13 @@ def watchlist(request):
                    "signalTable": signalTable})
 
 
-@login_required
 def backtester(request):
     if request.method == "GET":
         user = request.user
         return render(request, "stock_screener/backtester.html", {"stockForm": BacktestForm(user)})
 
     if request.method == "POST":
+        user = request.user
         if 'tickers' in request.POST:
             backtestForm = BacktestForm(request.user, request.POST)
 
@@ -618,7 +618,11 @@ def backtester(request):
                 tickers = backtestForm.cleaned_data['tickers']
 
                 if "ALL" in tickers:
-                    tickers = sorted([o.ticker for o in SavedSearch.objects.filter(user=request.user)])
+                    if user.is_authenticated:
+                        if len(SavedSearch.objects.filter(user=request.user)) > 0:
+                            tickers = sorted([o.ticker for o in SavedSearch.objects.filter(user=request.user)])
+                    else:
+                        tickers = suggestedTickers
 
                 # Calculating the start date according to client requirements
                 endDate = date.today()
@@ -792,20 +796,24 @@ def backtester(request):
                 signalTable = prepare_signal_table(signalDict)
 
                 # Check if the user has a signal saved in their profile
-                try:
-                    # checking if the user has previously saved any signal for their watchlist
-                    constructorObj = SignalConstructor.objects.filter(user=request.user)
+                if user.is_authenticated:
+                    try:
+                        # checking if the user has previously saved any signal for their watchlist
+                        constructorObj = SignalConstructor.objects.filter(user=request.user)
 
-                    if len(constructorObj):
-                        savedConstructor = constructorObj[0]
-                        # checking if the signal user has previously saved
-                        # matches the signal being used for the current search
-                        constructorAdded = compare_signals(savedConstructor, signalDict)
-                    else:
+                        if len(constructorObj):
+                            savedConstructor = constructorObj[0]
+                            # checking if the signal user has previously saved
+                            # matches the signal being used for the current search
+                            constructorAdded = compare_signals(savedConstructor, signalDict)
+                        else:
+                            constructorAdded = False
+                            savedConstructor = None
+
+                    except SignalConstructor.DoesNotExist:
                         constructorAdded = False
                         savedConstructor = None
-
-                except SignalConstructor.DoesNotExist:
+                else:
                     constructorAdded = False
                     savedConstructor = None
 

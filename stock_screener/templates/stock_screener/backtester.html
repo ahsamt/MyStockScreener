@@ -203,10 +203,18 @@
                     {% endif %}
 
 
-
+                    {% if user.is_authenticated %}
                     <div class="centre mt-4 mb-4 ">
                         {% include "stock_screener/child_templates/save_signal_button.html" with signalSelected=signalSelected constructorAdded=constructorAdded newSignal=newSignal %}
                     </div>
+                        {% else %}
+                        <p class="centre mt-3 mb-3">
+                    Please
+                    <a href="{% url 'login' %}" class="bright-red">log In</a>
+                    or <a href="{% url 'register' %}" class="bright-red">register</a> to use this signal for your
+                    watchlist.
+                </p>
+                        {% endif %}
 
 
 

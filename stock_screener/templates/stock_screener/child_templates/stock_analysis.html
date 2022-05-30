@@ -56,12 +56,12 @@
 
                 {% endif %} {% else %}
 
-                <p>
+                <p><small>
                     Please
-                    <a href="{% url 'login' %}">log In</a>
-                    or <a href="{% url 'register' %}">register</a> to add this stock to your
-                    watchlist
-                </p>
+                    <a href="{% url 'login' %}" class="bright-red">log In</a>
+                    or <a href="{% url 'register' %}" class="bright-red">register</a> to add this stock to your
+                    watchlist or to apply this signal to watchlisted items.
+                </small></p>
 
             {% endif %}
 
@@ -88,8 +88,11 @@
 
 
                     <div id="backtesting-table">{{ htmlBacktestTable | safe }}</div>
-                </div>
-            </div>
+                 <p><small>
+                    Please use the
+    <a href="{% url 'backtester' %}">Backtester</a> to test this signal on a wider range of stocks using additional parameters</small></p>
+            </div></div>
+
         {% else %}
             <div class="stock_info card mb-4">
                 <div class="card-body">
@@ -98,6 +101,9 @@
                         Insufficient number of buy/sell recommendations have been generated for this ticker
                     </h5>
                 </div>
+            <p><small>
+                    Please use the
+    <a href="{% url 'backtester' %}">Backtester</a> to test this signal on a wider range of stocks using additional parameters</small></p>
             </div>
         {% endif %}
 

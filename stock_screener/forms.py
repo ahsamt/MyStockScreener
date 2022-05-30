@@ -2,6 +2,8 @@ from django import forms
 
 from stock_screener.models import SavedSearch
 
+suggestedTickers = ["AAPL", "GS", "IBM"]
+
 ma1_choices = [('SMA', 'Simple Moving Average'), ('EMA', 'Exponential Moving Average')]
 ma2_choices = [('SMA', 'Simple Moving Average'), ('EMA', 'Exponential Moving Average')]
 
@@ -84,7 +86,23 @@ class BacktestForm(SignalForm):
 
     def __init__(self, user, *args, **kwargs):
         super(BacktestForm, self).__init__(*args, *kwargs)
-        self.fields['tickers'] = forms.MultipleChoiceField(
-            choices=([("ALL", "All watchlisted tickers")] + sorted([(o.ticker, o.ticker)
-                                                                    for o in SavedSearch.objects.filter(user=user)])),
-            widget=forms.CheckboxSelectMultiple, initial="ALL")
+        if user.is_authenticated:
+            if len(SavedSearch.objects.filter(user=user)) > 0:
+                self.fields['tickers'] = forms.MultipleChoiceField(
+                    choices=([("ALL", "All watchlisted tickers")] + sorted([(o.ticker, o.ticker)
+                                                                            for o in
+                                                                            SavedSearch.objects.filter(user=user)])),
+                    widget=forms.CheckboxSelectMultiple, initial="ALL")
+        else:
+            self.fields['tickers'] = forms.MultipleChoiceField(
+                choices=([("ALL", "All suggested tickers")] + sorted([(ticker, ticker)
+                                                                        for ticker in suggestedTickers])) ,
+                widget=forms.CheckboxSelectMultiple, initial="ALL")
+
+
+
+
+        # self.fields['tickers'] = forms.MultipleChoiceField(
+        #     choices=([("ALL", "All watchlisted tickers")] + sorted([(o.ticker, o.ticker)
+        #                                                             for o in SavedSearch.objects.filter(user=user)])),
+        #     widget=forms.CheckboxSelectMultiple, initial="ALL")
