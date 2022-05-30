@@ -890,3 +890,8 @@ def display_graph(request, ticker_id, constructor_id):
 
     return render(request, "stock_screener/graph.html",
                   {"ticker": ticker, 'graph1': graph1, "graph2": graph2})
+
+
+def about(request):
+
+    return render(request, "stock_screener/about.html")

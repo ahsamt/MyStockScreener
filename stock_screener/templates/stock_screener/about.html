@@ -1,6 +1,6 @@
 {% extends "stock_screener/layout.html" %}
 {% load static %}
-<div id="all_index">
+<div id="about_section">
     {% block body %}
 
 
@@ -22,7 +22,7 @@
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav justify-content-end w-100">
                         <li class="nav-item">
-                            <a class="nav-link active" href="{% url 'index' %}">Search</a>
+                            <a class="nav-link" href="{% url 'index' %}">Search</a>
                         </li>
 
                         {%  if user.is_authenticated %}
@@ -37,7 +37,7 @@
                         </li>
 
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'about' %}">About</a>
+                            <a class="nav-link active" href="{% url 'about' %}">About</a>
                         </li>
 
                         {%  if user.is_authenticated %}
@@ -60,59 +60,6 @@
         </nav>
 
         <div class="container">
-            {% if not ticker %}
-
-                <div class="welcome">
-                    <h1>Welcome to StockScreener!</h1>
-                    <h4>Please enter a ticker below and select the relevant signals</h4>
-
-
-                </div>
-                <div class="search-form mt-2 mb-1">
-                    <form action="" method="post">
-                        {% csrf_token %}
-                        <div class="centre mb-3">
-                            {{ stockForm.ticker }}
-                        </div>
-
-                        {% include "stock_screener/child_templates/signal_builder.html" %}
-
-                        <div class = "mt-3">
-                            <button type="submit" id="searchButton" >Get Results</button>
-                        </div>
-
-                    </form>
-                </div>
-
-                {% if message %}
-                    <p id="search_error_message">{{ message }}</p>
-                {% endif %}
-
-            {% else %}
-
-
-                <div class="row mt-5">
-                    <div class="col">
-
-                        {% include "stock_screener/child_templates/stock_analysis.html" with ticker=ticker priceChange=priceChange closingPrice=closingPrice recommendation=recommendation htmlResultTable=htmlResultTable savedConstructor=savedConstructor constructorAdded=constructorAdded newSignal=newSignal %}
-
-                    </div>
-
-
-
-                    <div class="col">
-                        <div class="col d-flex align-items-center justify-content-center">
-                            {{ graph1 | safe }}
-                        </div>
-                        {% if graph2 %}
-                            <div class="col d-flex align-items-center justify-content-center mt-4">
-                                {{ graph2 | safe }}
-                            </div>
-                        {% endif %}
-                    </div>
-                </div>
-
-            {% endif %}
-        </div >
-    {% endblock %}
-</div>
+           About this project
+        </div>
+{% endblock %}
