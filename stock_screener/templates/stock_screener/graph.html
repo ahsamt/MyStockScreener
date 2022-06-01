@@ -2,24 +2,27 @@
 {% load static %}
 
 {% block body %}
-{#    <div id="loader">Graph loading...</div>#}
+    {#    <div id="loader">Graph loading...</div>#}
     <div class="graph_page">
         {% if error_message %}
             <h4 class="mt-5 ms-5">{{ error_message }}</h4>
         {% else %}
-            {% if graph2 %}
-                <h1 class="centre">Signal Graphs ({{ ticker }})</h1>
+            {% if graph2 or graph3 or graph4 %}
+                <h2 class="centre mt-4 mb-2">Signal Graphs ({{ ticker }})</h2>
             {% else %}
-                <h1 class="centre">Signal Graphs ({{ ticker }})</h1>
+                <h2 class="centre mt-4 mb-2">Signal Graphs ({{ ticker }})</h2>
             {% endif %}
             <h5 class="grey centre ms-5 me-5">This page has been opened in a new tab. Simply close it to get back to your watchlist.</h5>
             <div class="row mt-5 ms-5 me-5">
-                <div class="col d-flex align-items-center justify-content-center">
-                    {{ graph1 | safe }}
-                </div>
-                <div class="col d-flex align-items-center justify-content-center">
-                    {{ graph2 | safe }}
-                </div>
+
+                {% for graph in graphs %}
+
+                {% if graph %}
+                    <div class="col d-flex align-items-center justify-content-center mb-4">
+                        {{ graph | safe }}
+                    </div>
+                {% endif %}
+                {% endfor %}
             </div>
         {% endif %}
 

@@ -27,13 +27,13 @@ class SignalForm(forms.Form):
                               widget=forms.NumberInput(attrs={'style': 'width:7ch'}))
 
     adx = forms.BooleanField(label='ADX', required=False)
-    adxW = forms.IntegerField(label='Window length, days', min_value=1, max_value=220, initial="14",
+    adxW = forms.IntegerField(label='Time periods (days)', min_value=1, max_value=220, initial="14",
                               widget=forms.NumberInput(attrs={'style': 'width:7ch'}))
     adxL = forms.IntegerField(label='Value limit', min_value=0, max_value=100, initial="20",
                               widget=forms.NumberInput(attrs={'style': 'width:7ch'}))
 
     srsi = forms.BooleanField(label='Stochastic RSI', required=False)
-    srsiW = forms.IntegerField(label='Window length, days', min_value=1, max_value=220, initial="13",
+    srsiW = forms.IntegerField(label='Time periods (days)', min_value=1, max_value=220, initial="13",
                                widget=forms.NumberInput(attrs={'style': 'width:7ch'}))
     srsiSm1 = forms.IntegerField(label='Smooth 1', min_value=1, max_value=220, initial="3",
                                  widget=forms.NumberInput(attrs={'style': 'width:7ch'}))

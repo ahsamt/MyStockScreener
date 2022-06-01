@@ -64,7 +64,8 @@
 
                 <div class="welcome">
                     <h1>Welcome to StockScreener!</h1>
-                    <h4>Please enter a ticker below and select the relevant signals</h4>
+                    <h4>Please enter a ticker below and select your preferred signals</h4>
+                <h5 class="grey">(Hover over each signal for more information)</h5>
 
 
                 </div>
@@ -109,9 +110,19 @@
                                 {{ graph2 | safe }}
                             </div>
                         {% endif %}
+                    {% if graph3 %}
+                            <div class="col d-flex align-items-center justify-content-center mt-4">
+                                {{ graph3 | safe }}
+                            </div>
+                        {% endif %}
+                    {% if graph4 %}
+                            <div class="col d-flex align-items-center justify-content-center mt-4">
+                                {{ graph4 | safe }}
+                            </div>
+                        {% endif %}
                     </div>
                 </div>
-
+                <br /><br />
             {% endif %}
         </div >
     {% endblock %}

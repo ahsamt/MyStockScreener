@@ -171,7 +171,7 @@ def index(request):
 
                 # adjusting the start date according to client requirements and preparing the graph
                 stock = adjust_start(stock, startDateDatetime)
-                graph1, graph2 = make_graph(stock, ticker, selectedSignals, height, width)
+                graph1, graph2, graph3, graph4 = make_graph(stock, ticker, selectedSignals, height, width)
 
                 if signalSelected:
                     # preparing backtesting information to be shown on search page
@@ -241,6 +241,8 @@ def index(request):
                     # "country": country,
                     "graph1": graph1,
                     "graph2": graph2,
+                    "graph3": graph3,
+                    "graph4": graph4,
                     "rec": rec,
                     "closingPrice": format_float(closingPrice),
                     "priceChange": priceChange,
@@ -699,6 +701,7 @@ def backtester(request):
                         numTransactions = len(backtestData.index)
                         averageNumbersOfTransactions.append(numTransactions)
 
+
                         # if there is more than 1 transaction in the backtest DataFrame
                         if numTransactions > 1:
                             daysBetweenStockTransactions = []
@@ -744,6 +747,7 @@ def backtester(request):
                         averageTimeHoldingStock = None
                         finalAmount = None
                         result = None
+                        averageNumbersOfTransactions.append(0)
 
                         indTable = "The selected signal has not generated a sufficient number " \
                                    "of buy/sell recommendations for this ticker"
@@ -886,10 +890,10 @@ def display_graph(request, ticker_id, constructor_id):
 
         # Prepare a graph for each ticker
         data = adjust_start(data, startDateDatetime)
-        graph1, graph2 = make_graph(data, ticker, selectedSignals, 480, 630)
+        graphs = list(make_graph(data, ticker, selectedSignals, 600, 870))
 
     return render(request, "stock_screener/graph.html",
-                  {"ticker": ticker, 'graph1': graph1, "graph2": graph2})
+                  {"ticker": ticker, 'graphs': graphs})
 
 
 def about(request):

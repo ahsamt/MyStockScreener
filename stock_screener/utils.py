@@ -112,10 +112,12 @@ def stock_tidy_up(df, ticker):
     newDF = newDF.sort_index(axis=1)
     return newDF
 
+
 def get_saved_stocks_details():
     df = pd.read_csv("stock_screener/stocks_details.csv")
     df.set_index("Symbol", inplace=True)
     return df
+
 
 def get_current_tickers_info(bucket):
     """(string) => pd DataFrame
@@ -163,52 +165,95 @@ def make_graph(df, ticker, signal_names, height, width):
                {"count": 6, "label": "6M", "step": "month", "stepmode": "backward"},
                {"count": 1, "label": "1Y", "step": "year", "stepmode": "backward"}, ]
 
-    graphList1 = []
-    graphList2 = []
+    graph1List = []
+    srsiGraph = False
+    adxGraph = False
+    macdGraph = False
     for elt in signal_names:
-        if elt not in ["Stochastic RSI", "MACD", "ADX"]:
-            graphList1.append(elt)
-        else:
-            graphList2.append(elt)
+        if elt.startswith("SMA") or elt.startswith("EMA") or elt == "Parabolic SAR":
+            graph1List.append(elt)
+        elif elt == "Stochastic RSI":
+            srsiGraph = True
+        elif elt == "ADX":
+            adxGraph = True
+        elif elt == "MACD":
+            macdGraph = True
 
-    print(f"graph list 1 : {graphList1}")
-    print(f"graph list 2 : {graphList2}")
     fig1 = go.Figure()
+    fig1.add_trace(go.Scatter(name=ticker, x=df["Date"], y=df["Close"], line=dict(color="#325C84", width=2)))
+    for signalName in graph1List:
+        if signalName == "Parabolic SAR":
 
-    fig1.add_trace(go.Scatter(name=ticker, x=df["Date"], y=df["Close"]))
+            fig1.add_trace(go.Scatter(name=signalName, x=df["Date"], y=df[signalName], mode="markers", marker=dict(
+                color='#99103d',
+                size=4)))
+        else:
+            fig1.add_trace(go.Scatter(name=signalName, x=df["Date"], y=df[signalName], mode="lines", line=dict(
+                width=3)))
 
-    for signalName in graphList1:
-        fig1.add_trace(go.Scatter(name=signalName, x=df["Date"], y=df[signalName]))
-
-    fig1.update_layout(title=f"{', '.join(['Stock Price'] + graphList1)} over the past year", template="seaborn",
+    fig1.update_layout(title=f"{', '.join(['Stock Price'] + graph1List)} over the past year", template="seaborn",
                        legend={"orientation": "h", "xanchor": "left"},
                        xaxis={
                            "rangeselector": {
                                "buttons": buttons
                            }}, width=width, height=height,
+                       font=dict(
+                           family="Open Sans, sans-serif",
+                           size=13,
+                           color="#333333",
+                       )
                        )
     graph1 = fig1.to_html(full_html=False)
 
-    if len(graphList2) == 0:
+    if not adxGraph:
         graph2 = None
-
     else:
-
         fig2 = go.Figure()
+        fig2.add_trace(go.Scatter(name="ADX", x=df["Date"], y=df["ADX"], mode="lines", line=dict(
+                width=2, color='#346602')))
 
-        for signalName in graphList2:
-            fig2.add_trace(go.Scatter(name=signalName, x=df["Date"], y=df[signalName]))
-
-        fig2.update_layout(title=f"{', '.join(graphList2)} over the past year", template="seaborn",
+        fig2.update_layout(title="ADX over the past year", template="seaborn",
                            legend={"orientation": "h", "xanchor": "left"},
                            xaxis={
                                "rangeselector": {
                                    "buttons": buttons
-                               }}, width=width, height=height,
+                               }}, width=width, height=height/1.5,
                            )
         graph2 = fig2.to_html(full_html=False)
 
-    return graph1, graph2
+    if not srsiGraph:
+        graph3 = None
+    else:
+        fig3 = go.Figure()
+        fig3.add_trace(go.Scatter(name="Stochastic RSI", x=df["Date"], y=df["Stochastic RSI"], mode="lines", line=dict(
+                width=2, color='#858689')))
+        fig3.update_layout(title="Stochastic RSI over the past year", template="seaborn",
+                           legend={"orientation": "h", "xanchor": "left"},
+                           xaxis={
+                               "rangeselector": {
+                                   "buttons": buttons
+                               }}, width=width, height=height/1.5,
+
+                           )
+        graph3 = fig3.to_html(full_html=False)
+
+
+    if not macdGraph:
+        graph4 = None
+    else:
+        fig4 = go.Figure()
+        fig4.add_trace(go.Scatter(name="MACD", x=df["Date"], y=df["MACD"], mode="lines", line=dict(width=2, color="#058093")))
+
+        fig4.update_layout(title="MACD over the past year", template="seaborn",
+                           legend={"orientation": "h", "xanchor": "left"},
+                           xaxis={
+                               "rangeselector": {
+                                   "buttons": buttons
+                               }}, width=width, height=height/1.5,
+                           )
+        graph4 = fig4.to_html(full_html=False)
+
+    return graph1, graph2, graph3, graph4
 
 
 def format_float(number):
