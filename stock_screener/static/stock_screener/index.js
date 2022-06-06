@@ -12,8 +12,11 @@ document.querySelectorAll(".watchlist-loader").forEach((item) => {
     item.addEventListener("click", () => show_loader("Getting your watchlist ready..."));
 });
 
-if (document.getElementById("searchButton")) {
-document.getElementById("searchButton").addEventListener("click", () => show_loader("Preparing the data..."))}
+if (document.querySelector(".search-form")) {
+document.querySelector(".search-form").addEventListener("submit", () => show_loader("Preparing the data..."))}
+
+if (document.querySelector(".backtest-form")) {
+document.querySelector(".backtest-form").addEventListener("submit", () => show_loader("Running the back test..."))}
 
 function show_loader(content) {
     document.querySelector(".loader-content").innerHTML = content;
