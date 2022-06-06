@@ -28,7 +28,7 @@
                         {%  if user.is_authenticated %}
 
                             <li class="nav-item">
-                                <a class="nav-link" href="{% url 'watchlist' %}">Watchlist</a>
+                                <a class="nav-link watchlist-loader" href="{% url 'watchlist' %}">Watchlist</a>
                             </li>
                         {% endif %}
 
@@ -59,7 +59,10 @@
             </div>
         </nav>
 
-        <div class="container">
+          {% include "stock_screener/child_templates/loader.html" %}
+
+
+        <div class="container main">
             {% if not ticker %}
 
                 <div class="welcome">

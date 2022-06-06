@@ -8,6 +8,15 @@
     }
 };*/
 
+document.querySelectorAll(".watchlist-loader").forEach((item) => {
+    item.addEventListener("click", () => show_loader());
+});
+
+function show_loader() {
+    document.querySelector(".loader").style.display = "block";
+    document.querySelector(".main").style.display= "none";
+}
+
 document.addEventListener("DOMContentLoaded", () => {
     // check on scroll if "back to top" button should be displayed
     window.addEventListener("scroll", () => top_scroll());

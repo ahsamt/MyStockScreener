@@ -664,7 +664,7 @@ def backtester(request):
 
                 for ticker in tickers:
                     # Preparing a dataframe for the period of time indicated by the user + 12 months for calculations
-                    # startDateInternal = get_date_within_df(existingStocks[ticker], startDateInternal)
+                    startDateInternal = get_date_within_df(existingStocks[ticker], startDateInternal)
                     stock = existingStocks[ticker].copy().loc[startDateInternal:, :]
 
                     # removing NaN values from the stock data

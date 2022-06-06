@@ -173,6 +173,12 @@ li > .nav-link {
   color: var(--blue-font-color);
   margin-top: 5px;
 }
+
+.loader {
+  display: none;
+  color: var(--blue-font-color);
+
+}
 .navbar {
   background-color: var(--blue-font-color);
 }
@@ -254,6 +260,7 @@ li > .nav-link {
   margin: auto;
   text-align: start;
 }
+
 
 .stock_link {
   background-color: white;

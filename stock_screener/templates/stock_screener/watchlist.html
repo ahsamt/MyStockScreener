@@ -26,7 +26,7 @@
                     {%  if user.is_authenticated %}
 
                         <li class="nav-item">
-                            <a class="nav-link active" href="{% url 'watchlist' %}">Watchlist</a>
+                            <a class="nav-link active watchlist-loader" href="{% url 'watchlist' %}">Watchlist</a>
                         </li>
 
                     {% endif %}
@@ -56,7 +56,8 @@
             </div>
         </div>
     </nav>
-
+    {% include "stock_screener/child_templates/loader.html" %}
+<div class="main">
     {% if empty_message %}
 
         <h4 class="mt-5 ms-5">{{ empty_message }}</h4>
@@ -81,6 +82,6 @@
         {% endfor %}
     {% endif %}
 
-
+</div>
 {% endblock %}
 
