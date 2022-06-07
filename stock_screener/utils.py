@@ -1,5 +1,9 @@
 from io import StringIO
 
+
+from dateutil.relativedelta import relativedelta
+from datetime import date, datetime
+
 import boto3
 import numpy as np
 import pandas as pd
@@ -307,14 +311,25 @@ def get_date_within_df(df, dt):
         col = df["Date"]
     else:
         col = df.index
+
+    # print(f"col min type is {type(col.min())} and the value is {col.min()}")
     allDates = list(col)
+    # print(f"dt is {type(dt)}, and dt value is {dt}")
     while dt not in allDates:
+
         if dt > col.min():
             dt = dt - pd.DateOffset(1)
         else:
             return None
     return dt
 
+
+def get_start_dates(num_months_back):
+    endDate = date.today()
+    displayStartDate = endDate + relativedelta(months=-num_months_back)
+    calculationsStartDate = pd.Timestamp(displayStartDate + relativedelta(months=-12))
+    displayStartDateDatetime = datetime.combine(displayStartDate, datetime.min.time())
+    return calculationsStartDate, displayStartDateDatetime
 
 def get_previous_sma(df, sma_col, no_of_days):
     """(pd DataFrame, string, timestamp, integer) => (float)

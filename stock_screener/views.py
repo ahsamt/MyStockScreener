@@ -18,7 +18,7 @@ from .models import User, SavedSearch, SignalConstructor
 from .utils import read_csv_from_S3, adjust_start, make_graph, get_price_change, upload_csv_to_S3, stock_tidy_up, \
     prepare_ticker_info_update, get_company_details_from_yf, get_previous_sma, \
     calculate_price_dif, format_float, backtest_signal, prepare_signal_table, calc_average_percentage, \
-    check_and_add_sma, constructorFields, compare_signals, get_date_within_df, get_saved_stocks_details
+    check_and_add_sma, constructorFields, compare_signals, get_date_within_df, get_saved_stocks_details, get_start_dates
 
 bucket = 'stockscreener-data'
 
@@ -50,10 +50,8 @@ def index(request):
                     return render(request, "stock_screener/index.html", context)
 
                 # Calculating the start date according to client requirements
-                endDate = date.today()
-                startDate = endDate + relativedelta(months=-numMonths)
-                startDateInternal = startDate + relativedelta(months=-12)
-                startDateDatetime = datetime.combine(startDate, datetime.min.time())
+
+                calcsStartDate, displayStartDateDt = get_start_dates(numMonths)
 
                 signalResults = []
 
@@ -114,8 +112,8 @@ def index(request):
 
                 # Getting the slice of the data starting from 18 months back
                 # (12 required for display + 12 extra for analysis)
-                startDateInternal = get_date_within_df(stock, startDateInternal)
-                stock = stock.loc[startDateInternal:, :]
+                calcsStartDate = get_date_within_df(stock, calcsStartDate)
+                stock = stock.loc[calcsStartDate:, :]
 
                 # removing NaN values from the stock data
                 stock.dropna(how="all", inplace=True)
@@ -170,7 +168,8 @@ def index(request):
                         smaChanges.append(calculate_price_dif(closingPrice, smaValue)[1] + "%")
 
                 # adjusting the start date according to client requirements and preparing the graph
-                stock = adjust_start(stock, startDateDatetime)
+                stock = adjust_start(stock, displayStartDateDt)
+                print(stock.tail())
                 graph1, graph2, graph3, graph4 = make_graph(stock, ticker, selectedSignals, height, width)
 
                 if signalSelected:
@@ -458,10 +457,7 @@ def saved_signals(request):
 @login_required
 def watchlist(request):
     numMonths = 12
-    endDate = date.today()
-    startDate = endDate + relativedelta(months=-numMonths)
-    startDateInternal = startDate + relativedelta(months=-12)
-    startDateDatetime = datetime.combine(startDate, datetime.min.time())
+    calcsStartDate, displayStartDateDt = get_start_dates(numMonths)
 
     if request.method == "GET":
         watchedTickers = []
@@ -473,10 +469,10 @@ def watchlist(request):
         # watchlist = sorted(watchlist, key=lambda p: p.date, reverse=True)
         allStocksFull = read_csv_from_S3(bucket, "Stocks")
         print(allStocksFull.head())
-        startDateInternal = get_date_within_df(allStocksFull, startDateInternal)
+        calcsStartDate = get_date_within_df(allStocksFull, calcsStartDate)
 
         # Getting the slice of the data starting from 18 months back (12 required for display + 12 extra for analysis)
-        allStocks = allStocksFull.loc[startDateInternal:, :]
+        allStocks = allStocksFull.loc[calcsStartDate:, :]
 
         # Check if the user has a signal saved in their profile
         try:
@@ -613,7 +609,7 @@ def backtester(request):
                 days_to_sell = backtestForm.cleaned_data["days_to_sell"]
                 buy_price_adjustment = backtestForm.cleaned_data["buy_price_adjustment"]
                 sell_price_adjustment = backtestForm.cleaned_data["sell_price_adjustment"]
-                num_years = backtestForm.cleaned_data["num_years"]
+                num_years = int(backtestForm.cleaned_data["num_years"])
                 fee_per_trade = backtestForm.cleaned_data["fee_per_trade"]
                 amount_to_invest = backtestForm.cleaned_data["amount_to_invest"]
 
@@ -627,10 +623,7 @@ def backtester(request):
                         tickers = suggestedTickers
 
                 # Calculating the start date according to client requirements
-                endDate = date.today()
-                startDate = endDate + relativedelta(years=-int(num_years))
-                startDateInternal = startDate + relativedelta(months=-12)
-                startDateDatetime = datetime.combine(startDate, datetime.min.time())
+                calcsStartDate, displayStartDateDt = get_start_dates(num_years * 12)
 
                 # getting stocks data from S3
                 existingStocks = read_csv_from_S3(bucket, "Stocks")
@@ -664,8 +657,8 @@ def backtester(request):
 
                 for ticker in tickers:
                     # Preparing a dataframe for the period of time indicated by the user + 12 months for calculations
-                    startDateInternal = get_date_within_df(existingStocks[ticker], startDateInternal)
-                    stock = existingStocks[ticker].copy().loc[startDateInternal:, :]
+                    calcsStartDate = get_date_within_df(existingStocks[ticker], calcsStartDate)
+                    stock = existingStocks[ticker].copy().loc[calcsStartDate:, :]
 
                     # removing NaN values from the stock data
                     stock.dropna(how="all", inplace=True)
@@ -676,7 +669,7 @@ def backtester(request):
                     # adding columns with calculations for the selected signals
                     stock, selectedSignals = make_calculations(stock, signalDict)
 
-                    stock = adjust_start(stock, startDateDatetime)
+                    stock = adjust_start(stock, displayStartDateDt)
 
                     # preparing backtesting information for the ticker
                     backtestResult, backtestDataFull = backtest_signal(stock,
@@ -700,7 +693,6 @@ def backtester(request):
 
                         numTransactions = len(backtestData.index)
                         averageNumbersOfTransactions.append(numTransactions)
-
 
                         # if there is more than 1 transaction in the backtest DataFrame
                         if numTransactions > 1:
@@ -777,6 +769,15 @@ def backtester(request):
                 else:
                     overallAverageTimeHoldingStock = None
 
+                # Preparing a table with general stats
+
+                genStats = {'Average time between transactions': overallAverageTimeBetweenTransactions,
+                            'Average time holding stock': overallAverageTimeHoldingStock,
+                            'Average number of transactions': sum(averageNumbersOfTransactions) // len(
+                                averageNumbersOfTransactions)}
+
+                genStatsTable = pd.DataFrame.from_dict(genStats, orient="index")
+
                 # Preparing a main joint table with the results of backtesting
                 backtesterTable = pd.DataFrame.from_dict(allResults, orient="index")
                 backtesterTable.reset_index(inplace=True)
@@ -829,6 +830,7 @@ def backtester(request):
                     "overallAverageTimeHoldingStock": overallAverageTimeHoldingStock,
                     "averageNumberOfTransactions": sum(averageNumbersOfTransactions) // len(
                         averageNumbersOfTransactions),
+                    "genStatsTable": genStatsTable,
                     "signalTable": signalTable,
                     "signalSelected": signalSelected,
                     "constructorAdded": constructorAdded,
@@ -842,10 +844,7 @@ def backtester(request):
 @login_required
 def display_graph(request, ticker_id, constructor_id):
     numMonths = 12
-    endDate = date.today()
-    startDate = endDate + relativedelta(months=-numMonths)
-    startDateInternal = startDate + relativedelta(months=-12)
-    startDateDatetime = datetime.combine(startDate, datetime.min.time())
+    calcsStartDate, displayStartDateDt = get_start_dates(numMonths)
 
     if request.method == "GET":
         try:
@@ -858,8 +857,8 @@ def display_graph(request, ticker_id, constructor_id):
         allStocksFull = read_csv_from_S3(bucket, "Stocks")
 
         # Getting the slice of the data starting from 18 months back (12 required for display + 12 extra for analysis)
-        startDateInternal = get_date_within_df(allStocksFull, startDateInternal)
-        allStocks = allStocksFull.loc[startDateInternal:, :]
+        calcsStartDate = get_date_within_df(allStocksFull, calcsStartDate)
+        allStocks = allStocksFull.loc[calcsStartDate:, :]
 
         signal = SignalConstructor.objects.get(user=request.user, id=constructor_id)
 
@@ -889,7 +888,7 @@ def display_graph(request, ticker_id, constructor_id):
         data, selectedSignals = make_calculations(data, signalDict)
 
         # Prepare a graph for each ticker
-        data = adjust_start(data, startDateDatetime)
+        data = adjust_start(data, displayStartDateDt)
         graphs = list(make_graph(data, ticker, selectedSignals, 600, 870))
 
     return render(request, "stock_screener/graph.html",
@@ -897,5 +896,4 @@ def display_graph(request, ticker_id, constructor_id):
 
 
 def about(request):
-
     return render(request, "stock_screener/about.html")
