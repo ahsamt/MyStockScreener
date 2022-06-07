@@ -761,22 +761,27 @@ def backtester(request):
                     overallAverageTimeBetweenTransactions = round(
                         sum(averageIndTimesBetweenTransactions) / len(averageIndTimesBetweenTransactions), 2)
                 else:
-                    overallAverageTimeBetweenTransactions = None
+                    overallAverageTimeBetweenTransactions = "No transactions identified"
 
                 if len(averageIndTimesHoldingStock) > 0:
                     overallAverageTimeHoldingStock = round(
                         sum(averageIndTimesHoldingStock) / len(averageIndTimesHoldingStock), 2)
                 else:
-                    overallAverageTimeHoldingStock = None
+                    overallAverageTimeHoldingStock = "No transactions identified"
 
                 # Preparing a table with general stats
 
-                genStats = {'Average time between transactions': overallAverageTimeBetweenTransactions,
-                            'Average time holding stock': overallAverageTimeHoldingStock,
+                genStats = {'Average time between transactions (days)': overallAverageTimeBetweenTransactions,
+                            'Average time holding stock (days)': overallAverageTimeHoldingStock,
                             'Average number of transactions': sum(averageNumbersOfTransactions) // len(
                                 averageNumbersOfTransactions)}
 
                 genStatsTable = pd.DataFrame.from_dict(genStats, orient="index")
+                genStatsTable.reset_index(inplace=True)
+
+                htmlGenStatsTable = genStatsTable.to_html(col_space=[200, 200], bold_rows=True,
+                                                         classes=["table", "gen_stats_table"],
+                                                         escape=False, index=False, header = False)
 
                 # Preparing a main joint table with the results of backtesting
                 backtesterTable = pd.DataFrame.from_dict(allResults, orient="index")
@@ -826,11 +831,11 @@ def backtester(request):
                     "overallResult": overallResult,
                     "htmlJointTable": htmlJointTable,
                     "allDetails": allDetails,
-                    "overallAverageTimeBetweenTransactions": overallAverageTimeBetweenTransactions,
-                    "overallAverageTimeHoldingStock": overallAverageTimeHoldingStock,
-                    "averageNumberOfTransactions": sum(averageNumbersOfTransactions) // len(
-                        averageNumbersOfTransactions),
-                    "genStatsTable": genStatsTable,
+                    #"overallAverageTimeBetweenTransactions": overallAverageTimeBetweenTransactions,
+                    #"overallAverageTimeHoldingStock": overallAverageTimeHoldingStock,
+                    #"averageNumberOfTransactions": sum(averageNumbersOfTransactions) // len(
+                    #    averageNumbersOfTransactions),
+                    "htmlGenStatsTable": htmlGenStatsTable,
                     "signalTable": signalTable,
                     "signalSelected": signalSelected,
                     "constructorAdded": constructorAdded,

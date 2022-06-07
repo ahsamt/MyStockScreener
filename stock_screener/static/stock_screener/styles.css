@@ -369,7 +369,7 @@ li > .nav-link {
 }
 
 
-#outcome_card {
+#outcome_card, #gen_stats_card {
   display: block;
   margin: 0 auto;
 
@@ -436,7 +436,10 @@ li > .nav-link {
 
 }
 
-
+#gen_stats_card td {
+  color: var(--green-font-color);
+  vertical-align: middle;
+}
 
 
 @media (max-width: 991px) {
