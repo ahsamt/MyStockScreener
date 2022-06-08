@@ -1,21 +1,12 @@
 <div class="ind_result card mt-4 mb-4" id="{{ item.ticker }}_card">
         <h4 class="card-title mt-3 ms-3 red" >{{ item.ticker }}</h4>
-            {% if item.result %}
-                <h5 class="ind-backtest-info ms-3"><span class = "grey">Backtesting outcome: </span><strong>{{ item.result }}%</strong></h5>
-            {%  endif %}
-            {% if item.finalAmount %}
-                <h5 class="ind-backtest-info ms-3"><span class = "grey">Final amount (transaction fees deducted): </span><strong>{{ item.finalAmount }} USD</strong></h5>
-            {%  endif %}
-            {% if item.numTransactions %}
-                <h5 class="ind-backtest-info ms-3"><span class = "grey">Number of transactions: </span><strong>{{ item.numTransactions }}</strong></h5>
-            {%  endif %}
-            {% if item.averageTimeBetweenStockTransactions %}
-                <h5 class="ind-backtest-info ms-3"><span class = "grey">Average time between transactions: </span><strong>{{ item.averageTimeBetweenStockTransactions }} days</strong></h5>
-            {% endif %}
-            {% if item.averageTimeHoldingStock %}
-                <h5 class="ind-backtest-info ms-3"><span class = "grey">Average time holding stock: </span><strong>{{ item.averageTimeHoldingStock }} days</strong></h5>
-            {% endif %}
 
+                <h5 class="ind-backtest-info ms-3"><span class = "grey">Backtesting outcome: </span><strong>{{ item.result }}%</strong></h5>
+
+
+            <div class="card-body">
+                {{ item.htmlIndStatsTable | safe }}
+            </div>
 
             <div class="card-body">
                 {{ item.indTable | safe }}

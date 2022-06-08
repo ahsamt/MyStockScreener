@@ -29,30 +29,27 @@
 
                 {% if watchlisted %}
 
-                    <div class="card-link mb-3">
-                        <a
-                                href="/"
+                        <button
                                 class="watchlist"
                                 data-ticker_name="{{ ticker }}"
                                 data-ticker_id="{{ tickerID }}"
                                 data-ticker_full="{{ tickerName }}"
                         >
                             Remove {{ ticker }} from watchlist
-                        </a>
-                    </div>
+                        </button>
+
 
                 {% else %}
-                    <div class="card-link mb-3">
-                        <a
-                                href="/"
+
+                        <button
                                 class="watchlist"
                                 data-ticker_name="{{ ticker }}"
                                 data-ticker_id="{{ tickerID }}"
                                 data-ticker_full="{{ tickerName }}"
                         >
                             Add {{ ticker }} to watchlist
-                        </a>
-                    </div>
+                        </button>
+
 
                 {% endif %} {% else %}
 
@@ -90,7 +87,7 @@
                     <div id="backtesting-table">{{ htmlBacktestTable | safe }}</div>
                  <p><small>
                     Please use the
-    <a href="{% url 'backtester' %}">Backtester</a> to test this signal on a wider range of stocks using additional parameters</small></p>
+    <a href="{% url 'backtester' %}" class="bright-red">Backtester</a> to test this signal on a wider range of stocks using additional parameters</small></p>
             </div></div>
 
         {% else %}
@@ -103,7 +100,7 @@
                 </div>
             <p><small>
                     Please use the
-    <a href="{% url 'backtester' %}">Backtester</a> to test this signal on a wider range of stocks using additional parameters.</small></p>
+    <a href="{% url 'backtester' %}" class="bright-red">Backtester</a> to test this signal on a wider range of stocks using additional parameters.</small></p>
             </div>
         {% endif %}
 

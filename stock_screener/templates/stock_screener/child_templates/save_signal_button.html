@@ -2,11 +2,11 @@
 
     {% if constructorAdded %}
 
-        <div class="existing_signal_message">Signal already applied to watchlist</div>
+        <div class="existing_signal_message">Signal already saved</div>
 
     {% else %}
 
-        <a  href="#" class="add-signal"
+        <button class="add-signal"
             data-ma="{{ newSignal.ma }}"
             data-maS="{{ newSignal.maS }}"
             data-maL="{{ newSignal.maL }}"
@@ -32,13 +32,13 @@
 
         >
             {% if not savedConstructor %}
-                Save signal settings for your watchlist
+                Save signal settings
             {% else %}
-                Replace existing watchlist signal
+                Replace saved signal
             {%  endif %}
-        </a>
+        </button>
 
-        <div class="signal_saved_message">Signal applied to watchlist</div>
+        <div class="signal_saved_message">Signal saved</div>
 
     {%  endif %}
 
