@@ -62,7 +62,7 @@
 
 
         {% include "stock_screener/child_templates/loader.html" %}
-        <div class="container main">
+        <div class="container main mb-4">
             {% if not signalTable %}
 
                 <div class="welcome">
@@ -227,7 +227,7 @@
                     {% endif %}
 
 
-                    <div class="stock_info card mb-4 col-lg-6" id="gen_stats_card" >
+                    <div class="stock_info card mb-4 col-lg-5" id="gen_stats_card" >
                         <div class="card-body">
                             <div class="col d-flex justify-content-center">
 
@@ -238,7 +238,7 @@
 
 
 
-                    <div class="stock_info card col-lg-6" id="outcome_card">
+                    <div class="stock_info card col-lg-5" id="outcome_card">
                         <div class="card-body">
                             <div class="col d-flex justify-content-center">
 
@@ -257,5 +257,6 @@
 
             {% endif %}
         </div >
+
     {% endblock %}
 </div>

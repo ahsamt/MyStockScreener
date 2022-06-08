@@ -788,8 +788,7 @@ def backtester(request):
                 genStatsTable = pd.DataFrame.from_dict(genStats, orient="index")
                 genStatsTable.reset_index(inplace=True)
 
-                htmlGenStatsTable = genStatsTable.to_html(col_space=["300px", "250px"], bold_rows=True,
-                                                         classes=["table", "gen_stats_table"],
+                htmlGenStatsTable = genStatsTable.to_html(col_space=[300, 150], classes=["table", "gen_stats_table"],
                                                          escape=False, index=False, header = False)
 
                 # Preparing a main joint table with the results of backtesting
@@ -805,7 +804,7 @@ def backtester(request):
                     backtesterTable.loc[i, "Details"] = \
                         f"<button class = 'ind_outcome_button' data-ticker={nextTicker}>See details</button>"
 
-                htmlJointTable = backtesterTable.to_html(col_space=[150, 200, 150], bold_rows=True,
+                htmlJointTable = backtesterTable.to_html(col_space=[150, 150, 150], bold_rows=True,
                                                          classes=["table", "backtest_table"],
                                                          escape=False, index=False)
 
