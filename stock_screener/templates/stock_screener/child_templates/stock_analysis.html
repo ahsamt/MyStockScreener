@@ -29,26 +29,26 @@
 
                 {% if watchlisted %}
 
-                        <button
-                                class="watchlist"
-                                data-ticker_name="{{ ticker }}"
-                                data-ticker_id="{{ tickerID }}"
-                                data-ticker_full="{{ tickerName }}"
-                        >
-                            Remove {{ ticker }} from watchlist
-                        </button>
+                    <button
+                            class="watchlist"
+                            data-ticker_name="{{ ticker }}"
+                            data-ticker_id="{{ tickerID }}"
+                            data-ticker_full="{{ tickerName }}"
+                    >
+                        Remove {{ ticker }} from watchlist
+                    </button>
 
 
                 {% else %}
 
-                        <button
-                                class="watchlist"
-                                data-ticker_name="{{ ticker }}"
-                                data-ticker_id="{{ tickerID }}"
-                                data-ticker_full="{{ tickerName }}"
-                        >
-                            Add {{ ticker }} to watchlist
-                        </button>
+                    <button
+                            class="watchlist"
+                            data-ticker_name="{{ ticker }}"
+                            data-ticker_id="{{ tickerID }}"
+                            data-ticker_full="{{ tickerName }}"
+                    >
+                        Add {{ ticker }} to watchlist
+                    </button>
 
 
                 {% endif %} {% else %}
@@ -62,9 +62,11 @@
 
             {% endif %}
 
-            {% if user.is_authenticated %}
 
-                {% include "stock_screener/child_templates/save_signal_button.html" with signalSelected=signalSelected constructorAdded=constructorAdded newSignal=newSignal %}
+            {% if user.is_authenticated %}
+                <div>
+                    {% include "stock_screener/child_templates/save_signal_button.html" with signalSelected=signalSelected constructorAdded=constructorAdded newSignal=newSignal %}
+                </div>
             {% endif %}
         </div>
     </div>
@@ -74,21 +76,21 @@
             <div class="stock_info card mb-3">
                 <div class="card-body">
                     <h4 class="card-title bold"><span class="backtest_search_title">Signal Back Test ({{ ticker }}, 12 Months)</span>
-                        <div class="mt-2">
-                            {%  if backtestResult < 0 %}
-                                <span class="bright-red rec">{{ backtestResult }}%</span>
-                            {% else %}
-                                <span class="green rec">+{{ backtestResult }}%</span>
-                            {% endif %}
-                        </div>
+
+                        {%  if backtestResult < 0 %}
+                            <div class="bright-red rec mt-2">{{ backtestResult }}%</div>
+                        {% else %}
+                            <div class="green rec mt-2">">+{{ backtestResult }}%</div>
+                        {% endif %}
+
                     </h4>
 
 
                     <div id="backtesting-table">{{ htmlBacktestTable | safe }}</div>
-                 <p><small>
-                    Please use the
-    <a href="{% url 'backtester' %}" class="bright-red">Backtester</a> to test this signal on a wider range of stocks using additional parameters</small></p>
-            </div></div>
+                    <p><small>
+                        Please use the
+                        <a href="{% url 'backtester' %}" class="bright-red">Backtester</a> to test this signal on a wider range of stocks using additional parameters</small></p>
+                </div></div>
 
         {% else %}
             <div class="stock_info card mb-4">
@@ -98,9 +100,9 @@
                         Insufficient number of buy/sell recommendations have been generated for this ticker
                     </h5>
                 </div>
-            <p><small>
+                <p><small>
                     Please use the
-    <a href="{% url 'backtester' %}" class="bright-red">Backtester</a> to test this signal on a wider range of stocks using additional parameters.</small></p>
+                    <a href="{% url 'backtester' %}" class="bright-red">Backtester</a> to test this signal on a wider range of stocks using additional parameters.</small></p>
             </div>
         {% endif %}
 
