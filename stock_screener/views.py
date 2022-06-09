@@ -719,7 +719,7 @@ def backtester(request):
                             totalAmountRemaining = amount_to_invest * (1 + backtestResult / 100)
                             finalAmount = format_float(totalAmountRemaining - amountSpentOnFees)
 
-                            result = format_float(backtestResult)
+                            result = round(backtestResult, 2)
 
                         # if only one ("buy") transaction has taken place
                         else:

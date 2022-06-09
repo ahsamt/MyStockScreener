@@ -1,7 +1,13 @@
 <div class="ind_result card mt-4 mb-4" id="{{ item.ticker }}_card">
         <h4 class="card-title mt-3 ms-3 red" >{{ item.ticker }}</h4>
 
-                <h5 class="ind-backtest-info ms-3"><span class = "grey">Backtesting outcome: </span><strong>{{ item.result }}%</strong></h5>
+                <h5 class="ind-backtest-info ms-3"><span class = "grey">Backtesting outcome: </span><strong>
+
+                     {% if item.result > 0 %}
+                            <span id="positive_outcome">+{{ item.result }}%</span>
+                        {% else %}
+                            <span id="negative_outcome">{{ item.result }}%</span>
+                        {% endif %}</strong></h5>
 
 
             <div class="card-body">
