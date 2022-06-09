@@ -154,7 +154,7 @@ def add_days_since_change(df, col_name):
     return df
 
 
-def make_graph(df, ticker, signal_names, height, width):
+def make_graph(df, ticker, signal_names, height, width, srsi_overbought_limit=None, srsi_oversold_limit=None, adx_limit=None):
     """(pd DataFrame, string, list, integer, integer) => string
     Takes in:
         - Pandas DataFrame with stock prices and additional calculations
@@ -169,6 +169,7 @@ def make_graph(df, ticker, signal_names, height, width):
                {"count": 6, "label": "6M", "step": "month", "stepmode": "backward"},
                {"count": 1, "label": "1Y", "step": "year", "stepmode": "backward"}, ]
 
+    limitLine = dict(color='#CA3435', width=2)
     graph1List = []
     srsiGraph = False
     adxGraph = False
@@ -215,6 +216,9 @@ def make_graph(df, ticker, signal_names, height, width):
         fig2 = go.Figure()
         fig2.add_trace(go.Scatter(name="ADX", x=df["Date"], y=df["ADX"], mode="lines", line=dict(
                 width=2, color='#346602')))
+        fig2.add_shape(type='line',
+                        x0=df["Date"].min(), y0=adx_limit, x1=df["Date"].max(), y1=adx_limit,
+                        line=limitLine, xref='x', yref='y')
 
         fig2.update_layout(title="ADX over the past year", template="seaborn",
                            legend={"orientation": "h", "xanchor": "left"},
@@ -230,7 +234,14 @@ def make_graph(df, ticker, signal_names, height, width):
     else:
         fig3 = go.Figure()
         fig3.add_trace(go.Scatter(name="Stochastic RSI", x=df["Date"], y=df["Stochastic RSI"], mode="lines", line=dict(
-                width=2, color='#858689')))
+                width=2, color='#188399')))
+
+        fig3.add_shape(type='line',
+                        x0=df["Date"].min(), y0=srsi_overbought_limit, x1=df["Date"].max(), y1=srsi_overbought_limit,
+                        line=limitLine, xref='x', yref='y')
+        fig3.add_shape(type='line',
+                        x0=df["Date"].min(), y0=srsi_oversold_limit, x1=df["Date"].max(), y1=srsi_oversold_limit,
+                        line=limitLine, xref='x', yref='y')
         fig3.update_layout(title="Stochastic RSI over the past year", template="seaborn",
                            legend={"orientation": "h", "xanchor": "left"},
                            xaxis={
@@ -240,7 +251,6 @@ def make_graph(df, ticker, signal_names, height, width):
 
                            )
         graph3 = fig3.to_html(full_html=False)
-
 
     if not macdGraph:
         graph4 = None
@@ -330,6 +340,7 @@ def get_start_dates(num_months_back):
     calculationsStartDate = pd.Timestamp(displayStartDate + relativedelta(months=-12))
     displayStartDateDatetime = datetime.combine(displayStartDate, datetime.min.time())
     return calculationsStartDate, displayStartDateDatetime
+
 
 def get_previous_sma(df, sma_col, no_of_days):
     """(pd DataFrame, string, timestamp, integer) => (float)

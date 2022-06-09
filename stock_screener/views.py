@@ -1,5 +1,4 @@
 import json
-from datetime import date, datetime
 
 import pandas as pd
 import yfinance as yf
@@ -169,8 +168,10 @@ def index(request):
 
                 # adjusting the start date according to client requirements and preparing the graph
                 stock = adjust_start(stock, displayStartDateDt)
-                print(stock.tail())
-                graph1, graph2, graph3, graph4 = make_graph(stock, ticker, selectedSignals, height, width)
+                graph1, graph2, graph3, graph4 = make_graph(stock, ticker, selectedSignals, height, width,
+                                                            srsi_overbought_limit=signalDict["srsiOB"],
+                                                            srsi_oversold_limit=signalDict["srsiOS"],
+                                                            adx_limit=signalDict["adxL"])
 
                 if signalSelected:
                     # preparing backtesting information to be shown on search page
@@ -196,8 +197,8 @@ def index(request):
 
                 for signal in selectedSignals:
                     signalResults.append(format_float(stock.loc[stock.index.max()][signal]))
-                data = [recHtml, daysSinceChange, format_float(closingPrice), priceChange[0]] \
-                       + smaChanges + signalResults
+                data = [recHtml, daysSinceChange, format_float(closingPrice), priceChange[0]] + \
+                       smaChanges + signalResults
                 resultTable = pd.DataFrame([data],
                                            columns=['Analysis Outcome',
                                                     'Days Since Trend Change',
@@ -789,7 +790,7 @@ def backtester(request):
                 genStatsTable.reset_index(inplace=True)
 
                 htmlGenStatsTable = genStatsTable.to_html(col_space=[300, 150], classes=["table", "gen_stats_table"],
-                                                         escape=False, index=False, header = False)
+                                                          escape=False, index=False, header=False)
 
                 # Preparing a main joint table with the results of backtesting
                 backtesterTable = pd.DataFrame.from_dict(allResults, orient="index")
@@ -839,9 +840,9 @@ def backtester(request):
                     "overallResult": overallResult,
                     "htmlJointTable": htmlJointTable,
                     "allDetails": allDetails,
-                    #"overallAverageTimeBetweenTransactions": overallAverageTimeBetweenTransactions,
-                    #"overallAverageTimeHoldingStock": overallAverageTimeHoldingStock,
-                    #"averageNumberOfTransactions": sum(averageNumbersOfTransactions) // len(
+                    # "overallAverageTimeBetweenTransactions": overallAverageTimeBetweenTransactions,
+                    # "overallAverageTimeHoldingStock": overallAverageTimeHoldingStock,
+                    # "averageNumberOfTransactions": sum(averageNumbersOfTransactions) // len(
                     #    averageNumbersOfTransactions),
                     "htmlGenStatsTable": htmlGenStatsTable,
                     "signalTable": signalTable,
@@ -902,7 +903,9 @@ def display_graph(request, ticker_id, constructor_id):
 
         # Prepare a graph for each ticker
         data = adjust_start(data, displayStartDateDt)
-        graphs = list(make_graph(data, ticker, selectedSignals, 600, 870))
+        graphs = list(make_graph(data, ticker, selectedSignals, 600, 870, srsi_overbought_limit=signalDict["srsiOB"],
+                                                            srsi_oversold_limit=signalDict["srsiOS"],
+                                                            adx_limit=signalDict["adxL"]))
 
     return render(request, "stock_screener/graph.html",
                   {"ticker": ticker, 'graphs': graphs})

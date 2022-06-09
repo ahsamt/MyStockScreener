@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block body %}
-    {#    <div id="loader">Graph loading...</div>#}
+
     <div class="graph_page">
         {% if error_message %}
             <h4 class="mt-5 ms-5">{{ error_message }}</h4>
@@ -17,11 +17,11 @@
 
                 {% for graph in graphs %}
 
-                {% if graph %}
-                    <div class="col d-flex align-items-center justify-content-center mb-4">
-                        {{ graph | safe }}
-                    </div>
-                {% endif %}
+                    {% if graph %}
+                        <div class="col d-flex align-items-center justify-content-center mb-4">
+                            {{ graph | safe }}
+                        </div>
+                    {% endif %}
                 {% endfor %}
             </div>
         {% endif %}
