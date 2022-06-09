@@ -68,10 +68,10 @@ class BacktestForm(SignalForm):
     days_to_sell = forms.IntegerField(label='Days to Complete a Sell Order', min_value=0, max_value=10, initial="0",
                                       widget=forms.NumberInput(attrs={'style': 'width:9ch'}))
 
-    buy_price_adjustment = forms.IntegerField(label='Buy Price Adjustment, bps', min_value=0, max_value=10,
+    buy_price_adjustment = forms.IntegerField(label='Buy Price Adjustment, bps', min_value=0, max_value=100,
                                               initial="0",
                                               widget=forms.NumberInput(attrs={'style': 'width:9ch'}))
-    sell_price_adjustment = forms.IntegerField(label='Sell Price Adjustment, bps', min_value=0, max_value=10,
+    sell_price_adjustment = forms.IntegerField(label='Sell Price Adjustment, bps', min_value=0, max_value=100,
                                                initial="0",
                                                widget=forms.NumberInput(attrs={'style': 'width:9ch'}))
     amount_to_invest = forms.IntegerField(label='Amount to Invest, USD', initial=1000,
