@@ -196,6 +196,16 @@ def make_graph(df, ticker, signal_names, height, width, srsi_overbought_limit=No
             fig1.add_trace(go.Scatter(name=signalName, x=df["Date"], y=df[signalName], mode="lines", line=dict(
                 width=3)))
 
+    if "Buy" in df.columns:
+        fig1.add_trace(go.Scatter(name="Buy signals", x=df["Date"], y=df["Buy"], mode="markers", marker_symbol="x", marker=dict(
+                color='#b2fc05',
+                size=6)))
+    if "Sell" in df.columns:
+        fig1.add_trace(go.Scatter(name="Sell signals", x=df["Date"], y=df["Sell"],  mode="markers", marker_symbol="x", marker=dict(
+                color='#CC0200',
+                size=6)))
+
+
     fig1.update_layout(title=f"{', '.join(['Stock Price'] + graph1List)} over the past year", template="seaborn",
                        legend={"orientation": "h", "xanchor": "left"},
                        xaxis={
@@ -419,7 +429,6 @@ def backtest_signal(df, format_outcome=True, days_to_buy=0, days_to_sell=0, buy_
         if format_outcome:
             outcome = str(round(outcome, 2)) + "%"
 
-        print(backTestClean.tail())
 
         backTestClean["Profit/Loss"] = backTestClean["Profit/Loss"].apply(lambda x: (format_float(x)) + " %")
         backTestClean["Close"] = backTestClean["Close"].apply(lambda x: format_float(x))

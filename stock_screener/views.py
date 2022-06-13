@@ -469,7 +469,6 @@ def watchlist(request):
 
         # watchlist = sorted(watchlist, key=lambda p: p.date, reverse=True)
         allStocksFull = read_csv_from_S3(bucket, "Stocks")
-        print(allStocksFull.head())
         calcsStartDate = get_date_within_df(allStocksFull, calcsStartDate)
 
         # Getting the slice of the data starting from 18 months back (12 required for display + 12 extra for analysis)
@@ -506,6 +505,8 @@ def watchlist(request):
 
             # Get an updated dataframe + names of the signal columns added
             data, selectedSignals = make_calculations(data, signalDict)
+            print(ticker)
+            print(data.tail())
 
             # Get an overall buy/sell/wait recommendation based on the signals selected
             rec = data.loc[data.index[-1], "Final Rec"]

@@ -102,7 +102,7 @@ def add_macd(df, window_slow, window_fast, smoothing_period):
         Takes in :
             - stock data,
             - window size - slow,
-            - swindow size - fast,
+            - window size - fast,
             - smoothing period
         Returns a DataFrame with the Moving Average Convergence Divergence
          calculations and recommendations added"""
@@ -122,8 +122,6 @@ def add_final_rec_column(df, active_signals):
                'macd': 'MACD Rec',
                'psar': 'Parabolic SAR Rec',
                'srsi': 'Stochastic RSI Rec'}
-
-    print(active_signals)
 
     signal_num = len(active_signals)
 
@@ -155,7 +153,8 @@ def add_final_rec_column(df, active_signals):
             df["Final Rec"] = np.where(mask, df[recDict[signals_other_than_adx[0]]], "Wait")
 
         else:
-            mask = (df[recDict[active_signals[0]]] == df[recDict[active_signals[1]]]) & (df[recDict[active_signals[1]]] == df[recDict[active_signals[2]]])
+            mask = (df[recDict[active_signals[0]]] == df[recDict[active_signals[1]]]) & (
+                        df[recDict[active_signals[1]]] == df[recDict[active_signals[2]]])
             df["Final Rec"] = np.where(mask, df[recDict[active_signals[0]]], "Wait")
 
 
@@ -194,6 +193,17 @@ def add_final_rec_column(df, active_signals):
             df["Final Rec"] = np.where(mask, df[recDict[active_signals[0]]], "Wait")
     return df
 
+
+def add_buy_sell_cols(df):
+    df["Buy"] = np.NaN
+    df["Sell"] = np.NaN
+    mask1 = (df["Final Rec"] == "Buy") & (df["Change_Flag"] == True)
+    df.loc[mask1, "Buy"] = df.loc[mask1, "Close"]
+    mask2 = (df["Final Rec"] == "Sell") & (df["Change_Flag"] == True)
+    df.loc[mask2, "Sell"] = df.loc[mask2, "Close"]
+    return df
+
+
 def make_calculations(stock_df, signal_dict):
     signals_available = ['adx', 'ma', 'macd', 'psar', 'srsi']
     selectedSignals = []
@@ -227,5 +237,7 @@ def make_calculations(stock_df, signal_dict):
     stock_df = add_final_rec_column(stock_df, active_signals)
 
     stock_df = add_days_since_change(stock_df, "Final Rec")
+
+    stock_df = add_buy_sell_cols(stock_df)
 
     return stock_df, selectedSignals
