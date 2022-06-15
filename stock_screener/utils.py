@@ -197,10 +197,10 @@ def make_graph(df, ticker, signal_names, height, width, srsi_overbought_limit=No
 
     if "Buy" in df.columns:
         fig1.add_trace(go.Scatter(name="Buy signals", x=df["Date"], y=df["Buy"], mode="markers", marker_symbol="x", marker=dict(
-                color='#b2fc05', size=6)))
+                color='#1601FF', size=8)))
     if "Sell" in df.columns:
         fig1.add_trace(go.Scatter(name="Sell signals", x=df["Date"], y=df["Sell"],  mode="markers", marker_symbol="x", marker=dict(
-                color='#CC0200', size=6)))
+                color='#CC0200', size=8)))
 
 
     fig1.update_layout(title=f"{', '.join(['Stock Price'] + graph1List)} over the past year", template="seaborn",
