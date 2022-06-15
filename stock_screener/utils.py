@@ -168,7 +168,7 @@ def make_graph(df, ticker, signal_names, height, width, srsi_overbought_limit=No
                {"count": 3, "label": "3M", "step": "month", "stepmode": "backward"},
                {"count": 6, "label": "6M", "step": "month", "stepmode": "backward"},
                {"count": 1, "label": "1Y", "step": "year", "stepmode": "backward"}, ]
-
+    print(df.tail())
     limitLine = dict(color='#CA3435', width=2)
     graph1List = []
     srsiGraph = False
@@ -190,20 +190,17 @@ def make_graph(df, ticker, signal_names, height, width, srsi_overbought_limit=No
         if signalName == "Parabolic SAR":
 
             fig1.add_trace(go.Scatter(name=signalName, x=df["Date"], y=df[signalName], mode="markers", marker=dict(
-                color='#99103d',
-                size=4)))
+              color='#99103d', size=4)))
         else:
             fig1.add_trace(go.Scatter(name=signalName, x=df["Date"], y=df[signalName], mode="lines", line=dict(
-                width=3)))
+             width=3)))
 
     if "Buy" in df.columns:
         fig1.add_trace(go.Scatter(name="Buy signals", x=df["Date"], y=df["Buy"], mode="markers", marker_symbol="x", marker=dict(
-                color='#b2fc05',
-                size=6)))
+                color='#b2fc05', size=6)))
     if "Sell" in df.columns:
         fig1.add_trace(go.Scatter(name="Sell signals", x=df["Date"], y=df["Sell"],  mode="markers", marker_symbol="x", marker=dict(
-                color='#CC0200',
-                size=6)))
+                color='#CC0200', size=6)))
 
 
     fig1.update_layout(title=f"{', '.join(['Stock Price'] + graph1List)} over the past year", template="seaborn",
@@ -216,7 +213,7 @@ def make_graph(df, ticker, signal_names, height, width, srsi_overbought_limit=No
                            family="Open Sans, sans-serif",
                            size=13,
                            color="#333333",
-                       )
+                       ), xaxis_range=[df["Date"].min(), df["Date"].max()]
                        )
     graph1 = fig1.to_html(full_html=False)
 
@@ -296,29 +293,29 @@ def calculate_price_dif(new_price, old_price):
     perc_dif = format_float(price_dif / old_price * 100)
     return price_dif, perc_dif
 
-
-def get_price_change(df):
-    """(pd DataFrame) => (float, tuple)
-    Takes in Pandas DataFrame with stock prices for a specific instrument,
-    returns:
-    1 - a float for the last closing price
-    2 - a tuple:
-        - a string showing the changes in price since previous trading day,
-        - a colour name (red or green) to use in HTML template to display the change.
-    """
-
-    closingPrice = df["Close"].iloc[-1]
-    previousPrice = df["Close"].iloc[-2]
-    priceDif, percDif = calculate_price_dif(closingPrice, previousPrice)
-    if priceDif > 0:
-        sign = "+"
-        color = "green"
-    else:
-        sign = ""
-        color = "red"
-    priceDif = format_float(priceDif)
-    change = (f"{sign}{percDif}%", color)
-    return closingPrice, change
+#
+# def get_price_change(df):
+#     """(pd DataFrame) => (float, tuple)
+#     Takes in Pandas DataFrame with stock prices for a specific instrument,
+#     returns:
+#     1 - a float for the last closing price
+#     2 - a tuple:
+#         - a string showing the changes in price since previous trading day,
+#         - a colour name (red or green) to use in HTML template to display the change.
+#     """
+#
+#     closingPrice = df["Close"].iloc[-1]
+#     previousPrice = df["Close"].iloc[-2]
+#     priceDif, percDif = calculate_price_dif(closingPrice, previousPrice)
+#     if priceDif > 0:
+#         sign = "+"
+#         color = "green"
+#     else:
+#         sign = ""
+#         color = "red"
+#     priceDif = format_float(priceDif)
+#     change = (f"{sign}{percDif}%", color)
+#     return closingPrice, change
 
 
 def get_date_within_df(df, dt):
@@ -346,6 +343,7 @@ def get_date_within_df(df, dt):
 
 def get_start_dates(num_months_back):
     endDate = date.today()
+    print(f"today is {endDate}")
     displayStartDate = endDate + relativedelta(months=-num_months_back)
     calculationsStartDate = pd.Timestamp(displayStartDate + relativedelta(months=-12))
     displayStartDateDatetime = datetime.combine(displayStartDate, datetime.min.time())

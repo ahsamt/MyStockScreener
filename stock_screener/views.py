@@ -14,12 +14,14 @@ from django.views.decorators.csrf import csrf_exempt
 from .calculations import make_calculations
 from .forms import StockForm, BacktestForm, suggestedTickers
 from .models import User, SavedSearch, SignalConstructor
-from .utils import read_csv_from_S3, adjust_start, make_graph, get_price_change, upload_csv_to_S3, stock_tidy_up, \
+from .utils import read_csv_from_S3, adjust_start, make_graph, upload_csv_to_S3, stock_tidy_up, \
     prepare_ticker_info_update, get_company_details_from_yf, get_previous_sma, \
     calculate_price_dif, format_float, backtest_signal, prepare_signal_table, calc_average_percentage, \
     check_and_add_sma, constructorFields, compare_signals, get_date_within_df, get_saved_stocks_details, get_start_dates
 
 bucket = 'stockscreener-data'
+recColours = {'Wait': 'grey', 'Buy': 'green', 'Sell': 'bright-red'}
+recColoursWatchlist = {'Wait': 'grey', 'Buy': 'green-circle', 'Sell': 'bright-red-circle'}
 
 
 def index(request):
@@ -37,8 +39,6 @@ def index(request):
 
                 for k in constructorFields:
                     signalDict[k] = stockForm.cleaned_data[k]
-
-                print(f"Signal dict data :{signalDict}")
 
                 if signalDict['adx'] and not (
                         signalDict['ma'] or signalDict['psar'] or signalDict['srsi'] or signalDict['macd']):
@@ -100,7 +100,7 @@ def index(request):
                         # tickerList = set(updatedStocks.columns.get_level_values(0).tolist())
 
                 else:
-                    print("reading data and preparing graph")
+                    print("reading S3 data and preparing graph")
                     stock = existingStocks[ticker].copy()
 
                 # getting full company name for the selected ticker
@@ -143,13 +143,15 @@ def index(request):
                     stock, selectedSignals = make_calculations(stock, signalDict)
 
                     # getting info for the result table
-                    rec = stock.loc[stock.index[-1], "Final Rec"]
-                    recColours = {'Wait': 'grey', 'Buy': 'green', 'Sell': 'bright-red'}
+                    rec = stock["Final Rec"].iloc[-1]
                     recHtml = f"<span class={recColours[rec]} rec>{rec}</span>"
-                    daysSinceChange = stock.loc[stock.index[-1], "Days_Since_Change"]
+                    daysSinceChange = stock["Days_Since_Change"].iloc[-1]
 
                 # getting last closing price for the ticker + price change information to display in the results window
-                closingPrice, priceChange = get_price_change(stock)
+
+                closingPrice = stock["Close"].iloc[-1]
+                previousPrice = stock["Close"].iloc[-2]
+                _, priceChange = calculate_price_dif(closingPrice, previousPrice)
 
                 # Check if an SMA column has already been added, and add one if it has not been
                 stock, smaCol = check_and_add_sma(stock)
@@ -197,13 +199,13 @@ def index(request):
 
                 for signal in selectedSignals:
                     signalResults.append(format_float(stock.loc[stock.index.max()][signal]))
-                data = [recHtml, daysSinceChange, format_float(closingPrice), priceChange[0]] + \
+                data = [recHtml, daysSinceChange, format_float(closingPrice), priceChange+"%"] + \
                        smaChanges + signalResults
                 resultTable = pd.DataFrame([data],
                                            columns=['Analysis Outcome',
-                                                    'Days Since Trend Change',
+                                                    'Trading Days Since Trend Change',
                                                     'Last Closing Price, USD',
-                                                    'Change Since Previous Day',
+                                                    'Change Since Previous Trading Day',
                                                     '1 Week SMA Change',
                                                     '1 Month SMA Change',
                                                     '3 Months SMA Change'] + selectedSignals)
@@ -467,7 +469,6 @@ def watchlist(request):
             return render(request, "stock_screener/watchlist.html",
                           {"empty_message": "You do not have any tickers added to your watchlist"})
 
-        # watchlist = sorted(watchlist, key=lambda p: p.date, reverse=True)
         allStocksFull = read_csv_from_S3(bucket, "Stocks")
         calcsStartDate = get_date_within_df(allStocksFull, calcsStartDate)
 
@@ -505,16 +506,13 @@ def watchlist(request):
 
             # Get an updated dataframe + names of the signal columns added
             data, selectedSignals = make_calculations(data, signalDict)
-            print(ticker)
-            print(data.tail())
 
             # Get an overall buy/sell/wait recommendation based on the signals selected
-            rec = data.loc[data.index[-1], "Final Rec"]
-            recColours = {'Wait': 'grey', 'Buy': 'green-circle', 'Sell': 'bright-red-circle'}
-            recHtml = f"<span class={recColours[rec]} rec>{rec}</span>"
+            rec = data["Final Rec"].iloc[-1]
+            recHtml = f"<span class={recColoursWatchlist[rec]} rec>{rec}</span>"
 
             # Get the number of days since the current recommendation became active
-            daysSinceChange = data.loc[data.index[-1], "Days_Since_Change"]
+            daysSinceChange = data["Days_Since_Change"].iloc[-1]
 
             closingPrice = data["Close"].iloc[-1]
 
@@ -553,32 +551,25 @@ def watchlist(request):
                 [tickerHtml, recHtml, daysSinceChange, closingPrice] \
                 + smaChanges + signalResults + [graphButtonHtml, notesButtonHtml, removeButtonHtml]
 
+            tableColumns = ['Ticker',
+                            'Analysis Outcome',
+                            'Trading Days Since Trend Change',
+                            'Closing Price',
+                            '1 Week SMA Change',
+                            '1 Month SMA Change',
+                            '3 Months SMA Change'] + selectedSignals + ["Graph", "Notes", "Remove"]
+
             watchlistItem["resultTable"] = pd.DataFrame([tableEntries],
-                                                        columns=['Ticker',
-                                                                 'Analysis Outcome',
-                                                                 'Days Since Trend Change',
-                                                                 'Closing Price',
-                                                                 '1 Week SMA Change',
-                                                                 '1 Month SMA Change',
-                                                                 '3 Months SMA Change'] + selectedSignals +
-                                                                ["Graph", "Notes", "Remove"])
+                                                        columns=tableColumns)
 
             watchedTickers.append(watchlistItem)
 
         # Create a joint table with recommendations for each ticker to be displayed on the watchlist page
-        jointTable = pd.DataFrame(columns=['Ticker',
-                                           'Analysis Outcome',
-                                           'Days Since Trend Change',
-                                           'Closing Price',
-                                           '1 Week SMA Change',
-                                           '1 Month SMA Change',
-                                           '3 Months SMA Change'] + selectedSignals +
-                                          ["Graph", "Notes", "Remove"])
+        jointTable = pd.DataFrame(columns=tableColumns)
         for elt in watchedTickers:
             jointTable = pd.concat([jointTable, elt["resultTable"]], axis=0)
-
         jointTable.set_index("Ticker", inplace=True)
-        jointTable.sort_values(by=['Days Since Trend Change', 'Ticker'], inplace=True)
+        jointTable.sort_values(by=['Trading Days Since Trend Change', 'Ticker'], inplace=True)
         jointTable.rename_axis(None, inplace=True)
 
         htmlResultTable = jointTable.to_html(col_space='80px', bold_rows=True, classes=["table", "result_table"],
@@ -841,10 +832,6 @@ def backtester(request):
                     "overallResult": overallResult,
                     "htmlJointTable": htmlJointTable,
                     "allDetails": allDetails,
-                    # "overallAverageTimeBetweenTransactions": overallAverageTimeBetweenTransactions,
-                    # "overallAverageTimeHoldingStock": overallAverageTimeHoldingStock,
-                    # "averageNumberOfTransactions": sum(averageNumbersOfTransactions) // len(
-                    #    averageNumbersOfTransactions),
                     "htmlGenStatsTable": htmlGenStatsTable,
                     "signalTable": signalTable,
                     "signalSelected": signalSelected,
