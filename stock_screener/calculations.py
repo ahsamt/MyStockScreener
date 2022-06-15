@@ -157,7 +157,6 @@ def add_final_rec_column(df, active_signals):
                         df[recDict[active_signals[1]]] == df[recDict[active_signals[2]]])
             df["Final Rec"] = np.where(mask, df[recDict[active_signals[0]]], "Wait")
 
-
     elif signal_num == 4:
         if 'adx' in active_signals:
             mask1 = df["ADX Rec"] == True

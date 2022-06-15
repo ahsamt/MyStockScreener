@@ -100,7 +100,7 @@ def index(request):
                         # tickerList = set(updatedStocks.columns.get_level_values(0).tolist())
 
                 else:
-                    print("reading S3 data and preparing graph")
+                    #print("reading S3 data and preparing graph")
                     stock = existingStocks[ticker].copy()
 
                 # getting full company name for the selected ticker
@@ -384,7 +384,7 @@ def saved_signals(request):
     data = json.loads(request.body)
 
     ma = data.get("ma")
-    print(ma)
+
     if ma == "":
         return JsonResponse({
             "error": "True or False is required."
@@ -424,6 +424,7 @@ def saved_signals(request):
     except SignalConstructor.DoesNotExist:
         print("nothing to delete")
     print("creating constructor")
+
 
     newSignal = SignalConstructor(
         user=request.user,

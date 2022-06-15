@@ -168,7 +168,7 @@ def make_graph(df, ticker, signal_names, height, width, srsi_overbought_limit=No
                {"count": 3, "label": "3M", "step": "month", "stepmode": "backward"},
                {"count": 6, "label": "6M", "step": "month", "stepmode": "backward"},
                {"count": 1, "label": "1Y", "step": "year", "stepmode": "backward"}, ]
-    print(df.tail())
+
     limitLine = dict(color='#CA3435', width=2)
     graph1List = []
     srsiGraph = False
@@ -246,7 +246,7 @@ def make_graph(df, ticker, signal_names, height, width, srsi_overbought_limit=No
         fig3.add_shape(type='line',
                         x0=df["Date"].min(), y0=srsi_overbought_limit, x1=df["Date"].max(), y1=srsi_overbought_limit,
                         line=limitLine, xref='x', yref='y')
-        fig3.add_shape(type='line',
+        fig3.add_shape(type='line', name="Oversold Limit",
                         x0=df["Date"].min(), y0=srsi_oversold_limit, x1=df["Date"].max(), y1=srsi_oversold_limit,
                         line=limitLine, xref='x', yref='y')
         fig3.update_layout(title="Stochastic RSI over the past year", template="seaborn",
@@ -328,12 +328,9 @@ def get_date_within_df(df, dt):
         col = df["Date"]
     else:
         col = df.index
-
-    # print(f"col min type is {type(col.min())} and the value is {col.min()}")
     allDates = list(col)
-    # print(f"dt is {type(dt)}, and dt value is {dt}")
-    while dt not in allDates:
 
+    while dt not in allDates:
         if dt > col.min():
             dt = dt - pd.DateOffset(1)
         else:
@@ -343,7 +340,6 @@ def get_date_within_df(df, dt):
 
 def get_start_dates(num_months_back):
     endDate = date.today()
-    print(f"today is {endDate}")
     displayStartDate = endDate + relativedelta(months=-num_months_back)
     calculationsStartDate = pd.Timestamp(displayStartDate + relativedelta(months=-12))
     displayStartDateDatetime = datetime.combine(displayStartDate, datetime.min.time())
@@ -511,9 +507,7 @@ def calc_average_percentage(perc_iterable):
     result = 1
     for v in perc_iterable:
         adj_v = (v + 100) / 100
-        print(adj_v)
         result *= adj_v
-
     return round((result * 100 - 100), 2)
 
 
