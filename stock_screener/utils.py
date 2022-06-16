@@ -118,22 +118,22 @@ def stock_tidy_up(df, ticker):
 
 
 def get_saved_stocks_details():
-    df = pd.read_csv("stock_screener/stocks_details.csv")
-    df.set_index("Symbol", inplace=True)
+    df = pd.read_csv("stock_screener/Tickers_details.csv")
+    df.set_index("Ticker", inplace=True)
     return df
 
-
-def get_current_tickers_info(bucket):
-    """(string) => pd DataFrame
-    Accesses the TickersInfo file on S3,
-    returns a DataFrame with the data contained in the file"""
-    s3_client = boto3.client("s3")
-    object_key = "TickersInfo.csv"
-    csv_obj = s3_client.get_object(Bucket=bucket, Key=object_key)
-    body = csv_obj['Body']
-    csv_string = body.read().decode('utf-8')
-    df = pd.read_csv(StringIO(csv_string), index_col=[0])
-    return df
+#
+# def get_current_tickers_info(bucket):
+#     """(string) => pd DataFrame
+#     Accesses the TickersInfo file on S3,
+#     returns a DataFrame with the data contained in the file"""
+#     s3_client = boto3.client("s3")
+#     object_key = "TickersInfo.csv"
+#     csv_obj = s3_client.get_object(Bucket=bucket, Key=object_key)
+#     body = csv_obj['Body']
+#     csv_string = body.read().decode('utf-8')
+#     df = pd.read_csv(StringIO(csv_string), index_col=[0])
+#     return df
 
 
 def add_days_since_change(df, col_name):
@@ -292,31 +292,6 @@ def calculate_price_dif(new_price, old_price):
     price_dif = new_price - old_price
     perc_dif = format_float(price_dif / old_price * 100)
     return price_dif, perc_dif
-
-#
-# def get_price_change(df):
-#     """(pd DataFrame) => (float, tuple)
-#     Takes in Pandas DataFrame with stock prices for a specific instrument,
-#     returns:
-#     1 - a float for the last closing price
-#     2 - a tuple:
-#         - a string showing the changes in price since previous trading day,
-#         - a colour name (red or green) to use in HTML template to display the change.
-#     """
-#
-#     closingPrice = df["Close"].iloc[-1]
-#     previousPrice = df["Close"].iloc[-2]
-#     priceDif, percDif = calculate_price_dif(closingPrice, previousPrice)
-#     if priceDif > 0:
-#         sign = "+"
-#         color = "green"
-#     else:
-#         sign = ""
-#         color = "red"
-#     priceDif = format_float(priceDif)
-#     change = (f"{sign}{percDif}%", color)
-#     return closingPrice, change
-
 
 def get_date_within_df(df, dt):
     """(pd DataFrame, timestamp) => (timestamp)

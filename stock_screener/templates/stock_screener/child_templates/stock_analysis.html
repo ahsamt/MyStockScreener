@@ -3,22 +3,22 @@
         <div class="card-body">
             <h4 class="card-title mb-2" id="ticker_name">{{ ticker }} ({{ tickerName }})</h4>
             <div class="additional_info mb-3">
+                {##}
+                {#                {%  if industry %}#}
+                {#                    {{ industry }}#}
+                {#                {% endif %}#}
 
-                {%  if industry %}
-                    {{ industry }}
+                {%  if sector %}
+                    {{ sector }}
                 {% endif %}
 
-                {#                {%  if sector %}#}
-                {#                    {{ sector }}#}
-                {#                {% endif %}#}
-                {##}
-                {#                {% if sector and country %}#}
-                {#                    -#}
-                {#                {% endif %}#}
-                {##}
-                {#                {%  if country %}#}
-                {#                    {{ country }}#}
-                {#                {% endif %}#}
+                {% if sector and country %}
+                    -
+                {% endif %}
+
+                {%  if country %}
+                    {{ country }}
+                {% endif %}
             </div>
 
 

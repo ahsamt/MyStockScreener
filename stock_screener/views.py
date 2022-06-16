@@ -89,25 +89,23 @@ def index(request):
                         upload_csv_to_S3(bucket, updatedStocks, "Stocks")
 
                         # check if we have company details in local csv file:
-                        tickerInfo = get_saved_stocks_details()
                         if ticker not in tickerInfo.index:
                             # get company info for the ticker and save info on S3
                             # This needs to be updated to save changes to local csv!!!!
                             tickerName, sector, country = get_company_details_from_yf(ticker)
                             tickerInfo = prepare_ticker_info_update(tickerInfo, ticker, tickerName, sector, country)
-                            upload_csv_to_S3(bucket, tickerInfo, "AllTickersInfo")
+                            print(tickerInfo.tail())
 
                         # tickerList = set(updatedStocks.columns.get_level_values(0).tolist())
 
                 else:
-                    #print("reading S3 data and preparing graph")
+                    # print("reading S3 data and preparing graph")
                     stock = existingStocks[ticker].copy()
 
                 # getting full company name for the selected ticker
                 tickerName = tickerInfo.loc[ticker]["Name"]
-                industry = tickerInfo.loc[ticker]["Industry"]
-                # sector = tickerInfo.loc[ticker]["Sector"]
-                # country = tickerInfo.loc[ticker]["Country"]
+                sector = tickerInfo.loc[ticker]["Sector"]
+                country = tickerInfo.loc[ticker]["Country"]
 
                 # Getting the slice of the data starting from 18 months back
                 # (12 required for display + 12 extra for analysis)
@@ -238,9 +236,8 @@ def index(request):
                 context = {
                     "ticker": ticker,
                     "tickerName": tickerName,
-                    "industry": industry,
-                    # "sector": sector,
-                    # "country": country,
+                    "sector": sector,
+                    "country": country,
                     "graph1": graph1,
                     "graph2": graph2,
                     "graph3": graph3,
@@ -424,7 +421,6 @@ def saved_signals(request):
     except SignalConstructor.DoesNotExist:
         print("nothing to delete")
     print("creating constructor")
-
 
     newSignal = SignalConstructor(
         user=request.user,
