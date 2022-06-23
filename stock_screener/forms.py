@@ -2,7 +2,7 @@ from django import forms
 
 from stock_screener.models import SavedSearch
 
-suggestedTickers = ["AAPL", "GS", "IBM"]
+suggestedTickers = ["AAPL", "AMZN", "BABA", "CRM", "GOOG", "IBM", "INTC", "META", "MSFT", "NVDA", "PYPL", "TSLA", "YELP"]
 
 ma1_choices = [('SMA', 'Simple Moving Average'), ('EMA', 'Exponential Moving Average')]
 ma2_choices = [('SMA', 'Simple Moving Average'), ('EMA', 'Exponential Moving Average')]

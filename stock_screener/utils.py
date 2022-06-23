@@ -69,16 +69,14 @@ def upload_csv_to_S3(bucket, df, file_name):
 
 
 def prepare_ticker_info_update(current_tickers_info, ticker, ticker_name, sector, country):
-    """(df, string, string) => df
+    """(df, string, string, string, string) => df
    Takes in a string representing the name of the S3 bucket where current tickers are being stored
    and a list of new tickers that need to be added to the ticker information file on S3.
    Uploads an updated ticker information file to S3 as a csv file and returns the updated dataframe.
    """
     dt = {'Ticker': [ticker], 'Name': [ticker_name], 'Sector': [sector], 'Country': [country]}
     dfUpdate = pd.DataFrame(data=dt).set_index('Ticker')
-    df = current_tickers_info.append(dfUpdate, ignore_index=False)
-    df.drop_duplicates(subset=None, keep='first', inplace=True, ignore_index=False)
-
+    df = pd.concat([current_tickers_info, dfUpdate])
     return df
 
 

@@ -88,20 +88,17 @@ def index(request):
                         # update stock data table and upload back on S3
                         updatedStocks = pd.concat([existingStocks, updatedStock], axis=1)
                         upload_csv_to_S3(bucket, updatedStocks, "Stocks")
-
-                        # check if we have company details in local csv file:
-                        if ticker not in tickerInfo.index:
-                            # get company info for the ticker and save info on S3
-                            # This needs to be updated to save changes to local csv!!!!
-                            tickerName, sector, country = get_company_details_from_yf(ticker)
-                            tickerInfo = prepare_ticker_info_update(tickerInfo, ticker, tickerName, sector, country)
-                            print(tickerInfo.tail())
-
-                        # tickerList = set(updatedStocks.columns.get_level_values(0).tolist())
-
                 else:
                     # print("reading S3 data and preparing graph")
                     stock = existingStocks[ticker].copy()
+
+                # check if we have company details in local csv file:
+                if ticker not in tickerInfo.index:
+                    # get company info for the ticker and save info on S3
+                    # This needs to be updated to save changes to local csv!!!!
+                    tickerName, sector, country = get_company_details_from_yf(ticker)
+                    tickerInfo = prepare_ticker_info_update(tickerInfo, ticker, tickerName, sector, country)
+                    tickerInfo.to_csv("stock_screener/Tickers_details.csv")
 
                 # getting full company name for the selected ticker
                 tickerName = tickerInfo.loc[ticker]["Name"]
