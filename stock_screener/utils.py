@@ -122,19 +122,6 @@ def get_saved_stocks_details():
     df.set_index("Ticker", inplace=True)
     return df
 
-#
-# def get_current_tickers_info(bucket):
-#     """(string) => pd DataFrame
-#     Accesses the TickersInfo file on S3,
-#     returns a DataFrame with the data contained in the file"""
-#     s3_client = boto3.client("s3")
-#     object_key = "TickersInfo.csv"
-#     csv_obj = s3_client.get_object(Bucket=bucket, Key=object_key)
-#     body = csv_obj['Body']
-#     csv_string = body.read().decode('utf-8')
-#     df = pd.read_csv(StringIO(csv_string), index_col=[0])
-#     return df
-
 
 def add_days_since_change(df, col_name):
     """(pd DataFrame, string) => pd DataFrame
