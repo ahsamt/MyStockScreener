@@ -1,4 +1,5 @@
 import json
+import time
 
 import pandas as pd
 import yfinance as yf
@@ -60,8 +61,9 @@ def index(request):
 
                 # getting stocks data from S3
                 existingStocks = read_csv_from_S3(bucket, "Stocks")
+                tickerList = existingStocks.columns.get_level_values(0)
 
-                tickerList = set(existingStocks.columns.get_level_values(0).tolist())
+                #getting previously saved tickers details table
                 tickerInfo = get_saved_stocks_details()
 
                 if ticker not in tickerList:
