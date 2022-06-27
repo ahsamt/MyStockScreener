@@ -1,8 +1,8 @@
 from io import StringIO
 
-
 from dateutil.relativedelta import relativedelta
 from datetime import date, datetime
+from typing import Tuple
 
 import boto3
 import numpy as np
@@ -15,9 +15,8 @@ constructorFields = ['ma', 'maS', 'maL', 'maWS', 'maWL', 'psar', 'psarAF', 'psar
                      'srsiW', 'srsiSm1', 'srsiSm2', 'srsiOB', 'srsiOS', 'macd', 'macdF', 'macdS', 'macdSm']
 
 
-def adjust_start(df, start_date):
-    """(pd DataFrame, date as datetime.datetime) => pd DataFrame
-    Creates a copy of current dataframe with starting date matching the requirements"""
+def adjust_start(df: pd.DataFrame, start_date: datetime) -> pd.DataFrame:
+    """Creates a copy of current dataframe with starting date matching the requirements"""
 
     mask = (df["Date"] >= start_date)
     dfNew = df.loc[mask]  # .copy()
@@ -25,11 +24,8 @@ def adjust_start(df, start_date):
     return dfNew
 
 
-def get_company_details_from_yf(ticker):
-    """(string) => (string, string, string)
-    Takes in a ticker as a string.
-    Returns the matching company name found on yfinance.
-    """
+def get_company_details_from_yf(ticker: str) -> Tuple[str, str, str]:
+    """Returns the matching company name, sector and country found on yfinance."""
 
     ticker = yf.Ticker(ticker)
     tickerDetails = ticker.info
@@ -52,15 +48,13 @@ def get_company_details_from_yf(ticker):
     return name, sector, country
 
 
-def upload_csv_to_S3(bucket, df, file_name):
-    """(string, pd DataFrame), string => None
-    converts dataframe  to CSV format and uploads it to S3"""
+def upload_csv_to_S3(bucket: str, df: pd.DataFrame, file_name: str) -> None:
+    """Converts dataframe  to CSV format and uploads it to S3"""
     csv_buffer = StringIO()
     df.to_csv(csv_buffer)
     s3_resource = boto3.resource('s3')
     result = s3_resource.Object(bucket, f"{file_name}.csv").put(Body=csv_buffer.getvalue())
     res = result.get('ResponseMetadata')
-
     if res.get('HTTPStatusCode') == 200:
         print('File Uploaded Successfully')
     else:
@@ -68,22 +62,17 @@ def upload_csv_to_S3(bucket, df, file_name):
     return None
 
 
-def prepare_ticker_info_update(current_tickers_info, ticker, ticker_name, sector, country):
-    """(df, string, string, string, string) => df
-   Takes in a string representing the name of the S3 bucket where current tickers are being stored
-   and a list of new tickers that need to be added to the ticker information file on S3.
-   Uploads an updated ticker information file to S3 as a csv file and returns the updated dataframe.
-   """
+def prepare_ticker_info_update(current_tickers_info: pd.DataFrame, ticker: str, ticker_name: str, sector: str,
+                               country: str) -> pd.DataFrame:
+    """Adds information for a new ticker to the existing tickers details dataframe"""
     dt = {'Ticker': [ticker], 'Name': [ticker_name], 'Sector': [sector], 'Country': [country]}
     dfUpdate = pd.DataFrame(data=dt).set_index('Ticker')
     df = pd.concat([current_tickers_info, dfUpdate])
     return df
 
 
-def read_csv_from_S3(bucket, file_name):
-    """(string, string) => pd DataFrame
-    Takes in the name of the S3 bucket and the name of the csv file to be read,
-    returns decoded CSV file as pd DataFrame"""
+def read_csv_from_S3(bucket: str, file_name: str) -> pd.DataFrame:
+    """Reads stock data from the S3 bucket indicated and returns a tidied up DataFrame."""
     s3_client = boto3.client("s3")
     object_key = f"{file_name}.csv"
     csv_obj = s3_client.get_object(Bucket=bucket, Key=object_key)
@@ -93,20 +82,8 @@ def read_csv_from_S3(bucket, file_name):
     return df
 
 
-def stocks_tidy_up(df):
-    """(pd DataFrame) => pd DataFrame
-    Takes in the DataFrame with data for multiple stocks,
-    prepares the data for upload on S3"""
-    df.columns = df.columns.to_flat_index()
-    df.columns = pd.MultiIndex.from_tuples(df.columns)
-    df = df.swaplevel(axis=1).sort_index(axis=1)
-    return df
-
-
-def stock_tidy_up(df, ticker):
-    """(pd DataFrame, string) => pd DataFrame
-    Takes in the DataFrame with data for one stock,
-    prepares the data for upload on S3"""
+def stock_tidy_up(df: pd.DataFrame, ticker: str) -> pd.DataFrame:
+    """Prepares stock data for upload on S3"""
     newDF = df.copy(deep=True)
     columns = [(ticker, 'Open'), (ticker, 'High'), (ticker, "Low"), (ticker, "Close"), (ticker, "Adj Close"),
                (ticker, "Volume")]
@@ -115,15 +92,15 @@ def stock_tidy_up(df, ticker):
     return newDF
 
 
-def get_saved_stocks_details():
+def get_saved_stocks_details() -> pd.DataFrame:
+    """Prepares a locally saved csv file with tickers details for processing."""
     df = pd.read_csv("stock_screener/Tickers_details.csv")
     df.set_index("Ticker", inplace=True)
     return df
 
 
-def add_days_since_change(df, col_name):
-    """(pd DataFrame, string) => pd DataFrame
-    Takes in a dataframe and the name of the column in the dataframe that needs to be analysed.
+def add_days_since_change(df: pd.DataFrame, col_name: str) -> pd.DataFrame:
+    """Takes in a dataframe and the name of the column in the dataframe that needs to be analysed.
     Returns an updated dataframe with a "Days_Since_Change" column added that shows
     the number of days since the value in the column indicated changed"""
     mask = df[col_name].eq(df[col_name].shift())
@@ -139,9 +116,10 @@ def add_days_since_change(df, col_name):
     return df
 
 
-def make_graph(df, ticker, signal_names, height, width, srsi_overbought_limit=None, srsi_oversold_limit=None, adx_limit=None):
-    """(pd DataFrame, string, list, integer, integer) => string
-    Takes in:
+def make_graph(df: pd.DataFrame, ticker: str, signal_names: list, height: int, width: int,
+               srsi_overbought_limit: float = None, srsi_oversold_limit: float = None,
+               adx_limit: int = None) -> Tuple[str, str, str, str]:
+    """Takes in:
         - Pandas DataFrame with stock prices and additional calculations
         - stock ticker
         - names of the DataFrame columns to be plotted
@@ -175,18 +153,19 @@ def make_graph(df, ticker, signal_names, height, width, srsi_overbought_limit=No
         if signalName == "Parabolic SAR":
 
             fig1.add_trace(go.Scatter(name=signalName, x=df["Date"], y=df[signalName], mode="markers", marker=dict(
-              color='#99103d', size=4)))
+                color='#99103d', size=4)))
         else:
             fig1.add_trace(go.Scatter(name=signalName, x=df["Date"], y=df[signalName], mode="lines", line=dict(
-             width=3)))
+                width=3)))
 
     if "Buy" in df.columns:
-        fig1.add_trace(go.Scatter(name="Buy signals", x=df["Date"], y=df["Buy"], mode="markers", marker_symbol="x", marker=dict(
+        fig1.add_trace(
+            go.Scatter(name="Buy signals", x=df["Date"], y=df["Buy"], mode="markers", marker_symbol="x", marker=dict(
                 color='#1601FF', size=8)))
     if "Sell" in df.columns:
-        fig1.add_trace(go.Scatter(name="Sell signals", x=df["Date"], y=df["Sell"],  mode="markers", marker_symbol="x", marker=dict(
+        fig1.add_trace(
+            go.Scatter(name="Sell signals", x=df["Date"], y=df["Sell"], mode="markers", marker_symbol="x", marker=dict(
                 color='#CC0200', size=8)))
-
 
     fig1.update_layout(title=f"{', '.join(['Stock Price'] + graph1List)} over the past year", template="seaborn",
                        legend={"orientation": "h", "xanchor": "left"},
@@ -207,17 +186,17 @@ def make_graph(df, ticker, signal_names, height, width, srsi_overbought_limit=No
     else:
         fig2 = go.Figure()
         fig2.add_trace(go.Scatter(name="ADX", x=df["Date"], y=df["ADX"], mode="lines", line=dict(
-                width=2, color='#346602')))
+            width=2, color='#346602')))
         fig2.add_shape(type='line',
-                        x0=df["Date"].min(), y0=adx_limit, x1=df["Date"].max(), y1=adx_limit,
-                        line=limitLine, xref='x', yref='y')
+                       x0=df["Date"].min(), y0=adx_limit, x1=df["Date"].max(), y1=adx_limit,
+                       line=limitLine, xref='x', yref='y')
 
         fig2.update_layout(title="ADX over the past year", template="seaborn",
                            legend={"orientation": "h", "xanchor": "left"},
                            xaxis={
                                "rangeselector": {
                                    "buttons": buttons
-                               }}, width=width, height=height/1.5,
+                               }}, width=width, height=height / 1.5,
                            )
         graph2 = fig2.to_html(full_html=False)
 
@@ -226,20 +205,20 @@ def make_graph(df, ticker, signal_names, height, width, srsi_overbought_limit=No
     else:
         fig3 = go.Figure()
         fig3.add_trace(go.Scatter(name="Stochastic RSI", x=df["Date"], y=df["Stochastic RSI"], mode="lines", line=dict(
-                width=2, color='#188399')))
+            width=2, color='#188399')))
 
         fig3.add_shape(type='line',
-                        x0=df["Date"].min(), y0=srsi_overbought_limit, x1=df["Date"].max(), y1=srsi_overbought_limit,
-                        line=limitLine, xref='x', yref='y')
+                       x0=df["Date"].min(), y0=srsi_overbought_limit, x1=df["Date"].max(), y1=srsi_overbought_limit,
+                       line=limitLine, xref='x', yref='y')
         fig3.add_shape(type='line', name="Oversold Limit",
-                        x0=df["Date"].min(), y0=srsi_oversold_limit, x1=df["Date"].max(), y1=srsi_oversold_limit,
-                        line=limitLine, xref='x', yref='y')
+                       x0=df["Date"].min(), y0=srsi_oversold_limit, x1=df["Date"].max(), y1=srsi_oversold_limit,
+                       line=limitLine, xref='x', yref='y')
         fig3.update_layout(title="Stochastic RSI over the past year", template="seaborn",
                            legend={"orientation": "h", "xanchor": "left"},
                            xaxis={
                                "rangeselector": {
                                    "buttons": buttons
-                               }}, width=width, height=height/1.5,
+                               }}, width=width, height=height / 1.5,
 
                            )
         graph3 = fig3.to_html(full_html=False)
@@ -248,24 +227,23 @@ def make_graph(df, ticker, signal_names, height, width, srsi_overbought_limit=No
         graph4 = None
     else:
         fig4 = go.Figure()
-        fig4.add_trace(go.Scatter(name="MACD", x=df["Date"], y=df["MACD"], mode="lines", line=dict(width=2, color="#058093")))
+        fig4.add_trace(
+            go.Scatter(name="MACD", x=df["Date"], y=df["MACD"], mode="lines", line=dict(width=2, color="#058093")))
 
         fig4.update_layout(title="MACD over the past year", template="seaborn",
                            legend={"orientation": "h", "xanchor": "left"},
                            xaxis={
                                "rangeselector": {
                                    "buttons": buttons
-                               }}, width=width, height=height/1.5,
+                               }}, width=width, height=height / 1.5,
                            )
         graph4 = fig4.to_html(full_html=False)
 
     return graph1, graph2, graph3, graph4
 
 
-def format_float(number):
-    """(float) => string
-    Takes a number that needs to be formatted, returns a string formatted as a float with 2 decimal places
-    """
+def format_float(number: float) -> str:
+    """Takes a number that needs to be formatted, returns a string formatted as a float with 2 decimal places."""
     string = '{0:.2f}'.format(number)
     return string
 
@@ -277,6 +255,7 @@ def calculate_price_dif(new_price, old_price):
     price_dif = new_price - old_price
     perc_dif = format_float(price_dif / old_price * 100)
     return price_dif, perc_dif
+
 
 def get_date_within_df(df, dt):
     """(pd DataFrame, timestamp) => (timestamp)
@@ -382,7 +361,6 @@ def backtest_signal(df, format_outcome=True, days_to_buy=0, days_to_sell=0, buy_
 
         if format_outcome:
             outcome = str(round(outcome, 2)) + "%"
-
 
         backTestClean["Profit/Loss"] = backTestClean["Profit/Loss"].apply(lambda x: (format_float(x)) + " %")
         backTestClean["Close"] = backTestClean["Close"].apply(lambda x: format_float(x))
