@@ -1,12 +1,14 @@
+from typing import Tuple
+
 import numpy as np
+import pandas as pd
 import ta
 
 from .utils import add_days_since_change
 
 
-def add_ma(df, ma_short, ma_long, window_short, window_long):
-    """(pd DataFrame, string, string, integer, integer) => pd DataFrame, string, string
-    Takes in :
+def add_ma(df: pd.DataFrame, ma_short: str, ma_long: str, window_short: int, window_long: int) -> Tuple[pd.DataFrame, str, str]:
+    """Takes in :
         - stock data,
         - types of Moving Average signal (SMA/EMA) for a short and long window
         - sizes of the window for short and long window
@@ -43,9 +45,8 @@ def add_ma(df, ma_short, ma_long, window_short, window_long):
     return df, colShort, colLong
 
 
-def add_psar(df, psar_af, psar_ma):
-    """(pd DataFrame, float, float) => pd DataFrame
-    Takes in :
+def add_psar(df: pd.DataFrame, psar_af: float, psar_ma: float) -> pd.DataFrame:
+    """Takes in :
         - stock data,
         - Acceleration Factor,
         - Maximum Acceleration
@@ -59,9 +60,8 @@ def add_psar(df, psar_af, psar_ma):
     return df
 
 
-def add_adx(df, window_size, limit):
-    """(pd DataFrame, integer, integer) => pd DataFrame
-    Takes in :
+def add_adx(df: pd.DataFrame, window_size: int, limit: int) -> pd.DataFrame:
+    """Takes in :
         - stock data,
         - window size,
         - limit value above which an instrument is considered to be trending
@@ -75,16 +75,16 @@ def add_adx(df, window_size, limit):
     return df
 
 
-def add_srsi(df, window_size, smooth1, smooth2, overbought_limit, oversold_limit):
-    """(pd DataFrame, integer, integer, integer, float, float) => pd DataFrame
-    Takes in :
+def add_srsi(df: pd.DataFrame, window_size: int, smooth1: int, smooth2: int, overbought_limit: float, oversold_limit: float) -> pd.DataFrame:
+    """(Takes in :
         - stock data,
         - window size,
         - smooth 1 value,
         - smooth 2 value,
         - overbought limit,
         - oversold limit
-    Returns a DataFrame with the Stochastic RSI calculations and recommendations added"""
+    Returns a DataFrame with the Stochastic RSI calculations and recommendations added."""
+
     if 'Date' not in df.columns:
         df = df.reset_index()
     df["Stochastic RSI"] = ta.momentum.StochRSIIndicator(df["Close"], window=window_size,
@@ -97,15 +97,15 @@ def add_srsi(df, window_size, smooth1, smooth2, overbought_limit, oversold_limit
     return df
 
 
-def add_macd(df, window_slow, window_fast, smoothing_period):
-    """(pd DataFrame, integer, integer, integer) => pd DataFrame
-        Takes in :
+def add_macd(df: pd.DataFrame, window_slow: int, window_fast: int, smoothing_period: int) -> pd.DataFrame:
+    """Takes in :
             - stock data,
             - window size - slow,
             - window size - fast,
             - smoothing period
         Returns a DataFrame with the Moving Average Convergence Divergence
-         calculations and recommendations added"""
+         calculations and recommendations added."""
+
     if 'Date' not in df.columns:
         df = df.reset_index()
     df["MACD"] = ta.trend.MACD(df["Close"], window_slow=window_slow, window_fast=window_fast,
@@ -116,7 +116,9 @@ def add_macd(df, window_slow, window_fast, smoothing_period):
     return df
 
 
-def add_final_rec_column(df, active_signals):
+def add_final_rec_column(df: pd.DataFrame, active_signals: list) -> pd.DataFrame:
+    """Combines recommendations from the individual signals selected and adds then as a separate "Final Rec" column."""
+
     recDict = {'ma': 'MA Rec',
                'adx': 'ADX Rec',
                'macd': 'MACD Rec',
@@ -193,7 +195,9 @@ def add_final_rec_column(df, active_signals):
     return df
 
 
-def add_buy_sell_cols(df):
+def add_buy_sell_cols(df: pd.DataFrame) -> pd.DataFrame:
+    """Adds separate columns for 'Buy' and 'Sell" recommendations"""
+
     df["Buy"] = np.NaN
     df["Sell"] = np.NaN
     mask1 = (df["Final Rec"] == "Buy") & (df["Change_Flag"] == True)
@@ -203,7 +207,9 @@ def add_buy_sell_cols(df):
     return df
 
 
-def make_calculations(stock_df, signal_dict):
+def make_calculations(stock_df: pd.DataFrame, signal_dict: dict) -> Tuple[pd.DataFrame, list]:
+    """Adds columns with calculations and recommendations based on teh signals selected by the user."""
+
     signals_available = ['adx', 'ma', 'macd', 'psar', 'srsi']
     selectedSignals = []
 

@@ -14,10 +14,11 @@ from django.views.decorators.csrf import csrf_exempt
 from .calculations import make_calculations
 from .forms import StockForm, BacktestForm, suggestedTickers
 from .models import User, SavedSearch, SignalConstructor
-from .utils import read_csv_from_S3, adjust_start, make_graph, upload_csv_to_s3, stock_tidy_up, \
+from .utils import adjust_start, make_graph, upload_csv_to_s3, stock_tidy_up, \
     prepare_ticker_info_update, get_company_details_from_yf, get_previous_sma, \
     calculate_price_dif, format_float, backtest_signal, prepare_signal_table, calc_average_percentage, \
-    check_and_add_sma, constructorFields, compare_signals, get_date_within_df, get_saved_stocks_details, get_start_dates
+    check_and_add_sma, constructorFields, compare_signals, get_date_within_df, get_saved_stocks_details, \
+    get_start_dates, read_csv_from_s3
 
 bucket = 'stockscreener-data'
 recColours = {'Wait': 'grey', 'Buy': 'green', 'Sell': 'bright-red'}
@@ -59,7 +60,7 @@ def index(request):
                 width = 840
 
                 # getting stocks data from S3
-                existingStocks = read_csv_from_S3(bucket, "Stocks")
+                existingStocks = read_csv_from_s3(bucket, "Stocks")
                 tickerList = existingStocks.columns.get_level_values(0)
 
                 #getting previously saved tickers details table
@@ -464,7 +465,7 @@ def watchlist(request):
             return render(request, "stock_screener/watchlist.html",
                           {"empty_message": "You do not have any tickers added to your watchlist"})
 
-        allStocksFull = read_csv_from_S3(bucket, "Stocks")
+        allStocksFull = read_csv_from_s3(bucket, "Stocks")
         calcsStartDate = get_date_within_df(allStocksFull, calcsStartDate)
 
         # Getting the slice of the data starting from 18 months back (12 required for display + 12 extra for analysis)
@@ -614,7 +615,7 @@ def backtester(request):
                 calcsStartDate, displayStartDateDt = get_start_dates(num_years * 12)
 
                 # getting stocks data from S3
-                existingStocks = read_csv_from_S3(bucket, "Stocks")
+                existingStocks = read_csv_from_s3(bucket, "Stocks")
 
                 # if no signals have been selected, remind the user to select signals
                 if not (signalDict['ma']
@@ -850,7 +851,7 @@ def display_graph(request, ticker_id, constructor_id):
             return render(request, "stock_screener/child_templates/graph.html",
                           {"error_message": "You do not have any saved ticker associated with this ID"})
 
-        allStocksFull = read_csv_from_S3(bucket, "Stocks")
+        allStocksFull = read_csv_from_s3(bucket, "Stocks")
 
         # Getting the slice of the data starting from 18 months back (12 required for display + 12 extra for analysis)
         calcsStartDate = get_date_within_df(allStocksFull, calcsStartDate)
