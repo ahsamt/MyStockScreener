@@ -14,7 +14,7 @@ from django.views.decorators.csrf import csrf_exempt
 from .calculations import make_calculations
 from .forms import StockForm, BacktestForm, suggestedTickers
 from .models import User, SavedSearch, SignalConstructor
-from .utils import read_csv_from_S3, adjust_start, make_graph, upload_csv_to_S3, stock_tidy_up, \
+from .utils import read_csv_from_S3, adjust_start, make_graph, upload_csv_to_s3, stock_tidy_up, \
     prepare_ticker_info_update, get_company_details_from_yf, get_previous_sma, \
     calculate_price_dif, format_float, backtest_signal, prepare_signal_table, calc_average_percentage, \
     check_and_add_sma, constructorFields, compare_signals, get_date_within_df, get_saved_stocks_details, get_start_dates
@@ -87,7 +87,7 @@ def index(request):
 
                         # update stock data table and upload back on S3
                         updatedStocks = pd.concat([existingStocks, updatedStock], axis=1)
-                        upload_csv_to_S3(bucket, updatedStocks, "Stocks")
+                        upload_csv_to_s3(bucket, updatedStocks, "Stocks")
                 else:
                     # print("reading S3 data and preparing graph")
                     stock = existingStocks[ticker].copy()
@@ -147,7 +147,7 @@ def index(request):
 
                 closingPrice = stock["Close"].iloc[-1]
                 previousPrice = stock["Close"].iloc[-2]
-                _, priceChange = calculate_price_dif(closingPrice, previousPrice)
+                priceChange = calculate_price_dif(closingPrice, previousPrice)
 
                 # Check if an SMA column has already been added, and add one if it has not been
                 stock, smaCol = check_and_add_sma(stock)
@@ -162,7 +162,7 @@ def index(request):
                     if smaValue is None:
                         smaChanges.append("No stock data")
                     else:
-                        smaChanges.append(calculate_price_dif(closingPrice, smaValue)[1] + "%")
+                        smaChanges.append(calculate_price_dif(closingPrice, smaValue) + "%")
 
                 # adjusting the start date according to client requirements and preparing the graph
                 stock = adjust_start(stock, displayStartDateDt)
@@ -173,7 +173,7 @@ def index(request):
 
                 if signalSelected:
                     # preparing backtesting information to be shown on search page
-                    backtestResult, backtestDataFull = backtest_signal(stock, format_outcome=False)
+                    backtestResult, backtestDataFull = backtest_signal(stock)
                     signalSelected = True
 
                     if backtestDataFull is not None:
@@ -524,7 +524,7 @@ def watchlist(request):
                 if smaValue is None:
                     smaChanges.append("No stock data")
                 else:
-                    smaChanges.append(calculate_price_dif(closingPrice, smaValue)[1] + "%")
+                    smaChanges.append(calculate_price_dif(closingPrice, smaValue) + "%")
 
             # Format the closing price for each ticker for table display
             closingPrice = format_float(closingPrice)
@@ -661,7 +661,6 @@ def backtester(request):
 
                     # preparing backtesting information for the ticker
                     backtestResult, backtestDataFull = backtest_signal(stock,
-                                                                       format_outcome=False,
                                                                        days_to_buy=days_to_buy,
                                                                        days_to_sell=days_to_sell,
                                                                        buy_price_adjustment=buy_price_adjustment,

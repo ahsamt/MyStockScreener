@@ -2,7 +2,7 @@ from io import StringIO
 
 from dateutil.relativedelta import relativedelta
 from datetime import date, datetime
-from typing import Tuple
+from typing import Tuple, Union
 
 import boto3
 import numpy as np
@@ -10,6 +10,8 @@ import pandas as pd
 import plotly.graph_objects as go
 import ta
 import yfinance as yf
+
+from .models import SignalConstructor
 
 constructorFields = ['ma', 'maS', 'maL', 'maWS', 'maWL', 'psar', 'psarAF', 'psarMA', 'adx', 'adxW', 'adxL', 'srsi',
                      'srsiW', 'srsiSm1', 'srsiSm2', 'srsiOB', 'srsiOS', 'macd', 'macdF', 'macdS', 'macdSm']
@@ -48,7 +50,7 @@ def get_company_details_from_yf(ticker: str) -> Tuple[str, str, str]:
     return name, sector, country
 
 
-def upload_csv_to_S3(bucket: str, df: pd.DataFrame, file_name: str) -> None:
+def upload_csv_to_s3(bucket: str, df: pd.DataFrame, file_name: str) -> None:
     """Converts dataframe  to CSV format and uploads it to S3"""
     csv_buffer = StringIO()
     df.to_csv(csv_buffer)
@@ -71,7 +73,7 @@ def prepare_ticker_info_update(current_tickers_info: pd.DataFrame, ticker: str, 
     return df
 
 
-def read_csv_from_S3(bucket: str, file_name: str) -> pd.DataFrame:
+def read_csv_from_s3(bucket: str, file_name: str) -> pd.DataFrame:
     """Reads stock data from the S3 bucket indicated and returns a tidied up DataFrame."""
     s3_client = boto3.client("s3")
     object_key = f"{file_name}.csv"
@@ -160,12 +162,12 @@ def make_graph(df: pd.DataFrame, ticker: str, signal_names: list, height: int, w
 
     if "Buy" in df.columns:
         fig1.add_trace(
-            go.Scatter(name="Buy signals", x=df["Date"], y=df["Buy"], mode="markers", marker_symbol="x", marker=dict(
-                color='#1601FF', size=8)))
+            go.Scatter(name="Buy signals", x=df["Date"], y=df["Buy"], mode="markers", marker=dict(
+                color='#1601FF', size=8, symbol="x")))
     if "Sell" in df.columns:
         fig1.add_trace(
-            go.Scatter(name="Sell signals", x=df["Date"], y=df["Sell"], mode="markers", marker_symbol="x", marker=dict(
-                color='#CC0200', size=8)))
+            go.Scatter(name="Sell signals", x=df["Date"], y=df["Sell"], mode="markers", marker=dict(
+                color='#CC0200', size=8, symbol="x")))
 
     fig1.update_layout(title=f"{', '.join(['Stock Price'] + graph1List)} over the past year", template="seaborn",
                        legend={"orientation": "h", "xanchor": "left"},
@@ -248,21 +250,17 @@ def format_float(number: float) -> str:
     return string
 
 
-def calculate_price_dif(new_price, old_price):
-    """(float/integer, float/integer => float/integer, string
-    Takes an old price and a new price, returns the difference as a number
-    as well as percentage of the old price"""
+def calculate_price_dif(new_price: Union[int, float], old_price: Union[int, float]) -> str:
+    """Returns the difference between the old price and the new price as percentage of the old price"""
     price_dif = new_price - old_price
     perc_dif = format_float(price_dif / old_price * 100)
-    return price_dif, perc_dif
+    return perc_dif
 
 
-def get_date_within_df(df, dt):
-    """(pd DataFrame, timestamp) => (timestamp)
-        Takes in Pandas DataFrame with a "Date" column and a timestamp for the date that needs to be located.
-        Returns the original timestamp if it is found in the "Date" column,
-        otherwise returns the closest earlier date
-        """
+def get_date_within_df(df: pd.DataFrame, dt: pd.Timestamp) -> Union[pd.Timestamp, None]:
+    """Takes in Pandas DataFrame with a "Date" column or a datetime index and a timestamp for the date that needs to be located.
+        Returns the original timestamp if it is found in the "Date" column, otherwise returns the closest earlier date"""
+
     if "Date" in df.columns:
         col = df["Date"]
     else:
@@ -277,7 +275,8 @@ def get_date_within_df(df, dt):
     return dt
 
 
-def get_start_dates(num_months_back):
+def get_start_dates(num_months_back: int) -> Tuple[pd.Timestamp, datetime]:
+    """Calculates the start dates for the dataframe - one to be used for performing calculations, one for displaying data to the user."""
     endDate = date.today()
     displayStartDate = endDate + relativedelta(months=-num_months_back)
     calculationsStartDate = pd.Timestamp(displayStartDate + relativedelta(months=-12))
@@ -285,13 +284,9 @@ def get_start_dates(num_months_back):
     return calculationsStartDate, displayStartDateDatetime
 
 
-def get_previous_sma(df, sma_col, no_of_days):
-    """(pd DataFrame, string, timestamp, integer) => (float)
-        Takes in Pandas DataFrame, name of teh Simple Moving Average column in the dataframe (such as "SMA 15")
-        with a "Date" column and a timestamp for the date that needs to be located.
-        Returns the original timestamp if it is found in the "Date" column,
-        otherwise returns the closest earlier date
-    """
+def get_previous_sma(df: pd.DataFrame, sma_col: str, no_of_days: int) -> Union[float, None]:
+    """Returns the Simple Moving Average value going back teh indicated number of days."""
+
     latest_date = df["Date"].max()
     reqDate = get_date_within_df(df, latest_date - pd.DateOffset(no_of_days))
     if reqDate is None:
@@ -302,13 +297,14 @@ def get_previous_sma(df, sma_col, no_of_days):
         return prevSma
 
 
-def backtest_signal(df, format_outcome=True, days_to_buy=0, days_to_sell=0, buy_price_adjustment=0,
-                    sell_price_adjustment=0):
-    """(pd DataFrame, boolean, integer, integer, integer, integer, """
+def backtest_signal(df: pd.DataFrame, days_to_buy: int = 0, days_to_sell: int = 0,
+                    buy_price_adjustment: int = 0, sell_price_adjustment: int = 0) -> Tuple[Union[int, float], Union[pd.DataFrame, None]]:
+    """Back tests the signal given the criteria provided, returns the profit/loss and a DataFrame with relevant calculations."""
+
     flags = ['Buy', 'Sell']
     columnsBacktest = ["Old_Index", "Date", "Close", "Final Rec", "Change_Flag", "Days_Since_Change"]
     backTest = df.loc[(df['Days_Since_Change'] == 0) & df['Final Rec'].isin(flags)].copy(deep=True)
-    backTest.reset_index(drop=False, inplace=True)  # change
+    backTest.reset_index(drop=False, inplace=True)
     backTest.rename(columns={"index": "Old_Index"}, inplace=True)
     backTest = add_days_since_change(backTest, "Final Rec")
     backTestClean = backTest.loc[backTest["Change_Flag"].isin([True]), columnsBacktest]
@@ -359,22 +355,16 @@ def backtest_signal(df, format_outcome=True, days_to_buy=0, days_to_sell=0, buy_
 
         outcome = calc_average_percentage(backTestClean["Profit/Loss"])
 
-        if format_outcome:
-            outcome = str(round(outcome, 2)) + "%"
-
         backTestClean["Profit/Loss"] = backTestClean["Profit/Loss"].apply(lambda x: (format_float(x)) + " %")
         backTestClean["Close"] = backTestClean["Close"].apply(lambda x: format_float(x))
         backTestClean["Price After Delay"] = backTestClean["Price After Delay"].apply(lambda x: format_float(x))
         backTestClean["Adjusted Price After Delay"] = backTestClean["Adjusted Price After Delay"].apply(
             lambda x: format_float(x))
 
-        # for col_title in ["Close", "Price After Delay", "Adjusted Price After Delay"]:
-        # backTestClean[col_title] = backTestClean[col_title].apply(lambda x: format_float(x))
-
         return outcome, backTestClean
 
 
-def check_for_sma_column(df):
+def check_for_sma_column(df: pd.DataFrame) -> Union[str, None]:
     """Checks if the dataframe has a column starting with 'SMA'
     (Simple Moving Average column)"""
     for column in df.columns:
@@ -383,14 +373,15 @@ def check_for_sma_column(df):
         return None
 
 
-def add_sma_col(df):
-    """Adds SMA """
+def add_sma_col(df: pd.DataFrame) -> Tuple[pd.DataFrame, str]:
+    """Adds a Simple Moving Average column with a window of 15 days to the dataframe"""
     df["Table SMA"] = ta.trend.sma_indicator(df["Close"], window=15)
     column = "Table SMA"
     return df, column
 
 
-def prepare_signal_table(signal_dict):
+def prepare_signal_table(signal_dict: dict) -> str:
+    """Returns an HTML string representing a table for the signal."""
     signalData = []
     signalHeaders = []
     if signal_dict['ma']:
@@ -441,7 +432,9 @@ def prepare_signal_table(signal_dict):
     return signalTable
 
 
-def calc_average_percentage(perc_iterable):
+def calc_average_percentage(perc_iterable: pd.Series) -> float:
+    """Calculates the final outcome of a back test as a percentage."""
+
     result = 1
     for v in perc_iterable:
         adj_v = (v + 100) / 100
@@ -449,14 +442,18 @@ def calc_average_percentage(perc_iterable):
     return round((result * 100 - 100), 2)
 
 
-def check_and_add_sma(df):
+def check_and_add_sma(df: pd.DataFrame) -> Tuple[pd.DataFrame, str]:
+    """Checks if a DataFrame contains a Simple Moving Average column, adds one if necessary."""
+
     smaCol = check_for_sma_column(df)
     if not smaCol:
         df, smaCol = add_sma_col(df)
     return df, smaCol
 
 
-def compare_signals(signal_class_instance, signal_dict):
+def compare_signals(signal_class_instance: SignalConstructor, signal_dict: dict) -> bool:
+    """Checks if two signals have identical settings."""
+
     signal_class_instance_dict = vars(signal_class_instance)
     for field in constructorFields:
         if signal_class_instance_dict[field] != signal_dict[field]:
