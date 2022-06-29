@@ -182,6 +182,7 @@ def index(request):
                         backtestData.reset_index(inplace=True)
                         backtestData.columns = ["Date", "Price", "Action", "Profit/Loss"]
 
+
                         htmlBacktestTable = backtestData.to_html(col_space=30, bold_rows=True,
                                                                  classes=["table", "backtesting_table"],
                                                                  justify="left", index=False)
@@ -783,8 +784,10 @@ def backtester(request):
                 backtesterTable = pd.DataFrame.from_dict(allResults, orient="index")
                 backtesterTable.reset_index(inplace=True)
                 backtesterTable.columns = ["Ticker", "Profit/Loss"]
-                backtesterTable["Profit/Loss"] = backtesterTable["Profit/Loss"].apply(
-                    lambda x: (format_float(x) + " %"))
+                backtesterTable["Profit/Loss"] = backtesterTable["Profit/Loss"].map(
+                    lambda x: ("<span class = 'bright-red'>" + format_float(x) + "% </ span>" if x <= 0 else "<span class = 'green'>" + '+' + format_float(x) + "% </ span>"))
+
+
 
                 backtesterTable["Details"] = ""
                 for i in range(backtesterTable.index.max() + 1):

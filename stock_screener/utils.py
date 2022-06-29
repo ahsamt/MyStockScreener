@@ -355,10 +355,10 @@ def backtest_signal(df: pd.DataFrame, days_to_buy: int = 0, days_to_sell: int = 
 
         outcome = calc_average_percentage(backTestClean["Profit/Loss"])
 
-        backTestClean["Profit/Loss"] = backTestClean["Profit/Loss"].apply(lambda x: (format_float(x)) + " %")
-        backTestClean["Close"] = backTestClean["Close"].apply(lambda x: format_float(x))
-        backTestClean["Price After Delay"] = backTestClean["Price After Delay"].apply(lambda x: format_float(x))
-        backTestClean["Adjusted Price After Delay"] = backTestClean["Adjusted Price After Delay"].apply(
+        backTestClean["Profit/Loss"] = backTestClean["Profit/Loss"].map(lambda x: (format_float(x) + "%" if x <= 0 else "+" + format_float(x) + "%"))
+        backTestClean["Close"] = backTestClean["Close"].map(lambda x: format_float(x))
+        backTestClean["Price After Delay"] = backTestClean["Price After Delay"].map(lambda x: format_float(x))
+        backTestClean["Adjusted Price After Delay"] = backTestClean["Adjusted Price After Delay"].map(
             lambda x: format_float(x))
 
         return outcome, backTestClean
