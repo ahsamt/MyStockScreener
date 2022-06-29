@@ -60,7 +60,38 @@
         </nav>
 {% include "stock_screener/child_templates/loader.html" %}
         <div class="container main">
-           About this project
+
+
+
+        <h2 class="mb-3">How to use StockScreener</h2>
+
+    <h6 class="mb-3">Search page</h6>
+    <ul>
+      <li class="mb-1">
+        Enter the ticker for your chosen stock in the search box.
+      </li>
+        <li class="mb-1">
+            Tick the boxes for the signals you would like to combine for the stock performance analysis and update the default parameters for these signals if required.
+        </li>
+        <li class="mb-1">Click "Get Results" to run stock performance analysis using the selected signals/settings.</li>
+      <li class="mb-1">
+        If you are logged in, the results page will allow you to add the selected stock to your watchlist and/or save your combination of signals/settings so that it can be applied to your watchlisted items.
+      </li>
+    </ul>
+
+        <h6>Watchlist page</h6>
+            <em>Available to logged in users only</em>
+    <ul>
+      <li class="mt-3 mb-1">
+        Make sure you have added at least one stock to your watchlist and saved your preferred combination of signals.
+      </li>
+        <li class="mb-1">
+            Go to the "Watchlist" page to view today's performance analysis and recommendations for your watchlisted stocks based on the combination of signals you have previously saved.
+        </li>
+        <li class="mb-1"></li>
+      <li class="mb-1">
+        </li>
+    </ul>
         </div>
 {% endblock %}
 </div>
