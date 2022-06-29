@@ -541,7 +541,7 @@ def watchlist(request):
             tickerHtml = f"<span class='watchlist-ticker'>{ticker}</span>"
 
             graphButtonHtml = f'<a href = "{reverse("display_graph", kwargs={"ticker_id": tickerId, "constructor_id": signalId})}" ' \
-                              f'target = "_blank"><button class = "graph-button">Plot</button></a>'
+                              f'target = "_blank"><button class = "graph-button">Graph</button></a>'
             notesButtonHtml = f"<button class = 'notes-button' data-ticker={ticker}>Notes</button>"
             removeButtonHtml = f"<button class = 'remove-ticker-button' data-ticker_id={tickerId}>&#10005</button>"
             tableEntries = \
