@@ -49,7 +49,7 @@ class SignalForm(forms.Form):
                                widget=forms.NumberInput(attrs={'style': 'width:7ch'}))
     macdS = forms.IntegerField(label='Slow', min_value=1, max_value=220, initial="26",
                                widget=forms.NumberInput(attrs={'style': 'width:7ch'}))
-    macdSm = forms.IntegerField(label='Smoothing period', min_value=1, max_value=220, initial="210",
+    macdSm = forms.IntegerField(label='Smoothing period', min_value=1, max_value=220, initial="9",
                                 widget=forms.NumberInput(attrs={'style': 'width:7ch'}))
 
 

@@ -195,10 +195,11 @@ Smooth 1 sets the window size for the moving average of Stochastic RSI, and Smoo
 
 
     <div class="signal row mt-3">
-        <div class="signal-checkbox col-2 mt-1 red" title = "Moving Average Convergence Divergence (MACD) aims to identify changes in a share price's momentum. The MACD collects data from different moving averages to determine current trends. Convergence means that two moving averages are coming together, while divergence means that they’re moving away from each other.
+        <div class="signal-checkbox col-2 mt-1 red" title = "Moving average convergence divergence (MACD) is a trend-following momentum indicator that shows the relationship between two moving averages of a stock price. The MACD is calculated by subtracting the longer-period (slow) exponential moving average (EMA) from the shorter-period (fast) EMA.
 
 The MACD crossing above the zero line, from below, triggers a ‘buy’ signal, and it crossing below the zero line triggers a ‘sell’ signal. The higher/lower the MACD line is from the zero, the stronger the signal and the likelihood of price moving significantly higher/lower.
 
+The common MACD is the difference between a 26-day and a 12-day exponential moving average. By default, the MACD employs a smoothing factor in an exponential moving average, and the traditional setting for it is 9 periods.
 ">
             {{ stockForm.macd }} {{ stockForm.macd.label }}
         </div>
