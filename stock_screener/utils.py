@@ -251,10 +251,14 @@ def format_float(number: float) -> str:
 
 
 def calculate_price_dif(new_price: Union[int, float], old_price: Union[int, float]) -> str:
-    """Returns the difference between the old price and the new price as percentage of the old price"""
+    """Returns the difference between the old price and the new price as percentage of the old price represented as a formatted string with a + or - sign."""
     price_dif = new_price - old_price
-    perc_dif = format_float(price_dif / old_price * 100)
-    return perc_dif
+    perc_dif = price_dif / old_price * 100
+    if perc_dif >= 0:
+        perc_dif_formatted = '+' + format_float(perc_dif)
+    else:
+        perc_dif_formatted = format_float(perc_dif)
+    return perc_dif_formatted
 
 
 def get_date_within_df(df: pd.DataFrame, dt: pd.Timestamp) -> Union[pd.Timestamp, None]:
