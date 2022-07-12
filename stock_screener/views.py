@@ -61,7 +61,7 @@ def index(request):
 
                 # getting stocks data from S3
                 existingStocks = read_csv_from_s3(bucket, "Stocks")
-                tickerList = existingStocks.columns.get_level_values(0)
+                tickerList = set(existingStocks.columns.get_level_values(0))
 
                 #getting previously saved tickers details table
                 tickerInfo = get_saved_stocks_details()
@@ -91,6 +91,7 @@ def index(request):
                         upload_csv_to_s3(bucket, updatedStocks, "Stocks")
                 else:
                     # print("reading S3 data and preparing graph")
+                    print(existingStocks[ticker].tail())
                     stock = existingStocks[ticker].copy()
 
                 # check if we have company details in local csv file:
@@ -167,6 +168,7 @@ def index(request):
 
                 # adjusting the start date according to client requirements and preparing the graph
                 stock = adjust_start(stock, displayStartDateDt)
+
                 graph1, graph2, graph3, graph4 = make_graph(stock, ticker, selectedSignals, height, width,
                                                             srsi_overbought_limit=signalDict["srsiOB"],
                                                             srsi_oversold_limit=signalDict["srsiOS"],
