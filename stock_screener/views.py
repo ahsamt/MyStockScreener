@@ -91,7 +91,6 @@ def index(request):
                         upload_csv_to_s3(bucket, updatedStocks, "Stocks")
                 else:
                     # print("reading S3 data and preparing graph")
-                    print(existingStocks[ticker].tail())
                     stock = existingStocks[ticker].copy()
 
                 # check if we have company details in local csv file:

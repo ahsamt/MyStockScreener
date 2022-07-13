@@ -1,13 +1,3 @@
-/*document.onreadystatechange = function() {
-    if (document.readyState !== "complete") {
-        document.querySelector(".graph_page").style.visibility = "hidden";
-        // document.querySelector("#loader").style.visibility = "visible";
-    } else {
-        // document.querySelector("#loader").style.display = "none";
-        document.querySelector(".graph_page").style.visibility = "visible";
-    }
-};*/
-
 document.querySelectorAll(".watchlist-loader").forEach((item) => {
     item.addEventListener("click", () => show_loader("Getting your watchlist ready..."));
 });
@@ -100,12 +90,12 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     function remove_ticker_from_watchlist(event) {
         let confirm = prompt(
-            `Are you sure you want to remove this stock from your watchlist? This will permanently delete any notes you have saved. (y/n)`
+            `Are you sure you want to remove this stock from your watchlist? This will permanently delete any notes you have saved. Please type "yes" or "no".`
         );
-        if (confirm === "y") {
+        if (confirm === "yes") {
             async_delete_from_watchlist(event);
 
-        } else if (confirm === "n") {
+        } else if (confirm === "no") {
             alert("No problem, we'll keep it where it is!");
         } else {
             alert("Sorry, we didn't get it! Please try again.");
@@ -144,23 +134,6 @@ document.addEventListener("DOMContentLoaded", () => {
         main_outcome_table.style.display = "block";
 
     }
-    //
-    // function show_graph(event) {
-    //     event.preventDefault();
-    //     console.log(event.target.parentElement.dataset)
-    //     let ticker = event.target.dataset.ticker;
-    //     console.log(`ticker is ${ticker}`);
-    //     document.getElementById(`${ticker}_graph`).style.display = "block";
-    //     console.log("graph displayed");
-    //     document.getElementById("watchlist-main-section").style.display = "none";
-    // }
-    //
-    // function hide_graphs(event) {
-    //     event.preventDefault();
-    //     event.target.parentElement.style.display = "none";
-    //     document.getElementById("watchlist-main-section").style.display = "block";
-    //
-    // }
 
     function show_notes(event) {
         event.preventDefault();
