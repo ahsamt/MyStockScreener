@@ -26,7 +26,7 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'default')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['mystockscreener-dev.eu-west-2.elasticbeanstalk.com', 'localhost']
+ALLOWED_HOSTS = ['MyStockScreener-dev.eu-west-2.elasticbeanstalk.com', '127.0.0.1']
 
 
 # Application definition

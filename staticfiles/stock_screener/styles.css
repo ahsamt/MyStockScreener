@@ -3,7 +3,7 @@
   --background-color: #fff2e5;
   --black-font-color: #231F20;
   --blue-font-color: #325c84;
-  --green-font-color: #458B00;
+  --green-font-color: #0a6b32;
   --grey-font-color: #333333;
   --red-font-color: #CC0200;
   --red-hover-color: #99103d;
@@ -29,10 +29,11 @@ body {
 
 button {
   background-color: var(--blue-font-color);
+  opacity: 0.9;
   border-radius: 4px;
   box-shadow: var(--custom-shadow);
   color: white;
-  margin: 10px 0 5px 0;
+  margin: 5px 0 5px 0;
   padding: 3px 11px;
   transition: ease-in-out 200ms;
 }
@@ -46,7 +47,7 @@ h1 {
   color: var(--blue-font-color);
   font-size: 27px;
   font-weight: 530;
-  padding: 60px 0px 20px 0px;
+  padding: 60px 0 20px 0;
 }
 
 h2 {
@@ -83,7 +84,7 @@ textarea {
 
 li > .nav-link {
   font-weight: bolder;
-  margin: 0px 20px 0px 0px;
+  margin: 0 20px 0 0;
 }
 
 .table svg {
@@ -218,7 +219,9 @@ li > .nav-link {
   font-weight: bolder;
 }
 
-
+.result_table {
+  border: 1px;
+}
 .result_table th {
   font-size: 14px;
 
@@ -231,6 +234,14 @@ li > .nav-link {
   text-align: center;
 }
 
+.watchlist, .add-signal {
+
+  margin: 4px 0 4px 0;
+/*  padding: 2px 8px;*/
+  font-size: 14px;
+  text-align: left;
+
+}
 
 .centre {
   align-items: center;
@@ -242,7 +253,7 @@ li > .nav-link {
 .signal, .backtest-params {
   background: rgb(234, 234, 241, 0.6);
   border-radius: 4px;
-  box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;
+  box-shadow: rgba(60, 64, 67, 0.3) 0 1px 2px 0, rgba(60, 64, 67, 0.15) 0 1px 3px 1px;
   font-weight: bolder;
   padding: 8px 30px;
 
@@ -267,7 +278,7 @@ li > .nav-link {
   border-radius: 4px;
   box-shadow: var(--custom-shadow);
   color: var(--blue-font-color);
-  margin: 0px 20px 0px 0px;
+  margin: 0 20px 0 0;
   padding: 6px 10px;
   text-decoration: none;
   z-index: 99;
@@ -304,11 +315,14 @@ li > .nav-link {
   border-radius: 4px;
   box-shadow: var(--custom-shadow);
   color: var(--blue-font-color);
-  margin: 0px 0 10px 0;
+
   padding: 4px 27px;
   text-decoration: none;
 }
-
+.table {
+  margin-top:5px;
+  margin-bottom: 5px;
+}
 
 .stock_table  thead th {
   background-color: rgb(234, 234, 241);
@@ -318,16 +332,24 @@ li > .nav-link {
 }
 
 
-.watchlist, .add-signal{
-  background-color: rgb(234, 234, 241, 0.2);
+. /*watchlist, .add-signal{
+  background-color: white;
   border-radius: 4px;
   font-size: 14px;
   box-shadow: var(--custom-shadow);
   color: var(--blue-font-color);
   margin: 10px 0 10px 0;
-  padding: 4px 8px;
+  padding: 5px 8px;
   text-decoration: none;
+  transition: ease-in-out 200ms;
 }
+
+.watchlist:hover, .add-signal:hover{
+  background-color: var(--blue-font-color);
+  opacity: 0.7;
+  color: white;
+
+}*/
 
 .watchlist-ticker {
   color: var(--red-hover-color);
@@ -351,7 +373,9 @@ li > .nav-link {
 }
 .existing_signal_message, .signal_saved_message {
   color: var(--green-font-color);
-  margin: 10px 0;
+  margin: 9px 12px;
+  font-size: 15px;
+  font-weight: bold;
 }
 
 
@@ -369,6 +393,13 @@ li > .nav-link {
 }
 
 
+#outcome_card, #gen_stats_card {
+  display: block;
+  margin: 0 auto;
+
+
+
+}
 
 #result-table {
   margin:30px;
@@ -408,7 +439,7 @@ li > .nav-link {
   font-weight: bold;
   padding: 10px 7px;
   position: fixed;
-  right: 0px;
+  right: 0;
   text-decoration: none;
   z-index: 99;
 }
@@ -430,6 +461,17 @@ li > .nav-link {
 }
 
 
+#gen_stats_card td {
+  vertical-align: middle;
+  font-size: 14px;
+  font-weight: bold;
+  border: 1px solid #8C8F92;
+
+}
+
+.ind_stats_table{
+  width: 400px;
+}
 
 
 @media (max-width: 991px) {
