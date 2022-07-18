@@ -583,12 +583,22 @@ def watchlist(request):
 def backtester(request):
     if request.method == "GET":
         user = request.user
-        return render(request, "stock_screener/backtester.html", {"stockForm": BacktestForm(user)})
+
+        if user.is_authenticated:
+            if len(SavedSearch.objects.filter(user=request.user)) == 0:
+                tickersMessage = "To use back tester with your preferred tickers, please add them to your watchlist first."
+
+            else:
+                tickersMessage = "To add more tickers to this back test, please add them to your watchlist first."
+        else:
+            tickersMessage = None
+        return render(request, "stock_screener/backtester.html", {"stockForm": BacktestForm(user), "tickersMessage": tickersMessage})
 
     if request.method == "POST":
         user = request.user
         if 'tickers' in request.POST:
             backtestForm = BacktestForm(request.user, request.POST)
+
 
             # Get all the form data
             if backtestForm.is_valid():
@@ -611,6 +621,8 @@ def backtester(request):
                     if user.is_authenticated:
                         if len(SavedSearch.objects.filter(user=request.user)) > 0:
                             tickers = sorted([o.ticker for o in SavedSearch.objects.filter(user=request.user)])
+                        else:
+                            tickers = suggestedTickers
                     else:
                         tickers = suggestedTickers
 
@@ -837,7 +849,7 @@ def backtester(request):
                     "signalSelected": signalSelected,
                     "constructorAdded": constructorAdded,
                     "savedConstructor": savedConstructor,
-                    "newSignal": signalDict
+                    "newSignal": signalDict,
                 }
 
                 return render(request, "stock_screener/backtester.html", context)

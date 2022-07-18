@@ -93,6 +93,11 @@ class BacktestForm(SignalForm):
                                                                             for o in
                                                                             SavedSearch.objects.filter(user=user)])),
                     widget=forms.CheckboxSelectMultiple, initial="ALL")
+            else:
+                self.fields['tickers'] = forms.MultipleChoiceField(
+                    choices=([("ALL", "All suggested tickers")] + sorted([(ticker, ticker)
+                                                                          for ticker in suggestedTickers])),
+                    widget=forms.CheckboxSelectMultiple, initial="ALL")
         else:
             self.fields['tickers'] = forms.MultipleChoiceField(
                 choices=([("ALL", "All suggested tickers")] + sorted([(ticker, ticker)

@@ -165,7 +165,11 @@
                             {% if not user.is_authenticated %}
                                 <h5 class="centre mt-1 grey">Please <a href="{% url 'login' %}" class="bright-red">log in</a>
                                     or <a href="{% url 'register' %}" class="bright-red">register</a> to run this back test with your preferred tickers</h5>
+                                {% else %}
+                                <h5 class="centre mt-1 grey">{{ tickersMessage }}</h5>
                             {% endif %}
+
+
                             <div class="backtest-params row mt-3">
 
                                 {%  for t in stockForm.tickers %}
