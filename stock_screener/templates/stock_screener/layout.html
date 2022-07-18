@@ -2,43 +2,43 @@
 
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=H, initial-scale=1.0" />
-  <meta name="description" content="A Stock Screening application utilising common technical analysis signals such as moving averages and directional indicators to produce buy / sell signals. Includes a back tester featuring configurable factors such as trading fees, minimum holding periods and the delay to execute the buy / sell order." />
+    <meta name="description" content="A Stock Screening application utilising common technical analysis signals such as moving averages and directional indicators to produce buy / sell signals. Includes a back tester featuring configurable factors such as trading fees, minimum holding periods and the delay to execute the buy / sell order." />
     <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-      integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We"
-      crossorigin="anonymous"
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css"
+            rel="stylesheet"
+            integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We"
+            crossorigin="anonymous"
     />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap"
-      rel="stylesheet"
+            href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap"
+            rel="stylesheet"
     />
     <script src="https://kit.fontawesome.com/12b86829fe.js" crossorigin="anonymous"></script>
     <script
-      src="https://kit.fontawesome.com/12b86829fe.js"
-      crossorigin="anonymous"
+            src="https://kit.fontawesome.com/12b86829fe.js"
+            crossorigin="anonymous"
     ></script>
     <link rel="stylesheet" href="{% static 'stock_screener/styles.css' %}" />
 
     <title>{% block title %}Stock Screener{% endblock %}</title>
-  </head>
+</head>
 
-  <body>
-    {% block body %} {% endblock %} {% if user.is_authenticated %}
+<body>
+{% block body %} {% endblock %} {% if user.is_authenticated %}
     <span id="username">{{ user }}</span>
-    {% endif %}
-    <a href="#top" id="topButton"><i class="fas fa-angle-double-up"></i></a>
-  </body>
-  <script
-    src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js"
-    integrity="sha384-U1DAWAznBHeqEIlVSCgzq+c9gqGAJn5c/t99JyeKa9xxaYpSvHU5awsuZVVFIhvj"
-    crossorigin="anonymous"
-  ></script>
-  <script src="{% static 'stock_screener/index.js' %}"></script>
+{% endif %}
+<a href="#top" id="topButton"><i class="fas fa-angle-double-up"></i></a>
+</body>
+<script
+        src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-U1DAWAznBHeqEIlVSCgzq+c9gqGAJn5c/t99JyeKa9xxaYpSvHU5awsuZVVFIhvj"
+        crossorigin="anonymous"
+></script>
+<script src="{% static 'stock_screener/index.js' %}"></script>
 </html>
