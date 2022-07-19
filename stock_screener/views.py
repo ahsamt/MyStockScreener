@@ -613,7 +613,7 @@ def backtester(request):
                 sell_price_adjustment = backtestForm.cleaned_data["sell_price_adjustment"]
                 num_years = int(backtestForm.cleaned_data["num_years"])
                 fee_per_trade = backtestForm.cleaned_data["fee_per_trade"]
-                amount_to_invest = backtestForm.cleaned_data["amount_to_invest"]
+                amount_to_invest = int(backtestForm.cleaned_data["amount_to_invest"])
 
                 tickers = backtestForm.cleaned_data['tickers']
 
@@ -654,6 +654,7 @@ def backtester(request):
 
                 signalSelected = True
                 allResults = {}
+                totalFinalAmount = 0
                 allDetails = []
                 averageIndTimesBetweenTransactions = []
                 averageIndTimesHoldingStock = []
@@ -720,7 +721,8 @@ def backtester(request):
 
                             amountSpentOnFees = fee_per_trade * numTransactions
                             totalAmountRemaining = amount_to_invest * (1 + backtestResult / 100)
-                            finalAmount = format_float(totalAmountRemaining - amountSpentOnFees)
+                            finalAmountRaw = totalAmountRemaining - amountSpentOnFees
+                            finalAmount = format_float(finalAmountRaw)
 
                             result = round(backtestResult, 2)
 
@@ -728,7 +730,8 @@ def backtester(request):
                         else:
                             averageTimeBetweenStockTransactions = "Insufficient number of transactions"
                             averageTimeHoldingStock = "Insufficient number of transactions"
-                            finalAmount = "Unchanged"
+                            finalAmount = amount_to_invest
+                            finalAmountRaw = amount_to_invest
                             result = 0
 
                         # prepare an individual backtesting table per stock
@@ -740,7 +743,8 @@ def backtester(request):
                         numTransactions = 0
                         averageTimeBetweenStockTransactions = "Insufficient number of transactions"
                         averageTimeHoldingStock = "Insufficient number of transactions"
-                        finalAmount = "Unchanged"
+                        finalAmount = amount_to_invest
+                        finalAmountRaw = amount_to_invest
                         result = 0
                         averageNumbersOfTransactions.append(0)
 
@@ -765,8 +769,16 @@ def backtester(request):
                                            'htmlIndStatsTable': htmlIndStatsTable,
                                            'indTable': indTable}
 
+
                     # Prepare a list of all ticker info and tables to iterate through
                     allDetails.append(allIndTickerDetails)
+
+                    # Add up the final amounts remaining for each ticker
+                    totalFinalAmount += finalAmountRaw
+
+                # Calculate total amount invested and profit or loss
+                totalInvestedAmount = amount_to_invest * len(tickers)
+                overallResult = round((totalFinalAmount/totalInvestedAmount * 100 - 100), 2)
 
                 # Calculate average time between transactions for all the selected stocks
                 if len(averageIndTimesBetweenTransactions) > 0:
@@ -813,7 +825,7 @@ def backtester(request):
                                                          classes=["table", "backtest_table"],
                                                          escape=False, index=False)
 
-                overallResult = calc_average_percentage(allResults.values())
+
 
                 # prepare a table to display the saved signal to the user
                 signalTable = prepare_signal_table(signalDict)
