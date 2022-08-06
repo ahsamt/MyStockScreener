@@ -4,6 +4,7 @@
 ## About this project</h2>
 StockScreener is designed to help you create your own customised signal for monitoring the performance of your watchlisted stocks. The signal can be back tested on financial data that goes back up to 5 years, and you can use custom parameters such as delaying order completion by a specified number of days, factoring in buy/sell price adjustment, specifying initial amount to be invested and taking into account trading fees.
 
+The financial data for this project is stored in my personal S3 bucket and gets updated every night using yfinance and AWS Lambda. If you would like to run this project locally (rather than use the website linked above), you may wish to update the code so that it queries yfinance for each new stock instead of trying to access the S3 bucket. Alternatively, you can set up your own S3 bucket with the relevant financial information.
 
 ## Signals available
 
