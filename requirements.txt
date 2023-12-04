@@ -3,7 +3,6 @@ appnope==0.1.2
 asttokens==2.0.5
 async-generator==1.10
 attrs==21.4.0
-awsebcli==3.20.10
 backcall==0.2.0
 beautifulsoup4==4.12.2
 blessed==1.20.0
