@@ -1,5 +1,4 @@
 appdirs==1.4.4
-appnope==0.1.2
 asttokens==2.0.5
 async-generator==1.10
 attrs==21.4.0
@@ -56,7 +55,6 @@ pytz==2023.3.post1
 PyYAML==6.0.1
 requests==2.31.0
 s3transfer==0.5.1
-selenium==4.15.2
 semantic-version==2.8.5
 six==1.16.0
 sniffio==1.2.0
@@ -74,7 +72,6 @@ tzdata==2023.3
 urllib3==1.26.18
 urllib3-secure-extra==0.1.0
 wcwidth==0.1.9
-webdriver-manager==4.0.1
 webencodings==0.5.1
 wsproto==1.1.0
 yfinance==0.2.32
